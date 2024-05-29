@@ -40,11 +40,11 @@ main :: ()
 
     for i: 0..MAX_COLUMNS - 1 {
         heights[i] = cast(float)GetRandomValue(1, 12);
-        positions[i] = make_vector3( cast(float)GetRandomValue(-15, 15), heights[i]/2.0, cast(float)GetRandomValue(-15, 15) );
+        positions[i] = Vector3.{cast(float)GetRandomValue(-15, 15), heights[i]/2.0, cast(float)GetRandomValue(-15, 15)};
         colors[i] = make_Color( GetRandomValue(20, 255), GetRandomValue(10, 55), 30, 255 );
     }
 
-    SetCameraMode(camera, .CAMERA_FIRST_PERSON); // Set a first person camera mode
+    UpdateCamera(camera, .CAMERA_FIRST_PERSON); // Set a first person camera mode
 
     SetTargetFPS(60);                           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ main :: ()
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(*camera);                  // Update camera
+        UpdateCamera(*camera, .CAMERA_FIRST_PERSON);                  // Update camera
         //----------------------------------------------------------------------------------
 
         // Draw

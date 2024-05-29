@@ -189,14 +189,14 @@ UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float)
 
 UpdateCameraCenter :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int)
 {
-    camera.offset = make_vector2(width/2.0, height/2.0);
+    camera.offset = Vector2.{width/2.0, height/2.0};
     camera.target = player.position;
 }
 
 UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int)
 {
     camera.target = player.position;
-    camera.offset = make_vector2(width/2.0, height/2.0);
+    camera.offset = Vector2.{width/2.0, height/2.0};
 
     minX :float = 1000;
     minY :float = 1000;
@@ -210,8 +210,8 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
         maxY = max(it.rect.y + it.rect.height, maxY);
     }
     
-    max_val := GetWorldToScreen2D(make_vector2(maxX, maxY), << camera);
-    min_val := GetWorldToScreen2D(make_vector2(minX, minY), << camera);
+    max_val := GetWorldToScreen2D(Vector2.{maxX, maxY}, << camera);
+    min_val := GetWorldToScreen2D(Vector2.{minX, minY}, << camera);
     
     if max_val.x < cast(float)width camera.offset.x = width - (max_val.x - width/2);
     if max_val.y < cast(float)height camera.offset.y = height - (max_val.y - height/2);
@@ -225,7 +225,7 @@ UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems:
     minEffectLength :: 10.0;
     fractionSpeed :: 0.8;
     
-    camera.offset = make_vector2(width/2.0, height/2.0);
+    camera.offset = Vector2.{width/2.0, height/2.0};
     diff := player.position - camera.target;
     diffLength := length(diff);
     
@@ -247,7 +247,7 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
 
     evenOutSpeed :: 700;
     
-    camera.offset = make_vector2(width/2.0, height/2.0);
+    camera.offset = Vector2.{width/2.0, height/2.0};
     camera.target.x = player.position.x;
     
     if eveningOut
@@ -287,9 +287,9 @@ UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: [
 {
     bbox: Vector2 = .{ 0.2, 0.2 };
 
-    bboxWorldMin := GetScreenToWorld2D(make_vector2((1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height ), << camera);
-    bboxWorldMax := GetScreenToWorld2D(make_vector2((1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height ), << camera);
-    camera.offset = make_vector2((1 - bbox.x)*0.5 * width, (1 - bbox.y)*0.5*height);
+    bboxWorldMin := GetScreenToWorld2D(Vector2.{(1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height}, << camera);
+    bboxWorldMax := GetScreenToWorld2D(Vector2.{(1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height}, << camera);
+    camera.offset = Vector2.{(1 - bbox.x)*0.5 * width, (1 - bbox.y)*0.5*height};
 
     if player.position.x < bboxWorldMin.x camera.target.x = player.position.x;
     if player.position.y < bboxWorldMin.y camera.target.y = player.position.y;

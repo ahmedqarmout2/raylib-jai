@@ -31,22 +31,22 @@ Vector2One :: () -> Vector2
 
 Vector2Add :: (v1: Vector2, v2: Vector2) -> Vector2
 {
-    return make_vector2(v1.x + v2.x, v1.y + v2.y);
+    return Vector2.{v1.x + v2.x, v1.y + v2.y};
 }
 
 Vector2AddValue :: (v: Vector2, add: float) -> Vector2
 {
-    return make_vector2(v.x + add, v.y + add);
+    return Vector2.{v.x + add, v.y + add};
 }
 
 Vector2Subtract :: (v1: Vector2, v2: Vector2) -> Vector2
 {
-    return make_vector2(v1.x - v2.x, v1.y - v2.y);
+    return Vector2.{v1.x - v2.x, v1.y - v2.y};
 }
 
 Vector2SubtractValue :: (v: Vector2, sub: float) -> Vector2
 {
-    return make_vector2(v.x - sub, v.y - sub);
+    return Vector2.{v.x - sub, v.y - sub};
 }
 
 Vector2Length :: (v: Vector2) -> float
@@ -56,11 +56,11 @@ Vector2Length :: (v: Vector2) -> float
 
 Vector2Scale :: (v: Vector2, scale: float) -> Vector2
 {
-    return make_vector2(v.x*scale, v.y*scale);
+    return Vector2.{v.x*scale, v.y*scale};
 }
 
 Vector2Scale :: (a: Vector2, b: Vector2) -> Vector2 {
-    return make_vector2(a.x * b.x, a.y * b.y);
+    return Vector2.{a.x * b.x, a.y * b.y};
 }
 
 Vector2Normalize :: (v: Vector2) -> Vector2 {

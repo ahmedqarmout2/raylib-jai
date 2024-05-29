@@ -71,7 +71,7 @@ main :: ()
     defer UnloadRenderTexture(target);
 
     // Setup orbital camera
-    SetCameraMode(camera, .CAMERA_ORBITAL);  // Set an orbital camera mode
+    UpdateCamera(camera, .CAMERA_ORBITAL);  // Set an orbital camera mode
 
     SetTargetFPS(60);                       // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ main :: ()
         // Send new value to the shader to be used on drawing
         SetShaderValue(shader, swirlCenterLoc, *swirlCenter[0], .SHADER_UNIFORM_VEC2);
 
-        UpdateCamera(*camera);              // Update camera
+        UpdateCamera(*camera, .CAMERA_FIRST_PERSON);              // Update camera
         //----------------------------------------------------------------------------------
 
         // Draw

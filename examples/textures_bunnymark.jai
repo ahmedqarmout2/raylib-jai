@@ -52,7 +52,7 @@ main :: () {
     {
         // Update
         //----------------------------------------------------------------------------------
-        if IsMouseButtonDown(.MOUSE_LEFT_BUTTON)
+        if IsMouseButtonDown(.MOUSE_BUTTON_LEFT)
         {
             // Create more bunnies
             for i: 0..99 {

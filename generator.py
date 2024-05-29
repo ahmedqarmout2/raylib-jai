@@ -141,12 +141,12 @@ constant_or_temp_cstring :: inline ($$text: string) -> *u8 {
     return c_str;
 }
 
-TraceLogCallback :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
+TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
 LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
 SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
 LoadFileTextCallback :: #type (fileName: *u8) -> *u8 #c_call;
 SaveFileTextCallback :: #type (fileName: *u8, text: *u8) -> bool #c_call;
-
+AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
 """
 
 # TODO: these could be a dictionary of argument types mapping to enum types and
@@ -158,16 +158,16 @@ function_replacements = dict(
     IsKeyUp       = "(key: KeyboardKey) -> bool",
     SetExitKey    = "(key: KeyboardKey) -> bool",
 
-    IsMouseButtonPressed = "(button: MouseButton) -> bool",
-    IsMouseButtonDown = "(button: MouseButton) -> bool",
+    IsMouseButtonPressed  = "(button: MouseButton) -> bool",
+    IsMouseButtonDown     = "(button: MouseButton) -> bool",
     IsMouseButtonReleased = "(button: MouseButton) -> bool",
-    IsMouseButtonUp = "(button: MouseButton) -> bool",
+    IsMouseButtonUp       = "(button: MouseButton) -> bool",
 
-    IsWindowState = "(flag: ConfigFlag) -> bool",
-    SetWindowState = "(flags: ConfigFlags)",
+    IsWindowState    = "(flag: ConfigFlags) -> bool",
+    SetWindowState   = "(flags: ConfigFlags)",
     ClearWindowState = "(flags: ConfigFlags)",
 
-    SetCameraMode = "(camera: Camera, mode: CameraMode)",
+    UpdateCamera = "(camera: Camera, mode: CameraMode)",
 
     SetConfigFlags = "(flags: ConfigFlags)",
 
@@ -183,6 +183,8 @@ function_replacements = dict(
     IsGamepadButtonUp       = "(gamepad: int, button: GamepadButton) -> bool",
 
     GetGamepadAxisMovement  = "(gamepad: int, axis: GamepadAxis) -> float",
+
+    ImageKernelConvolution = "(image: *Image, kernel: *float, kernelSize: s32)"
 )
 
 struct_field_replacements = dict(
@@ -358,11 +360,11 @@ def generate_jai_bindings():
         #
         p("\n#scope_file // ---------------\n")
         p("#if OS == .WINDOWS {")
-        p("""    #foreign_system_library "user32";""")
-        p("""    #foreign_system_library "gdi32";""")
-        p("""    #foreign_system_library "shell32";""")
-        p("""    #foreign_system_library "winmm";""")
-        p(f"    {native_lib_name} :: #foreign_library,no_dll \"{path_to_native_lib}\";")
+        p("""    user32  :: #library,system,link_always "user32";""")
+        p("""    gdi32   :: #library,system,link_always "gdi32";""")
+        p("""    shell32 :: #library,system,link_always "shell32";""")
+        p("""    winmm   :: #library,system,link_always "winmm";""")
+        p(f"    {native_lib_name} :: #library,no_dll \"{path_to_native_lib}\";")
         p("}")
         p("""#import "Math";""")
     
