@@ -163,6 +163,8 @@ function_replacements = dict(
     IsMouseButtonReleased = "(button: MouseButton) -> bool",
     IsMouseButtonUp       = "(button: MouseButton) -> bool",
 
+    IsGestureDetected = "(gesture: Gesture) -> bool",
+
     IsWindowState    = "(flag: ConfigFlags) -> bool",
     SetWindowState   = "(flags: ConfigFlags)",
     ClearWindowState = "(flags: ConfigFlags)",
@@ -193,12 +195,10 @@ struct_field_replacements = dict(
     )
 )
 
-def generate_jai_bindings():
-    header_filename = "include/raylib.h"
+def generate_jai_bindings(header_filename, output_filename):
     header = open(header_filename).read()
     native_lib_name = "raylib_native"
     path_to_native_lib = "lib/raylib"
-    output_filename = "raylib/module.jai"
 
     ctx["output_file"] = open(output_filename, "w")
     with ctx["output_file"]:
@@ -375,7 +375,8 @@ def main():
     # change to script directory
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    generate_jai_bindings()
+    generate_jai_bindings("include/raylib.h", "raylib/module.jai")
+    generate_jai_bindings("include/raymath.h", "raylib/raymath.jai")
 
 if __name__ == "__main__":
     main()
