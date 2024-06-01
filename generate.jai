@@ -6,14 +6,36 @@ String_Builder   :: Basic.String_Builder;
 print            :: Basic.print;
 print_to_builder :: Basic.print_to_builder;
 
+// Even values are the C types
+// Odd values are the jai types
+TYPE_MAP :: string.[
+    "const char",     "u8",
+    "unsigned short", "u16",
+    "unsigned int",   "u32",
+    "unsigned char",  "u8",
+    "char",           "s8",
+    "long",           "s32",
+    "double",         "float64",
+    "int",            "s32",
+    "Matrix",         "Matrix4",
+    "float",          "float"
+];
+
+DOUBLE_POINTER :: "**";
+SINGLE_POINTER :: "*";
+
 main :: () {
+    generate_bindings("raylib",  "raylib");
     generate_bindings("raymath", "raymath");
 }
 
-g_line_counter := -1;
-g_lines_count  := 0;
+g_line_counter : int;
+g_lines_count  : int;
 
 generate_bindings :: (input_filename: string, output_filename: string) {
+    g_line_counter = -1;
+    g_lines_count  = 0;
+
     print("------------------------------------\n");
     print("Generate bindings for: %\n", input_filename);
 
@@ -46,27 +68,13 @@ generate_bindings :: (input_filename: string, output_filename: string) {
             break;
         }
 
+        if (is_empty_line_or_comments(file_lines, *builder)) {
+            continue;
+        }
+
         line := file_lines[g_line_counter];
 
-        clean_line := String.trim(line);
-        if (clean_line.count == 0) {
-            print_to_builder(*builder, "\n");
-            continue;
-        }
-
-        prefix := "/*";
-        if (String.starts_with(line, prefix)) {
-            handle_comment_block(file_lines, *builder);
-            continue;
-        }
-
-        prefix = "//";
-        if (String.starts_with(line, prefix)) {
-            print_to_builder(*builder, "%\n", line);
-            continue;
-        }
-
-        prefix = "typedef struct";
+        prefix := "typedef struct";
         if (String.starts_with(line, prefix)) {
             handle_struct(file_lines, *builder);
             continue;
@@ -87,6 +95,30 @@ generate_bindings :: (input_filename: string, output_filename: string) {
 increment_line_counter :: () -> bool {
     g_line_counter += 1;
     return g_line_counter < g_lines_count - 1;
+}
+
+is_empty_line_or_comments :: (file_lines: []string, builder: *String_Builder) -> bool {
+    line := file_lines[g_line_counter];
+
+    clean_line := String.trim(line);
+    if (clean_line.count == 0) {
+        print_to_builder(builder, "\n");
+        return true;
+    }
+
+    prefix := "/*";
+    if (String.starts_with(clean_line, prefix)) {
+        handle_comment_block(file_lines, builder);
+        return true;
+    }
+
+    prefix = "//";
+    if (String.starts_with(clean_line, prefix)) {
+        print_to_builder(builder, "%\n", line);
+        return true;
+    }
+
+    return false;
 }
 
 handle_comment_block :: (file_lines: []string, builder: *String_Builder) {
@@ -121,11 +153,16 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
     print_to_builder(builder, "% :: {\n", struct_name);
     while (true) {
         if (!increment_line_counter()) {
-            print("EOF while looking for the end of a struct\n");
+            print("EOF while looking for the end of a struct: %\n", struct_name);
             return;
         }
 
         line := file_lines[g_line_counter];
+
+        if (is_empty_line_or_comments(file_lines, builder)) {
+            continue;
+        }
+
         if (String.starts_with(line, struct_end)) {
             print_to_builder(builder, "}\n");
             return;
@@ -134,18 +171,21 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         line_parts := String.split(line, ";");
         if (line_parts.count != 2) {
             print("Unexpected struct data formart\n");
+            print("%\n", struct_name);
+            print("%\n", line);
+            return;
         }
 
-        comment := line_parts[1];
+        code_part := String.trim(line_parts[0]);
+        comment   := line_parts[1];
 
-        code_part := String.split(String.trim(line_parts[0]), " ");
-        old_type  := code_part[0];
-        new_type  := convert_type(old_type);
+        convert_type(code_part);
 
         // Indentation for formating
-        print_to_builder(builder, "    ");
+        // print_to_builder(builder, "    ");
 
         // Array prefix
+        /*
         if (code_part.count == 2) {
             value := code_part[1];
 
@@ -170,21 +210,38 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
             }
         }
 
-        print_to_builder(builder, ": %; %\n", new_type, comment);
+        print_to_builder(builder, ": %; %\n", new_type, comment);*/
     }
 }
 
-convert_type :: (type: string) -> string {
-    if type == {
-        case "const char";     return "u8";
-        case "unsigned short"; return "u16";
-        case "unsigned int";   return "u32";
-        case "unsigned char";  return "u8";
-        case "char";           return "s8";
-        case "long";           return "s32";
-        case "double";         return "float64";
-        case "int";            return "s32";
-        case "Matrix";         return "Matrix4";
+convert_type :: (line: string) -> string {
+    for i: 0..TYPE_MAP.count-1 {
+        c_type   := TYPE_MAP[i];
+        jai_type := TYPE_MAP[i+1];
+
+        // Skip the jai type in the next iteration
+        i += 1;
+
+        if (!String.starts_with(line, c_type)) {
+            continue;
+        }
+
+        variables := String.slice(line, c_type.count, line.count - c_type.count);
+
+        clean_variables := String.trim(variables);
+
+        // Handle single and double pointer. For example: int *meshMaterial; or Transform **framePoses;
+        pointer_prefix := "";
+        if (String.starts_with(clean_variables, DOUBLE_POINTER)) {
+            pointer_prefix = DOUBLE_POINTER;              
+        } else if (String.starts_with(clean_variables, SINGLE_POINTER)) {
+            pointer_prefix = SINGLE_POINTER;
+        }
+
+        jai_type = String.join(pointer_prefix, jai_type);
+        clean_variables = String.slice(clean_variables, pointer_prefix.count, clean_variables.count - pointer_prefix.count);
+
+        print("%: %\n", clean_variables, jai_type);
     }
-    return type;
+    return line;
 }

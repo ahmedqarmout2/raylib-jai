@@ -69,42 +69,27 @@
 //----------------------------------------------------------------------------------
 // Vector2 type
 Vector2 :: {
-    x: float; 
-    y: float; 
 }
 
 // Vector3 type
 Vector3 :: {
-    x: float; 
-    y: float; 
-    z: float; 
 }
 
 // Vector4 type
 Vector4 :: {
-    x: float; 
-    y: float; 
-    z: float; 
-    w: float; 
 }
 
 // Quaternion type
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
 Matrix :: {
-    m0,m4,m8,m12: float;       // Matrix first row (4 components)
-    m1,m5,m9,m13: float;       // Matrix second row (4 components)
-    m2,m6,m10,m14: float;      // Matrix third row (4 components)
-    m3,m7,m11,m15: float;      // Matrix fourth row (4 components)
 }
 
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
 float3 :: {
-    v: [3]float; 
 }
 
 float16 :: {
-    v: [16]float; 
 }
 
 
@@ -179,6 +164,7 @@ float16 :: {
 // NOTE: Parameters need to be normalized
 // Current implementation should be aligned with glm::angle
 
+    // TODO(10/9/2023): Currently angles move clockwise, determine if this is wanted behavior
 
 
 // Scale vector (multiply by value)
@@ -276,6 +262,7 @@ float16 :: {
 
 
 
+    // Cross product between vectors
 
 
 // Calculate vector length
@@ -326,9 +313,13 @@ float16 :: {
 // Makes vectors normalized and orthogonal to each other
 // Gram-Schmidt function implementation
 
+    // Vector3Normalize(*v1);
 
+    // Vector3CrossProduct(*v1, *v2)
 
+    // Vector3Normalize(vn1);
 
+    // Vector3CrossProduct(vn1, *v1)
 
 
 // Transforms a Vector3 by a given Matrix
@@ -341,13 +332,20 @@ float16 :: {
 
 
 // Rotates a vector around an axis
+    // Using Euler-Rodrigues Formula
+    // Ref.: https://en.wikipedia.org/w/index.php?title=Euler%E2%80%93Rodrigues_formula
 
 
+    // Vector3Normalize(axis);
 
 
+    // Vector3CrossProduct(w, v)
 
+    // Vector3CrossProduct(w, wv)
 
+    // Vector3Scale(wv, 2*a)
 
+    // Vector3Scale(wwv, 2)
 
 
 
@@ -358,6 +356,9 @@ float16 :: {
 
 // Calculate reflected vector to normal
 
+    // I is the original vector
+    // N is the normal of the incident plane
+    // R = I - (2*N*(DotProduct[I, N]))
 
 
 
@@ -380,13 +381,20 @@ float16 :: {
 // Projects a Vector3 from screen space into object space
 // NOTE: We are avoiding calling other raymath functions despite available
 
+    // Calculate unprojected matrix (multiply view matrix by projection matrix) and invert it
+
+    // Calculate inverted matrix -> MatrixInvert(matViewProj);
+    // Cache the matrix values (speed optimization)
 
 
+    // Calculate the invert determinant (inlined to avoid double-caching)
 
 
+    // Create quaternion from source point
 
+    // Multiply quat point by unprojecte matrix
 
-
+    // Normalized world points in vectors
 
 
 // Get Vector3 as float array
@@ -426,6 +434,7 @@ float16 :: {
 
 // Compute matrix determinant
 
+    // Cache the matrix values (speed optimization)
 
 
 
@@ -438,8 +447,10 @@ float16 :: {
 
 // Invert provided matrix
 
+    // Cache the matrix values (speed optimization)
 
 
+    // Calculate the invert determinant (inlined to avoid double-caching)
 
 
 
@@ -525,6 +536,7 @@ float16 :: {
 // NOTE: Fovy angle must be provided in radians
 
 
+    // MatrixFrustum(-right, right, -top, top, near, far);
 
 
 
@@ -536,10 +548,15 @@ float16 :: {
 // Get camera look-at matrix (view matrix)
 
 
+    // Vector3Subtract(eye, target)
 
+    // Vector3Normalize(vz)
 
+    // Vector3CrossProduct(up, vz)
 
+    // Vector3Normalize(x)
 
+    // Vector3CrossProduct(vz, vx)
 
 
 
@@ -598,7 +615,9 @@ float16 :: {
 
 // Calculate slerp-optimized interpolation between two quaternions
 
+    // QuaternionLerp(q1, q2, amount)
 
+    // QuaternionNormalize(q);
 
 
 
@@ -615,6 +634,8 @@ float16 :: {
 
 
 
+    // QuaternionNormalize(q);
+    // NOTE: Normalize to essentially nlerp the original and identity to 0.5
 
 
 
@@ -640,15 +661,20 @@ float16 :: {
 
 
 
+        // Vector3Normalize(axis)
 
 
 
+        // QuaternionNormalize(q);
 
 
 // Get the rotation angle and axis for a given quaternion
+        // QuaternionNormalize(q);
 
 
 
+        // This occurs when the angle is zero.
+        // Not a problem: just set an arbitrary normalized axis.
 
 
 // Get the quaternion equivalent to Euler angles
@@ -660,8 +686,11 @@ float16 :: {
 // Get the Euler angles equivalent to quaternion (roll, pitch, yaw)
 // NOTE: Angles are returned in a Vector3 struct in radians
 
+    // Roll (x-axis rotation)
 
+    // Pitch (y-axis rotation)
 
+    // Yaw (z-axis rotation)
 
 
 // Transform a quaternion given a transformation matrix
