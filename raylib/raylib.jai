@@ -1,3 +1,20 @@
+//
+// This file was auto-generated using the following command:
+//
+// jai generate.jai && ./generate.exe
+//
+
+#import "Math";
+
+#if OS == .WINDOWS {
+    user32  :: #library,system,link_always "user32";
+    gdi32   :: #library,system,link_always "gdi32";
+    shell32 :: #library,system,link_always "shell32";
+    winmm   :: #library,system,link_always "winmm";
+
+    raylib_native :: #library,no_dll "lib/raylib";
+}
+
 /*
 ***********************************************************************************************
 *
@@ -493,63 +510,263 @@ AutomationEventList :: struct {
 
 
 // Window-related functions
+InitWindow :: (width: s32, height: s32, title: *u8) #foreign raylib_native;
+CloseWindow :: () #foreign raylib_native;
+WindowShouldClose :: () -> bool #foreign raylib_native;
+IsWindowReady :: () -> bool #foreign raylib_native;
+IsWindowFullscreen :: () -> bool #foreign raylib_native;
+IsWindowHidden :: () -> bool #foreign raylib_native;
+IsWindowMinimized :: () -> bool #foreign raylib_native;
+IsWindowMaximized :: () -> bool #foreign raylib_native;
+IsWindowFocused :: () -> bool #foreign raylib_native;
+IsWindowResized :: () -> bool #foreign raylib_native;
+IsWindowState :: (flag: u32) -> bool #foreign raylib_native;
+SetWindowState :: (flags: u32) #foreign raylib_native;
+ClearWindowState :: (flags: u32) #foreign raylib_native;
+ToggleFullscreen :: () #foreign raylib_native;
+ToggleBorderlessWindowed :: () #foreign raylib_native;
+MaximizeWindow :: () #foreign raylib_native;
+MinimizeWindow :: () #foreign raylib_native;
+RestoreWindow :: () #foreign raylib_native;
+SetWindowIcon :: (image: Image) #foreign raylib_native;
+SetWindowIcons :: (images: *Image, count: s32) #foreign raylib_native;
+SetWindowTitle :: (title: *u8) #foreign raylib_native;
+SetWindowPosition :: (x: s32, y: s32) #foreign raylib_native;
+SetWindowMonitor :: (monitor: s32) #foreign raylib_native;
+SetWindowMinSize :: (width: s32, height: s32) #foreign raylib_native;
+SetWindowMaxSize :: (width: s32, height: s32) #foreign raylib_native;
+SetWindowSize :: (width: s32, height: s32) #foreign raylib_native;
+SetWindowOpacity :: (opacity: float) #foreign raylib_native;
+SetWindowFocused :: () #foreign raylib_native;
+GetWindowHandle :: () -> *void #foreign raylib_native;
+GetScreenWidth :: () -> s32 #foreign raylib_native;
+GetScreenHeight :: () -> s32 #foreign raylib_native;
+GetRenderWidth :: () -> s32 #foreign raylib_native;
+GetRenderHeight :: () -> s32 #foreign raylib_native;
+GetMonitorCount :: () -> s32 #foreign raylib_native;
+GetCurrentMonitor :: () -> s32 #foreign raylib_native;
+GetMonitorPosition :: (monitor: s32) -> Vector2 #foreign raylib_native;
+GetMonitorWidth :: (monitor: s32) -> s32 #foreign raylib_native;
+GetMonitorHeight :: (monitor: s32) -> s32 #foreign raylib_native;
+GetMonitorPhysicalWidth :: (monitor: s32) -> s32 #foreign raylib_native;
+GetMonitorPhysicalHeight :: (monitor: s32) -> s32 #foreign raylib_native;
+GetMonitorRefreshRate :: (monitor: s32) -> s32 #foreign raylib_native;
+GetWindowPosition :: () -> Vector2 #foreign raylib_native;
+GetWindowScaleDPI :: () -> Vector2 #foreign raylib_native;
+GetMonitorName :: (monitor: s32) -> *u8 #foreign raylib_native;
+SetClipboardText :: (text: *u8) #foreign raylib_native;
+GetClipboardText :: () -> *u8 #foreign raylib_native;
+EnableEventWaiting :: () #foreign raylib_native;
+DisableEventWaiting :: () #foreign raylib_native;
 
 // Cursor-related functions
+ShowCursor :: () #foreign raylib_native;
+HideCursor :: () #foreign raylib_native;
+IsCursorHidden :: () -> bool #foreign raylib_native;
+EnableCursor :: () #foreign raylib_native;
+DisableCursor :: () #foreign raylib_native;
+IsCursorOnScreen :: () -> bool #foreign raylib_native;
 
 // Drawing-related functions
+ClearBackground :: (color: Color) #foreign raylib_native;
+BeginDrawing :: () #foreign raylib_native;
+EndDrawing :: () #foreign raylib_native;
+BeginMode2D :: (camera: Camera2D) #foreign raylib_native;
+EndMode2D :: () #foreign raylib_native;
+BeginMode3D :: (camera: Camera3D) #foreign raylib_native;
+EndMode3D :: () #foreign raylib_native;
+BeginTextureMode :: (target: RenderTexture2D) #foreign raylib_native;
+EndTextureMode :: () #foreign raylib_native;
+BeginShaderMode :: (shader: Shader) #foreign raylib_native;
+EndShaderMode :: () #foreign raylib_native;
+BeginBlendMode :: (mode: s32) #foreign raylib_native;
+EndBlendMode :: () #foreign raylib_native;
+BeginScissorMode :: (x: s32, y: s32, width: s32, height: s32) #foreign raylib_native;
+EndScissorMode :: () #foreign raylib_native;
+BeginVrStereoMode :: (config: VrStereoConfig) #foreign raylib_native;
+EndVrStereoMode :: () #foreign raylib_native;
 
 // VR stereo config functions for VR simulator
+LoadVrStereoConfig :: (device: VrDeviceInfo) -> VrStereoConfig #foreign raylib_native;
+UnloadVrStereoConfig :: (config: VrStereoConfig) #foreign raylib_native;
 
 // Shader management functions
 // NOTE: Shader functionality is not available on OpenGL 1.1
+LoadShader :: (vsFileName: *u8, fsFileName: *u8) -> Shader #foreign raylib_native;
+LoadShaderFromMemory :: (vsCode: *u8, fsCode: *u8) -> Shader #foreign raylib_native;
+IsShaderReady :: (shader: Shader) -> bool #foreign raylib_native;
+GetShaderLocation :: (shader: Shader, uniformName: *u8) -> s32 #foreign raylib_native;
+GetShaderLocationAttrib :: (shader: Shader, attribName: *u8) -> s32 #foreign raylib_native;
+SetShaderValue :: (shader: Shader, locIndex: s32, value: *void, uniformType: s32) #foreign raylib_native;
+SetShaderValueV :: (shader: Shader, locIndex: s32, value: *void, uniformType: s32, count: s32) #foreign raylib_native;
+SetShaderValueMatrix :: (shader: Shader, locIndex: s32, mat: Matrix4) #foreign raylib_native;
+SetShaderValueTexture :: (shader: Shader, locIndex: s32, texture: Texture2D) #foreign raylib_native;
+UnloadShader :: (shader: Shader) #foreign raylib_native;
 
 // Screen-space-related functions
+GetMouseRay :: (mousePosition: Vector2, camera: Camera) -> Ray #foreign raylib_native;
+GetCameraMatrix :: (camera: Camera) -> Matrix4 #foreign raylib_native;
+GetCameraMatrix2D :: (camera: Camera2D) -> Matrix4 #foreign raylib_native;
+GetWorldToScreen :: (position: Vector3, camera: Camera) -> Vector2 #foreign raylib_native;
+GetScreenToWorld2D :: (position: Vector2, camera: Camera2D) -> Vector2 #foreign raylib_native;
+GetWorldToScreenEx :: (position: Vector3, camera: Camera, width: s32, height: s32) -> Vector2 #foreign raylib_native;
+GetWorldToScreen2D :: (position: Vector2, camera: Camera2D) -> Vector2 #foreign raylib_native;
 
 // Timing-related functions
+SetTargetFPS :: (fps: s32) #foreign raylib_native;
+GetFrameTime :: () -> float #foreign raylib_native;
+GetTime :: () -> float64 #foreign raylib_native;
+GetFPS :: () -> s32 #foreign raylib_native;
 
 // Custom frame control functions
 // NOTE: Those functions are intended for advance users that want full control over the frame processing
 // By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
 // To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
+SwapScreenBuffer :: () #foreign raylib_native;
+PollInputEvents :: () #foreign raylib_native;
+WaitTime :: (seconds: float64) #foreign raylib_native;
 
 // Random values generation functions
+SetRandomSeed :: (seed: u32) #foreign raylib_native;
+GetRandomValue :: (min: s32, max: s32) -> s32 #foreign raylib_native;
+LoadRandomSequence :: (count: u32, min: s32, max: s32) -> *s32 #foreign raylib_native;
+UnloadRandomSequence :: (sequence: *s32) #foreign raylib_native;
 
 // Misc. functions
+TakeScreenshot :: (fileName: *u8) #foreign raylib_native;
+SetConfigFlags :: (flags: u32) #foreign raylib_native;
+OpenURL :: (url: *u8) #foreign raylib_native;
 
 // NOTE: Following functions implemented in module [utils]
 //------------------------------------------------------------------
+TraceLog :: (logLevel: s32, text: *u8, args: ..*u8) #foreign raylib_native;
+SetTraceLogLevel :: (logLevel: s32) #foreign raylib_native;
+MemAlloc :: (size: u32) -> *void #foreign raylib_native;
+MemRealloc :: (ptr: *void, size: u32) -> *void #foreign raylib_native;
+MemFree :: (ptr: *void) #foreign raylib_native;
 
 // Set custom callbacks
 // WARNING: Callbacks setup is intended for advance users
+SetTraceLogCallback :: (callback: TraceLogCallback) #foreign raylib_native;
+SetLoadFileDataCallback :: (callback: LoadFileDataCallback) #foreign raylib_native;
+SetSaveFileDataCallback :: (callback: SaveFileDataCallback) #foreign raylib_native;
+SetLoadFileTextCallback :: (callback: LoadFileTextCallback) #foreign raylib_native;
+SetSaveFileTextCallback :: (callback: SaveFileTextCallback) #foreign raylib_native;
 
 // Files management functions
+LoadFileData :: (fileName: *u8, dataSize: *s32) -> *u8 #foreign raylib_native;
+UnloadFileData :: (data: *u8) #foreign raylib_native;
+SaveFileData :: (fileName: *u8, data: *void, dataSize: s32) -> bool #foreign raylib_native;
+ExportDataAsCode :: (char *data: unsigned, dataSize: s32, fileName: *u8) -> bool #foreign raylib_native;
+LoadFileText :: (fileName: *u8) -> *s8 #foreign raylib_native;
+UnloadFileText :: (text: *s8) #foreign raylib_native;
+SaveFileText :: (fileName: *u8, text: *s8) -> bool #foreign raylib_native;
 //------------------------------------------------------------------
 
 // File system functions
+FileExists :: (fileName: *u8) -> bool #foreign raylib_native;
+DirectoryExists :: (dirPath: *u8) -> bool #foreign raylib_native;
+IsFileExtension :: (fileName: *u8, ext: *u8) -> bool #foreign raylib_native;
+GetFileLength :: (fileName: *u8) -> s32 #foreign raylib_native;
+GetFileExtension :: (fileName: *u8) -> *u8 #foreign raylib_native;
+GetFileName :: (filePath: *u8) -> *u8 #foreign raylib_native;
+GetFileNameWithoutExt :: (filePath: *u8) -> *u8 #foreign raylib_native;
+GetDirectoryPath :: (filePath: *u8) -> *u8 #foreign raylib_native;
+GetPrevDirectoryPath :: (dirPath: *u8) -> *u8 #foreign raylib_native;
+GetWorkingDirectory :: () -> *u8 #foreign raylib_native;
+GetApplicationDirectory :: () -> *u8 #foreign raylib_native;
+ChangeDirectory :: (dir: *u8) -> bool #foreign raylib_native;
+IsPathFile :: (path: *u8) -> bool #foreign raylib_native;
+LoadDirectoryFiles :: (dirPath: *u8) -> FilePathList #foreign raylib_native;
+LoadDirectoryFilesEx :: (basePath: *u8, filter: *u8, scanSubdirs: bool) -> FilePathList #foreign raylib_native;
+UnloadDirectoryFiles :: (files: FilePathList) #foreign raylib_native;
+IsFileDropped :: () -> bool #foreign raylib_native;
+LoadDroppedFiles :: () -> FilePathList #foreign raylib_native;
+UnloadDroppedFiles :: (files: FilePathList) #foreign raylib_native;
+GetFileModTime :: (fileName: *u8) -> s32 #foreign raylib_native;
 
 // Compression/Encoding functionality
+CompressData :: (char *data: unsigned, dataSize: s32, compDataSize: *s32) -> *u8 #foreign raylib_native;
+DecompressData :: (char *compData: unsigned, compDataSize: s32, dataSize: *s32) -> *u8 #foreign raylib_native;
+EncodeDataBase64 :: (char *data: unsigned, dataSize: s32, outputSize: *s32) -> *s8 #foreign raylib_native;
+DecodeDataBase64 :: (char *data: unsigned, outputSize: *s32) -> *u8 #foreign raylib_native;
 
 // Automation events functionality
+LoadAutomationEventList :: (fileName: *u8) -> AutomationEventList #foreign raylib_native;
+UnloadAutomationEventList :: (list: *AutomationEventList) #foreign raylib_native;
+ExportAutomationEventList :: (list: AutomationEventList, fileName: *u8) -> bool #foreign raylib_native;
+SetAutomationEventList :: (list: *AutomationEventList) #foreign raylib_native;
+SetAutomationEventBaseFrame :: (frame: s32) #foreign raylib_native;
+StartAutomationEventRecording :: () #foreign raylib_native;
+StopAutomationEventRecording :: () #foreign raylib_native;
+PlayAutomationEvent :: (event: AutomationEvent) #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)
 //------------------------------------------------------------------------------------
 
 // Input-related functions: keyboard
+IsKeyPressed :: (key: s32) -> bool #foreign raylib_native;
+IsKeyPressedRepeat :: (key: s32) -> bool #foreign raylib_native;
+IsKeyDown :: (key: s32) -> bool #foreign raylib_native;
+IsKeyReleased :: (key: s32) -> bool #foreign raylib_native;
+IsKeyUp :: (key: s32) -> bool #foreign raylib_native;
+GetKeyPressed :: () -> s32 #foreign raylib_native;
+GetCharPressed :: () -> s32 #foreign raylib_native;
+SetExitKey :: (key: s32) #foreign raylib_native;
 
 // Input-related functions: gamepads
+IsGamepadAvailable :: (gamepad: s32) -> bool #foreign raylib_native;
+GetGamepadName :: (gamepad: s32) -> *u8 #foreign raylib_native;
+IsGamepadButtonPressed :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
+IsGamepadButtonDown :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
+IsGamepadButtonReleased :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
+IsGamepadButtonUp :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
+GetGamepadButtonPressed :: () -> s32 #foreign raylib_native;
+GetGamepadAxisCount :: (gamepad: s32) -> s32 #foreign raylib_native;
+GetGamepadAxisMovement :: (gamepad: s32, axis: s32) -> float #foreign raylib_native;
+SetGamepadMappings :: (mappings: *u8) -> s32 #foreign raylib_native;
 
 // Input-related functions: mouse
+IsMouseButtonPressed :: (button: s32) -> bool #foreign raylib_native;
+IsMouseButtonDown :: (button: s32) -> bool #foreign raylib_native;
+IsMouseButtonReleased :: (button: s32) -> bool #foreign raylib_native;
+IsMouseButtonUp :: (button: s32) -> bool #foreign raylib_native;
+GetMouseX :: () -> s32 #foreign raylib_native;
+GetMouseY :: () -> s32 #foreign raylib_native;
+GetMousePosition :: () -> Vector2 #foreign raylib_native;
+GetMouseDelta :: () -> Vector2 #foreign raylib_native;
+SetMousePosition :: (x: s32, y: s32) #foreign raylib_native;
+SetMouseOffset :: (offsetX: s32, offsetY: s32) #foreign raylib_native;
+SetMouseScale :: (scaleX: float, scaleY: float) #foreign raylib_native;
+GetMouseWheelMove :: () -> float #foreign raylib_native;
+GetMouseWheelMoveV :: () -> Vector2 #foreign raylib_native;
+SetMouseCursor :: (cursor: s32) #foreign raylib_native;
 
 // Input-related functions: touch
+GetTouchX :: () -> s32 #foreign raylib_native;
+GetTouchY :: () -> s32 #foreign raylib_native;
+GetTouchPosition :: (index: s32) -> Vector2 #foreign raylib_native;
+GetTouchPointId :: (index: s32) -> s32 #foreign raylib_native;
+GetTouchPointCount :: () -> s32 #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Gestures and Touch Handling Functions (Module: rgestures)
 //------------------------------------------------------------------------------------
+SetGesturesEnabled :: (flags: u32) #foreign raylib_native;
+IsGestureDetected :: (gesture: u32) -> bool #foreign raylib_native;
+GetGestureDetected :: () -> s32 #foreign raylib_native;
+GetGestureHoldDuration :: () -> float #foreign raylib_native;
+GetGestureDragVector :: () -> Vector2 #foreign raylib_native;
+GetGestureDragAngle :: () -> float #foreign raylib_native;
+GetGesturePinchVector :: () -> Vector2 #foreign raylib_native;
+GetGesturePinchAngle :: () -> float #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Camera System Functions (Module: rcamera)
 //------------------------------------------------------------------------------------
+UpdateCamera :: (camera: *Camera, mode: s32) #foreign raylib_native;
+UpdateCameraPro :: (camera: *Camera, movement: Vector3, rotation: Vector3, zoom: float) #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Basic Shapes Drawing Functions (Module: shapes)
@@ -557,14 +774,76 @@ AutomationEventList :: struct {
 // Set texture and rectangle to be used on shapes drawing
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
+SetShapesTexture :: (texture: Texture2D, source: Rectangle) #foreign raylib_native;
 
 // Basic shapes drawing functions
+DrawPixel :: (posX: s32, posY: s32, color: Color) #foreign raylib_native;
+DrawPixelV :: (position: Vector2, color: Color) #foreign raylib_native;
+DrawLine :: (startPosX: s32, startPosY: s32, endPosX: s32, endPosY: s32, color: Color) #foreign raylib_native;
+DrawLineV :: (startPos: Vector2, endPos: Vector2, color: Color) #foreign raylib_native;
+DrawLineEx :: (startPos: Vector2, endPos: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawLineStrip :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+DrawLineBezier :: (startPos: Vector2, endPos: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawCircle :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
+DrawCircleSector :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawCircleSectorLines :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawCircleGradient :: (centerX: s32, centerY: s32, radius: float, color1: Color, color2: Color) #foreign raylib_native;
+DrawCircleV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
+DrawCircleLines :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
+DrawCircleLinesV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
+DrawEllipse :: (centerX: s32, centerY: s32, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
+DrawEllipseLines :: (centerX: s32, centerY: s32, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
+DrawRing :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawRingLines :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawRectangle :: (posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
+DrawRectangleV :: (position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
+DrawRectangleRec :: (rec: Rectangle, color: Color) #foreign raylib_native;
+DrawRectanglePro :: (rec: Rectangle, origin: Vector2, rotation: float, color: Color) #foreign raylib_native;
+DrawRectangleGradientV :: (posX: s32, posY: s32, width: s32, height: s32, color1: Color, color2: Color) #foreign raylib_native;
+DrawRectangleGradientH :: (posX: s32, posY: s32, width: s32, height: s32, color1: Color, color2: Color) #foreign raylib_native;
+DrawRectangleGradientEx :: (rec: Rectangle, col1: Color, col2: Color, col3: Color, col4: Color) #foreign raylib_native;
+DrawRectangleLines :: (posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
+DrawRectangleLinesEx :: (rec: Rectangle, lineThick: float, color: Color) #foreign raylib_native;
+DrawRectangleRounded :: (rec: Rectangle, roundness: float, segments: s32, color: Color) #foreign raylib_native;
+DrawRectangleRoundedLines :: (rec: Rectangle, roundness: float, segments: s32, lineThick: float, color: Color) #foreign raylib_native;
+DrawTriangle :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+DrawTriangleLines :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+DrawTriangleFan :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+DrawTriangleStrip :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+DrawPoly :: (center: Vector2, sides: s32, radius: float, rotation: float, color: Color) #foreign raylib_native;
+DrawPolyLines :: (center: Vector2, sides: s32, radius: float, rotation: float, color: Color) #foreign raylib_native;
+DrawPolyLinesEx :: (center: Vector2, sides: s32, radius: float, rotation: float, lineThick: float, color: Color) #foreign raylib_native;
 
 // Splines drawing functions
+DrawSplineLinear :: (points: *Vector2, pointCount: s32, thick: float, color: Color) #foreign raylib_native;
+DrawSplineBasis :: (points: *Vector2, pointCount: s32, thick: float, color: Color) #foreign raylib_native;
+DrawSplineCatmullRom :: (points: *Vector2, pointCount: s32, thick: float, color: Color) #foreign raylib_native;
+DrawSplineBezierQuadratic :: (points: *Vector2, pointCount: s32, thick: float, color: Color) #foreign raylib_native;
+DrawSplineBezierCubic :: (points: *Vector2, pointCount: s32, thick: float, color: Color) #foreign raylib_native;
+DrawSplineSegmentLinear :: (p1: Vector2, p2: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawSplineSegmentBasis :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawSplineSegmentCatmullRom :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawSplineSegmentBezierQuadratic :: (p1: Vector2, c2: Vector2, p3: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawSplineSegmentBezierCubic :: (p1: Vector2, c2: Vector2, c3: Vector2, p4: Vector2, thick: float, color: Color) #foreign raylib_native;
 
 // Spline segment point evaluation functions, for a given t [0.0f .. 1.0f]
+GetSplinePointLinear :: (startPos: Vector2, endPos: Vector2, t: float) -> Vector2 #foreign raylib_native;
+GetSplinePointBasis :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: float) -> Vector2 #foreign raylib_native;
+GetSplinePointCatmullRom :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: float) -> Vector2 #foreign raylib_native;
+GetSplinePointBezierQuad :: (p1: Vector2, c2: Vector2, p3: Vector2, t: float) -> Vector2 #foreign raylib_native;
+GetSplinePointBezierCubic :: (p1: Vector2, c2: Vector2, c3: Vector2, p4: Vector2, t: float) -> Vector2 #foreign raylib_native;
 
 // Basic shapes collision detection functions
+CheckCollisionRecs :: (rec1: Rectangle, rec2: Rectangle) -> bool #foreign raylib_native;
+CheckCollisionCircles :: (center1: Vector2, radius1: float, center2: Vector2, radius2: float) -> bool #foreign raylib_native;
+CheckCollisionCircleRec :: (center: Vector2, radius: float, rec: Rectangle) -> bool #foreign raylib_native;
+CheckCollisionPointRec :: (point: Vector2, rec: Rectangle) -> bool #foreign raylib_native;
+CheckCollisionPointCircle :: (point: Vector2, center: Vector2, radius: float) -> bool #foreign raylib_native;
+CheckCollisionPointTriangle :: (point: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> bool #foreign raylib_native;
+CheckCollisionPointPoly :: (point: Vector2, points: *Vector2, pointCount: s32) -> bool #foreign raylib_native;
+CheckCollisionLines :: (startPos1: Vector2, endPos1: Vector2, startPos2: Vector2, endPos2: Vector2, collisionPoint: *Vector2) -> bool #foreign raylib_native;
+CheckCollisionPointLine :: (point: Vector2, p1: Vector2, p2: Vector2, threshold: s32) -> bool #foreign raylib_native;
+GetCollisionRec :: (rec1: Rectangle, rec2: Rectangle) -> Rectangle #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Texture Loading and Drawing Functions (Module: textures)
@@ -572,76 +851,366 @@ AutomationEventList :: struct {
 
 // Image loading functions
 // NOTE: These functions do not require GPU access
+LoadImage :: (fileName: *u8) -> Image #foreign raylib_native;
+LoadImageRaw :: (fileName: *u8, width: s32, height: s32, format: s32, headerSize: s32) -> Image #foreign raylib_native;
+LoadImageSvg :: (fileNameOrString: *u8, width: s32, height: s32) -> Image #foreign raylib_native;
+LoadImageAnim :: (fileName: *u8, frames: *s32) -> Image #foreign raylib_native;
+LoadImageFromMemory :: (fileType: *u8, char *fileData: unsigned, dataSize: s32) -> Image #foreign raylib_native;
+LoadImageFromTexture :: (texture: Texture2D) -> Image #foreign raylib_native;
+LoadImageFromScreen :: () -> Image #foreign raylib_native;
+IsImageReady :: (image: Image) -> bool #foreign raylib_native;
+UnloadImage :: (image: Image) #foreign raylib_native;
+ExportImage :: (image: Image, fileName: *u8) -> bool #foreign raylib_native;
+ExportImageToMemory :: (image: Image, fileType: *u8, fileSize: *s32) -> *u8 #foreign raylib_native;
+ExportImageAsCode :: (image: Image, fileName: *u8) -> bool #foreign raylib_native;
 
 // Image generation functions
+GenImageColor :: (width: s32, height: s32, color: Color) -> Image #foreign raylib_native;
+GenImageGradientLinear :: (width: s32, height: s32, direction: s32, start: Color, end: Color) -> Image #foreign raylib_native;
+GenImageGradientRadial :: (width: s32, height: s32, density: float, inner: Color, outer: Color) -> Image #foreign raylib_native;
+GenImageGradientSquare :: (width: s32, height: s32, density: float, inner: Color, outer: Color) -> Image #foreign raylib_native;
+GenImageChecked :: (width: s32, height: s32, checksX: s32, checksY: s32, col1: Color, col2: Color) -> Image #foreign raylib_native;
+GenImageWhiteNoise :: (width: s32, height: s32, factor: float) -> Image #foreign raylib_native;
+GenImagePerlinNoise :: (width: s32, height: s32, offsetX: s32, offsetY: s32, scale: float) -> Image #foreign raylib_native;
+GenImageCellular :: (width: s32, height: s32, tileSize: s32) -> Image #foreign raylib_native;
+GenImageText :: (width: s32, height: s32, text: *u8) -> Image #foreign raylib_native;
 
 // Image manipulation functions
+ImageCopy :: (image: Image) -> Image #foreign raylib_native;
+ImageFromImage :: (image: Image, rec: Rectangle) -> Image #foreign raylib_native;
+ImageText :: (text: *u8, fontSize: s32, color: Color) -> Image #foreign raylib_native;
+ImageTextEx :: (font: Font, text: *u8, fontSize: float, spacing: float, tint: Color) -> Image #foreign raylib_native;
+ImageFormat :: (image: *Image, newFormat: s32) #foreign raylib_native;
+ImageToPOT :: (image: *Image, fill: Color) #foreign raylib_native;
+ImageCrop :: (image: *Image, crop: Rectangle) #foreign raylib_native;
+ImageAlphaCrop :: (image: *Image, threshold: float) #foreign raylib_native;
+ImageAlphaClear :: (image: *Image, color: Color, threshold: float) #foreign raylib_native;
+ImageAlphaMask :: (image: *Image, alphaMask: Image) #foreign raylib_native;
+ImageAlphaPremultiply :: (image: *Image) #foreign raylib_native;
+ImageBlurGaussian :: (image: *Image, blurSize: s32) #foreign raylib_native;
+ImageResize :: (image: *Image, newWidth: s32, newHeight: s32) #foreign raylib_native;
+ImageResizeNN :: (image: *Image, newWidth,int newHeight: s32) #foreign raylib_native;
+ImageResizeCanvas :: (image: *Image, newWidth: s32, newHeight: s32, offsetX: s32, offsetY: s32, fill: Color) #foreign raylib_native;
+ImageMipmaps :: (image: *Image) #foreign raylib_native;
+ImageDither :: (image: *Image, rBpp: s32, gBpp: s32, bBpp: s32, aBpp: s32) #foreign raylib_native;
+ImageFlipVertical :: (image: *Image) #foreign raylib_native;
+ImageFlipHorizontal :: (image: *Image) #foreign raylib_native;
+ImageRotate :: (image: *Image, degrees: s32) #foreign raylib_native;
+ImageRotateCW :: (image: *Image) #foreign raylib_native;
+ImageRotateCCW :: (image: *Image) #foreign raylib_native;
+ImageColorTint :: (image: *Image, color: Color) #foreign raylib_native;
+ImageColorInvert :: (image: *Image) #foreign raylib_native;
+ImageColorGrayscale :: (image: *Image) #foreign raylib_native;
+ImageColorContrast :: (image: *Image, contrast: float) #foreign raylib_native;
+ImageColorBrightness :: (image: *Image, brightness: s32) #foreign raylib_native;
+ImageColorReplace :: (image: *Image, color: Color, replace: Color) #foreign raylib_native;
+LoadImageColors :: (image: Image) -> *Color #foreign raylib_native;
+LoadImagePalette :: (image: Image, maxPaletteSize: s32, colorCount: *s32) -> *Color #foreign raylib_native;
+UnloadImageColors :: (colors: *Color) #foreign raylib_native;
+UnloadImagePalette :: (colors: *Color) #foreign raylib_native;
+GetImageAlphaBorder :: (image: Image, threshold: float) -> Rectangle #foreign raylib_native;
+GetImageColor :: (image: Image, x: s32, y: s32) -> Color #foreign raylib_native;
 
 // Image drawing functions
 // NOTE: Image software-rendering functions (CPU)
+ImageClearBackground :: (dst: *Image, color: Color) #foreign raylib_native;
+ImageDrawPixel :: (dst: *Image, posX: s32, posY: s32, color: Color) #foreign raylib_native;
+ImageDrawPixelV :: (dst: *Image, position: Vector2, color: Color) #foreign raylib_native;
+ImageDrawLine :: (dst: *Image, startPosX: s32, startPosY: s32, endPosX: s32, endPosY: s32, color: Color) #foreign raylib_native;
+ImageDrawLineV :: (dst: *Image, start: Vector2, end: Vector2, color: Color) #foreign raylib_native;
+ImageDrawCircle :: (dst: *Image, centerX: s32, centerY: s32, radius: s32, color: Color) #foreign raylib_native;
+ImageDrawCircleV :: (dst: *Image, center: Vector2, radius: s32, color: Color) #foreign raylib_native;
+ImageDrawCircleLines :: (dst: *Image, centerX: s32, centerY: s32, radius: s32, color: Color) #foreign raylib_native;
+ImageDrawCircleLinesV :: (dst: *Image, center: Vector2, radius: s32, color: Color) #foreign raylib_native;
+ImageDrawRectangle :: (dst: *Image, posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
+ImageDrawRectangleV :: (dst: *Image, position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
+ImageDrawRectangleRec :: (dst: *Image, rec: Rectangle, color: Color) #foreign raylib_native;
+ImageDrawRectangleLines :: (dst: *Image, rec: Rectangle, thick: s32, color: Color) #foreign raylib_native;
+ImageDraw :: (dst: *Image, src: Image, srcRec: Rectangle, dstRec: Rectangle, tint: Color) #foreign raylib_native;
+ImageDrawText :: (dst: *Image, text: *u8, posX: s32, posY: s32, fontSize: s32, color: Color) #foreign raylib_native;
+ImageDrawTextEx :: (dst: *Image, font: Font, text: *u8, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
 
 // Texture loading functions
 // NOTE: These functions require GPU access
+LoadTexture :: (fileName: *u8) -> Texture2D #foreign raylib_native;
+LoadTextureFromImage :: (image: Image) -> Texture2D #foreign raylib_native;
+LoadTextureCubemap :: (image: Image, layout: s32) -> TextureCubemap #foreign raylib_native;
+LoadRenderTexture :: (width: s32, height: s32) -> RenderTexture2D #foreign raylib_native;
+IsTextureReady :: (texture: Texture2D) -> bool #foreign raylib_native;
+UnloadTexture :: (texture: Texture2D) #foreign raylib_native;
+IsRenderTextureReady :: (target: RenderTexture2D) -> bool #foreign raylib_native;
+UnloadRenderTexture :: (target: RenderTexture2D) #foreign raylib_native;
+UpdateTexture :: (texture: Texture2D, pixels: *void) #foreign raylib_native;
+UpdateTextureRec :: (texture: Texture2D, rec: Rectangle, pixels: *void) #foreign raylib_native;
 
 // Texture configuration functions
+GenTextureMipmaps :: (texture: *Texture2D) #foreign raylib_native;
+SetTextureFilter :: (texture: Texture2D, filter: s32) #foreign raylib_native;
+SetTextureWrap :: (texture: Texture2D, wrap: s32) #foreign raylib_native;
 
 // Texture drawing functions
+DrawTexture :: (texture: Texture2D, posX: s32, posY: s32, tint: Color) #foreign raylib_native;
+DrawTextureV :: (texture: Texture2D, position: Vector2, tint: Color) #foreign raylib_native;
+DrawTextureEx :: (texture: Texture2D, position: Vector2, rotation: float, scale: float, tint: Color) #foreign raylib_native;
+DrawTextureRec :: (texture: Texture2D, source: Rectangle, position: Vector2, tint: Color) #foreign raylib_native;
+DrawTexturePro :: (texture: Texture2D, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
+DrawTextureNPatch :: (texture: Texture2D, nPatchInfo: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 
 // Color/pixel related functions
+Fade :: (color: Color, alpha: float) -> Color #foreign raylib_native;
+ColorToInt :: (color: Color) -> s32 #foreign raylib_native;
+ColorNormalize :: (color: Color) -> Vector4 #foreign raylib_native;
+ColorFromNormalized :: (normalized: Vector4) -> Color #foreign raylib_native;
+ColorToHSV :: (color: Color) -> Vector3 #foreign raylib_native;
+ColorFromHSV :: (hue: float, saturation: float, value: float) -> Color #foreign raylib_native;
+ColorTint :: (color: Color, tint: Color) -> Color #foreign raylib_native;
+ColorBrightness :: (color: Color, factor: float) -> Color #foreign raylib_native;
+ColorContrast :: (color: Color, contrast: float) -> Color #foreign raylib_native;
+ColorAlpha :: (color: Color, alpha: float) -> Color #foreign raylib_native;
+ColorAlphaBlend :: (dst: Color, src: Color, tint: Color) -> Color #foreign raylib_native;
+GetColor :: (hexValue: u32) -> Color #foreign raylib_native;
+GetPixelColor :: (srcPtr: *void, format: s32) -> Color #foreign raylib_native;
+SetPixelColor :: (dstPtr: *void, color: Color, format: s32) #foreign raylib_native;
+GetPixelDataSize :: (width: s32, height: s32, format: s32) -> s32 #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Font Loading and Text Drawing Functions (Module: text)
 //------------------------------------------------------------------------------------
 
 // Font loading/unloading functions
+GetFontDefault :: () -> Font #foreign raylib_native;
+LoadFont :: (fileName: *u8) -> Font #foreign raylib_native;
+LoadFontEx :: (fileName: *u8, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
+LoadFontFromImage :: (image: Image, key: Color, firstChar: s32) -> Font #foreign raylib_native;
+LoadFontFromMemory :: (fileType: *u8, char *fileData: unsigned, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
+IsFontReady :: (font: Font) -> bool #foreign raylib_native;
+LoadFontData :: (char *fileData: unsigned, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: s32) -> *GlyphInfo #foreign raylib_native;
+GenImageFontAtlas :: (glyphs: *GlyphInfo, glyphRecs: **Rectangle, glyphCount: s32, fontSize: s32, padding: s32, packMethod: s32) -> Image #foreign raylib_native;
+UnloadFontData :: (glyphs: *GlyphInfo, glyphCount: s32) #foreign raylib_native;
+UnloadFont :: (font: Font) #foreign raylib_native;
+ExportFontAsCode :: (font: Font, fileName: *u8) -> bool #foreign raylib_native;
 
 // Text drawing functions
+DrawFPS :: (posX: s32, posY: s32) #foreign raylib_native;
+DrawText :: (text: *u8, posX: s32, posY: s32, fontSize: s32, color: Color) #foreign raylib_native;
+DrawTextEx :: (font: Font, text: *u8, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
+DrawTextPro :: (font: Font, text: *u8, position: Vector2, origin: Vector2, rotation: float, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
+DrawTextCodepoint :: (font: Font, codepoint: s32, position: Vector2, fontSize: float, tint: Color) #foreign raylib_native;
+DrawTextCodepoints :: (font: Font, codepoints: *int, codepointCount: s32, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
 
 // Text font info functions
+SetTextLineSpacing :: (spacing: s32) #foreign raylib_native;
+MeasureText :: (text: *u8, fontSize: s32) -> s32 #foreign raylib_native;
+MeasureTextEx :: (font: Font, text: *u8, fontSize: float, spacing: float) -> Vector2 #foreign raylib_native;
+GetGlyphIndex :: (font: Font, codepoint: s32) -> s32 #foreign raylib_native;
+GetGlyphInfo :: (font: Font, codepoint: s32) -> GlyphInfo #foreign raylib_native;
+GetGlyphAtlasRec :: (font: Font, codepoint: s32) -> Rectangle #foreign raylib_native;
 
 // Text codepoints management functions (unicode characters)
+LoadUTF8 :: (codepoints: *int, length: s32) -> *s8 #foreign raylib_native;
+UnloadUTF8 :: (text: *s8) #foreign raylib_native;
+LoadCodepoints :: (text: *u8, count: *s32) -> *s32 #foreign raylib_native;
+UnloadCodepoints :: (codepoints: *s32) #foreign raylib_native;
+GetCodepointCount :: (text: *u8) -> s32 #foreign raylib_native;
+GetCodepoint :: (text: *u8, codepointSize: *s32) -> s32 #foreign raylib_native;
+GetCodepointNext :: (text: *u8, codepointSize: *s32) -> s32 #foreign raylib_native;
+GetCodepointPrevious :: (text: *u8, codepointSize: *s32) -> s32 #foreign raylib_native;
+CodepointToUTF8 :: (codepoint: s32, utf8Size: *s32) -> *u8 #foreign raylib_native;
 
 // Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!
+TextCopy :: (dst: *s8, src: *u8) -> s32 #foreign raylib_native;
+TextIsEqual :: (text1: *u8, text2: *u8) -> bool #foreign raylib_native;
+TextLength :: (text: *u8) -> u32 #foreign raylib_native;
+TextFormat :: (text: *u8, args: ..*u8) -> *u8 #foreign raylib_native;
+TextSubtext :: (text: *u8, position: s32, length: s32) -> *u8 #foreign raylib_native;
+TextReplace :: (text: *s8, replace: *u8, by: *u8) -> *s8 #foreign raylib_native;
+TextInsert :: (text: *u8, insert: *u8, position: s32) -> *s8 #foreign raylib_native;
+TextJoin :: (textList: **u8, count: s32, delimiter: *u8) -> *u8 #foreign raylib_native;
+TextSplit :: (text: *u8, delimiter: s8, count: *s32) -> **u8 #foreign raylib_native;
+TextAppend :: (text: *s8, append: *u8, position: *s32) #foreign raylib_native;
+TextFindIndex :: (text: *u8, find: *u8) -> s32 #foreign raylib_native;
+TextToUpper :: (text: *u8) -> *u8 #foreign raylib_native;
+TextToLower :: (text: *u8) -> *u8 #foreign raylib_native;
+TextToPascal :: (text: *u8) -> *u8 #foreign raylib_native;
+TextToInteger :: (text: *u8) -> s32 #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)
 //------------------------------------------------------------------------------------
 
 // Basic geometric 3D shapes drawing functions
+DrawLine3D :: (startPos: Vector3, endPos: Vector3, color: Color) #foreign raylib_native;
+DrawPoint3D :: (position: Vector3, color: Color) #foreign raylib_native;
+DrawCircle3D :: (center: Vector3, radius: float, rotationAxis: Vector3, rotationAngle: float, color: Color) #foreign raylib_native;
+DrawTriangle3D :: (v1: Vector3, v2: Vector3, v3: Vector3, color: Color) #foreign raylib_native;
+DrawTriangleStrip3D :: (points: *Vector3, pointCount: s32, color: Color) #foreign raylib_native;
+DrawCube :: (position: Vector3, width: float, height: float, length: float, color: Color) #foreign raylib_native;
+DrawCubeV :: (position: Vector3, size: Vector3, color: Color) #foreign raylib_native;
+DrawCubeWires :: (position: Vector3, width: float, height: float, length: float, color: Color) #foreign raylib_native;
+DrawCubeWiresV :: (position: Vector3, size: Vector3, color: Color) #foreign raylib_native;
+DrawSphere :: (centerPos: Vector3, radius: float, color: Color) #foreign raylib_native;
+DrawSphereEx :: (centerPos: Vector3, radius: float, rings: s32, slices: s32, color: Color) #foreign raylib_native;
+DrawSphereWires :: (centerPos: Vector3, radius: float, rings: s32, slices: s32, color: Color) #foreign raylib_native;
+DrawCylinder :: (position: Vector3, radiusTop: float, radiusBottom: float, height: float, slices: s32, color: Color) #foreign raylib_native;
+DrawCylinderEx :: (startPos: Vector3, endPos: Vector3, startRadius: float, endRadius: float, sides: s32, color: Color) #foreign raylib_native;
+DrawCylinderWires :: (position: Vector3, radiusTop: float, radiusBottom: float, height: float, slices: s32, color: Color) #foreign raylib_native;
+DrawCylinderWiresEx :: (startPos: Vector3, endPos: Vector3, startRadius: float, endRadius: float, sides: s32, color: Color) #foreign raylib_native;
+DrawCapsule :: (startPos: Vector3, endPos: Vector3, radius: float, slices: s32, rings: s32, color: Color) #foreign raylib_native;
+DrawCapsuleWires :: (startPos: Vector3, endPos: Vector3, radius: float, slices: s32, rings: s32, color: Color) #foreign raylib_native;
+DrawPlane :: (centerPos: Vector3, size: Vector2, color: Color) #foreign raylib_native;
+DrawRay :: (ray: Ray, color: Color) #foreign raylib_native;
+DrawGrid :: (slices: s32, spacing: float) #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Model 3d Loading and Drawing Functions (Module: models)
 //------------------------------------------------------------------------------------
 
 // Model management functions
+LoadModel :: (fileName: *u8) -> Model #foreign raylib_native;
+LoadModelFromMesh :: (mesh: Mesh) -> Model #foreign raylib_native;
+IsModelReady :: (model: Model) -> bool #foreign raylib_native;
+UnloadModel :: (model: Model) #foreign raylib_native;
+GetModelBoundingBox :: (model: Model) -> BoundingBox #foreign raylib_native;
 
 // Model drawing functions
+DrawModel :: (model: Model, position: Vector3, scale: float, tint: Color) #foreign raylib_native;
+DrawModelEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) #foreign raylib_native;
+DrawModelWires :: (model: Model, position: Vector3, scale: float, tint: Color) #foreign raylib_native;
+DrawModelWiresEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) #foreign raylib_native;
+DrawBoundingBox :: (box: BoundingBox, color: Color) #foreign raylib_native;
+DrawBillboard :: (camera: Camera, texture: Texture2D, position: Vector3, size: float, tint: Color) #foreign raylib_native;
+DrawBillboardRec :: (camera: Camera, texture: Texture2D, source: Rectangle, position: Vector3, size: Vector2, tint: Color) #foreign raylib_native;
+DrawBillboardPro :: (camera: Camera, texture: Texture2D, source: Rectangle, position: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 
 // Mesh management functions
+UploadMesh :: (mesh: *Mesh, dynamic: bool) #foreign raylib_native;
+UpdateMeshBuffer :: (mesh: Mesh, index: s32, data: *void, dataSize: s32, offset: s32) #foreign raylib_native;
+UnloadMesh :: (mesh: Mesh) #foreign raylib_native;
+DrawMesh :: (mesh: Mesh, material: Material, transform: Matrix4) #foreign raylib_native;
+DrawMeshInstanced :: (mesh: Mesh, material: Material, transforms: *Matrix, instances: s32) #foreign raylib_native;
+ExportMesh :: (mesh: Mesh, fileName: *u8) -> bool #foreign raylib_native;
+GetMeshBoundingBox :: (mesh: Mesh) -> BoundingBox #foreign raylib_native;
+GenMeshTangents :: (mesh: *Mesh) #foreign raylib_native;
 
 // Mesh generation functions
+GenMeshPoly :: (sides: s32, radius: float) -> Mesh #foreign raylib_native;
+GenMeshPlane :: (width: float, length: float, resX: s32, resZ: s32) -> Mesh #foreign raylib_native;
+GenMeshCube :: (width: float, height: float, length: float) -> Mesh #foreign raylib_native;
+GenMeshSphere :: (radius: float, rings: s32, slices: s32) -> Mesh #foreign raylib_native;
+GenMeshHemiSphere :: (radius: float, rings: s32, slices: s32) -> Mesh #foreign raylib_native;
+GenMeshCylinder :: (radius: float, height: float, slices: s32) -> Mesh #foreign raylib_native;
+GenMeshCone :: (radius: float, height: float, slices: s32) -> Mesh #foreign raylib_native;
+GenMeshTorus :: (radius: float, size: float, radSeg: s32, sides: s32) -> Mesh #foreign raylib_native;
+GenMeshKnot :: (radius: float, size: float, radSeg: s32, sides: s32) -> Mesh #foreign raylib_native;
+GenMeshHeightmap :: (heightmap: Image, size: Vector3) -> Mesh #foreign raylib_native;
+GenMeshCubicmap :: (cubicmap: Image, cubeSize: Vector3) -> Mesh #foreign raylib_native;
 
 // Material loading/unloading functions
+LoadMaterials :: (fileName: *u8, materialCount: *s32) -> *Material #foreign raylib_native;
+LoadMaterialDefault :: () -> Material #foreign raylib_native;
+IsMaterialReady :: (material: Material) -> bool #foreign raylib_native;
+UnloadMaterial :: (material: Material) #foreign raylib_native;
+SetMaterialTexture :: (material: *Material, mapType: s32, texture: Texture2D) #foreign raylib_native;
+SetModelMeshMaterial :: (model: *Model, meshId: s32, materialId: s32) #foreign raylib_native;
 
 // Model animations loading/unloading functions
+LoadModelAnimations :: (fileName: *u8, animCount: *s32) -> *ModelAnimation #foreign raylib_native;
+UpdateModelAnimation :: (model: Model, anim: ModelAnimation, frame: s32) #foreign raylib_native;
+UnloadModelAnimation :: (anim: ModelAnimation) #foreign raylib_native;
+UnloadModelAnimations :: (animations: *ModelAnimation, animCount: s32) #foreign raylib_native;
+IsModelAnimationValid :: (model: Model, anim: ModelAnimation) -> bool #foreign raylib_native;
 
 // Collision detection functions
+CheckCollisionSpheres :: (center1: Vector3, radius1: float, center2: Vector3, radius2: float) -> bool #foreign raylib_native;
+CheckCollisionBoxes :: (box1: BoundingBox, box2: BoundingBox) -> bool #foreign raylib_native;
+CheckCollisionBoxSphere :: (box: BoundingBox, center: Vector3, radius: float) -> bool #foreign raylib_native;
+GetRayCollisionSphere :: (ray: Ray, center: Vector3, radius: float) -> RayCollision #foreign raylib_native;
+GetRayCollisionBox :: (ray: Ray, box: BoundingBox) -> RayCollision #foreign raylib_native;
+GetRayCollisionMesh :: (ray: Ray, mesh: Mesh, transform: Matrix4) -> RayCollision #foreign raylib_native;
+GetRayCollisionTriangle :: (ray: Ray, p1: Vector3, p2: Vector3, p3: Vector3) -> RayCollision #foreign raylib_native;
+GetRayCollisionQuad :: (ray: Ray, p1: Vector3, p2: Vector3, p3: Vector3, p4: Vector3) -> RayCollision #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Audio Loading and Playing Functions (Module: audio)
 //------------------------------------------------------------------------------------
 
 // Audio device management functions
+InitAudioDevice :: () #foreign raylib_native;
+CloseAudioDevice :: () #foreign raylib_native;
+IsAudioDeviceReady :: () -> bool #foreign raylib_native;
+SetMasterVolume :: (volume: float) #foreign raylib_native;
+GetMasterVolume :: () -> float #foreign raylib_native;
 
 // Wave/Sound loading/unloading functions
+LoadWave :: (fileName: *u8) -> Wave #foreign raylib_native;
+LoadWaveFromMemory :: (fileType: *u8, char *fileData: unsigned, dataSize: s32) -> Wave #foreign raylib_native;
+IsWaveReady :: (wave: Wave) -> bool #foreign raylib_native;
+LoadSound :: (fileName: *u8) -> Sound #foreign raylib_native;
+LoadSoundFromWave :: (wave: Wave) -> Sound #foreign raylib_native;
+LoadSoundAlias :: (source: Sound) -> Sound #foreign raylib_native;
+IsSoundReady :: (sound: Sound) -> bool #foreign raylib_native;
+UpdateSound :: (sound: Sound, data: *void, sampleCount: s32) #foreign raylib_native;
+UnloadWave :: (wave: Wave) #foreign raylib_native;
+UnloadSound :: (sound: Sound) #foreign raylib_native;
+UnloadSoundAlias :: (alias: Sound) #foreign raylib_native;
+ExportWave :: (wave: Wave, fileName: *u8) -> bool #foreign raylib_native;
+ExportWaveAsCode :: (wave: Wave, fileName: *u8) -> bool #foreign raylib_native;
 
 // Wave/Sound management functions
+PlaySound :: (sound: Sound) #foreign raylib_native;
+StopSound :: (sound: Sound) #foreign raylib_native;
+PauseSound :: (sound: Sound) #foreign raylib_native;
+ResumeSound :: (sound: Sound) #foreign raylib_native;
+IsSoundPlaying :: (sound: Sound) -> bool #foreign raylib_native;
+SetSoundVolume :: (sound: Sound, volume: float) #foreign raylib_native;
+SetSoundPitch :: (sound: Sound, pitch: float) #foreign raylib_native;
+SetSoundPan :: (sound: Sound, pan: float) #foreign raylib_native;
+WaveCopy :: (wave: Wave) -> Wave #foreign raylib_native;
+WaveCrop :: (wave: *Wave, initSample: s32, finalSample: s32) #foreign raylib_native;
+WaveFormat :: (wave: *Wave, sampleRate: s32, sampleSize: s32, channels: s32) #foreign raylib_native;
+LoadWaveSamples :: (wave: Wave) -> *float #foreign raylib_native;
+UnloadWaveSamples :: (samples: *float) #foreign raylib_native;
 
 // Music management functions
+LoadMusicStream :: (fileName: *u8) -> Music #foreign raylib_native;
+LoadMusicStreamFromMemory :: (fileType: *u8, char *data: unsigned, dataSize: s32) -> Music #foreign raylib_native;
+IsMusicReady :: (music: Music) -> bool #foreign raylib_native;
+UnloadMusicStream :: (music: Music) #foreign raylib_native;
+PlayMusicStream :: (music: Music) #foreign raylib_native;
+IsMusicStreamPlaying :: (music: Music) -> bool #foreign raylib_native;
+UpdateMusicStream :: (music: Music) #foreign raylib_native;
+StopMusicStream :: (music: Music) #foreign raylib_native;
+PauseMusicStream :: (music: Music) #foreign raylib_native;
+ResumeMusicStream :: (music: Music) #foreign raylib_native;
+SeekMusicStream :: (music: Music, position: float) #foreign raylib_native;
+SetMusicVolume :: (music: Music, volume: float) #foreign raylib_native;
+SetMusicPitch :: (music: Music, pitch: float) #foreign raylib_native;
+SetMusicPan :: (music: Music, pan: float) #foreign raylib_native;
+GetMusicTimeLength :: (music: Music) -> float #foreign raylib_native;
+GetMusicTimePlayed :: (music: Music) -> float #foreign raylib_native;
 
 // AudioStream management functions
+LoadAudioStream :: (sampleRate: u32, sampleSize: u32, channels: u32) -> AudioStream #foreign raylib_native;
+IsAudioStreamReady :: (stream: AudioStream) -> bool #foreign raylib_native;
+UnloadAudioStream :: (stream: AudioStream) #foreign raylib_native;
+UpdateAudioStream :: (stream: AudioStream, data: *void, frameCount: s32) #foreign raylib_native;
+IsAudioStreamProcessed :: (stream: AudioStream) -> bool #foreign raylib_native;
+PlayAudioStream :: (stream: AudioStream) #foreign raylib_native;
+PauseAudioStream :: (stream: AudioStream) #foreign raylib_native;
+ResumeAudioStream :: (stream: AudioStream) #foreign raylib_native;
+IsAudioStreamPlaying :: (stream: AudioStream) -> bool #foreign raylib_native;
+StopAudioStream :: (stream: AudioStream) #foreign raylib_native;
+SetAudioStreamVolume :: (stream: AudioStream, volume: float) #foreign raylib_native;
+SetAudioStreamPitch :: (stream: AudioStream, pitch: float) #foreign raylib_native;
+SetAudioStreamPan :: (stream: AudioStream, pan: float) #foreign raylib_native;
+SetAudioStreamBufferSizeDefault :: (size: s32) #foreign raylib_native;
+SetAudioStreamCallback :: (stream: AudioStream, callback: AudioCallback) #foreign raylib_native;
 
+AttachAudioStreamProcessor :: (stream: AudioStream, processor: AudioCallback) #foreign raylib_native;
+DetachAudioStreamProcessor :: (stream: AudioStream, processor: AudioCallback) #foreign raylib_native;
 
+AttachAudioMixedProcessor :: (processor: AudioCallback) #foreign raylib_native;
+DetachAudioMixedProcessor :: (processor: AudioCallback) #foreign raylib_native;
 
 
