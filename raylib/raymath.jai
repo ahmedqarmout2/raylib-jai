@@ -69,27 +69,42 @@
 //----------------------------------------------------------------------------------
 // Vector2 type
 Vector2 :: {
+    x: float; 
+    y: float; 
 }
 
 // Vector3 type
 Vector3 :: {
+    x: float; 
+    y: float; 
+    z: float; 
 }
 
 // Vector4 type
 Vector4 :: {
+    x: float; 
+    y: float; 
+    z: float; 
+    w: float; 
 }
 
 // Quaternion type
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
 Matrix :: {
+    m0, m4, m8, m12: float;       // Matrix first row (4 components)
+    m1, m5, m9, m13: float;       // Matrix second row (4 components)
+    m2, m6, m10, m14: float;      // Matrix third row (4 components)
+    m3, m7, m11, m15: float;      // Matrix fourth row (4 components)
 }
 
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
 float3 :: {
+    v: [3]float; 
 }
 
 float16 :: {
+    v: [16]float; 
 }
 
 

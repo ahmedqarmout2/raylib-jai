@@ -17,8 +17,7 @@ TYPE_MAP :: string.[
     "long",           "s32",
     "double",         "float64",
     "int",            "s32",
-    "Matrix",         "Matrix4",
-    "float",          "float"
+    "Matrix",         "Matrix4"
 ];
 
 DOUBLE_POINTER :: "**";
@@ -138,7 +137,13 @@ handle_comment_block :: (file_lines: []string, builder: *String_Builder) {
 }
 
 handle_struct :: (file_lines: []string, builder: *String_Builder) {
-    definition_line       := file_lines[g_line_counter];
+    definition_line := file_lines[g_line_counter];
+
+    if (String.contains(definition_line, ";")) {
+        print_to_builder(builder, "// TODO: parse this line. %\n", definition_line);
+        return;
+    } 
+
     definition_line_parts := String.split(definition_line, " ");
     if (definition_line_parts.count < 4) {
         print("--Unexpected struct definition--\n");
@@ -146,6 +151,8 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         print("--Expected: typedef struct <NAME> { --\n");
         return;
     }
+
+
 
     struct_name := definition_line_parts[2];
     struct_end  := String.join("} ", struct_name, ";");
@@ -176,72 +183,78 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
             return;
         }
 
-        code_part := String.trim(line_parts[0]);
-        comment   := line_parts[1];
+        struct_element := String.trim(line_parts[0]);
+        comment        := line_parts[1];
 
-        convert_type(code_part);
-
-        // Indentation for formating
-        // print_to_builder(builder, "    ");
-
-        // Array prefix
-        /*
-        if (code_part.count == 2) {
-            value := code_part[1];
-
-            // Check if this is an array value
-            right_bracket_idx := String.find_index_from_right(value, "]");
-            left_bracket_idx  := String.find_index_from_right(value, "[");
-
-            if (right_bracket_idx >= 0 && left_bracket_idx >= 0) {
-                array_prefix := String.slice(value, left_bracket_idx, right_bracket_idx - left_bracket_idx + 1);
-                
-                // Adjust the new type to inlcude array part
-                new_type = String.join(array_prefix, new_type);
-                
-                // Adjust the value to remove array part
-                value = String.slice(value, 0, left_bracket_idx);
-            }
-            print_to_builder(builder, "%", value);
-        } else {
-            // We could have a list of names with one type. For example: float m0, m4, m8, m12;
-            for i: 1..code_part.count-1 {
-                print_to_builder(builder, "%", code_part[i]);
-            }
+        successful, jai_format := convert_struct_element_type(struct_element);
+        if (!successful) {
+            print("Unexpected struct element format\n");
+            print("%\n", struct_name);
+            print("%\n", line);
+            return;
         }
 
-        print_to_builder(builder, ": %; %\n", new_type, comment);*/
+        print_to_builder(builder, "    %; %\n", jai_format, comment);
     }
 }
 
-convert_type :: (line: string) -> string {
+convert_struct_element_type :: (line: string) -> (successful: bool, jai_format: string) {
+    c_type   := "";
+    jai_type := "";
+
     for i: 0..TYPE_MAP.count-1 {
-        c_type   := TYPE_MAP[i];
-        jai_type := TYPE_MAP[i+1];
+        _c_type   := TYPE_MAP[i];
+        _jai_type := TYPE_MAP[i+1];
 
         // Skip the jai type in the next iteration
         i += 1;
 
-        if (!String.starts_with(line, c_type)) {
-            continue;
+        if (String.starts_with(line, _c_type)) {
+            c_type   = _c_type;
+            jai_type = _jai_type;
+            break;
         }
-
-        variables := String.slice(line, c_type.count, line.count - c_type.count);
-
-        clean_variables := String.trim(variables);
-
-        // Handle single and double pointer. For example: int *meshMaterial; or Transform **framePoses;
-        pointer_prefix := "";
-        if (String.starts_with(clean_variables, DOUBLE_POINTER)) {
-            pointer_prefix = DOUBLE_POINTER;              
-        } else if (String.starts_with(clean_variables, SINGLE_POINTER)) {
-            pointer_prefix = SINGLE_POINTER;
-        }
-
-        jai_type = String.join(pointer_prefix, jai_type);
-        clean_variables = String.slice(clean_variables, pointer_prefix.count, clean_variables.count - pointer_prefix.count);
-
-        print("%: %\n", clean_variables, jai_type);
     }
-    return line;
+
+    // c_type does not need to be mapped to a jai_type
+    if (c_type.count == 0 && jai_type.count == 0) {
+        found, _c_type, _variables := String.split_from_left(line, " ");
+        if (!found) {
+            return false, "";
+        }
+
+        c_type   = _c_type;
+        jai_type = _c_type;
+    }
+
+    // + 1 to account for the space after the c_type
+    variables := String.slice(line, c_type.count + 1, line.count - c_type.count + 1);
+
+
+    // Handle single and double pointer. For example: int *meshMaterial; or Transform **framePoses;
+    pointer_prefix := "";
+    if (String.starts_with(variables, DOUBLE_POINTER)) {
+        pointer_prefix = DOUBLE_POINTER;              
+    } else if (String.starts_with(variables, SINGLE_POINTER)) {
+        pointer_prefix = SINGLE_POINTER;
+    }
+
+    jai_type  = String.join(pointer_prefix, jai_type);
+    variables = String.slice(variables, pointer_prefix.count, variables.count - pointer_prefix.count);
+
+    // Handle array types. For example: float v[3];
+    right_bracket_idx := String.find_index_from_right(variables, "]");
+    left_bracket_idx  := String.find_index_from_right(variables, "[");
+
+    if (right_bracket_idx >= 0 && left_bracket_idx >= 0) {
+        array_prefix := String.slice(variables, left_bracket_idx, right_bracket_idx - left_bracket_idx + 1);
+        
+        // Adjust the new type to inlcude array part
+        jai_type = String.join(array_prefix, jai_type);
+        
+        // Adjust the variables to remove array part
+        variables = String.slice(variables, 0, left_bracket_idx);
+    }
+
+    return true, String.join(variables, ": ", jai_type);
 }

@@ -114,36 +114,67 @@
 
 // Vector2, 2 components
 Vector2 :: {
+    x: float;                 // Vector x component
+    y: float;                 // Vector y component
 }
 
 // Vector3, 3 components
 Vector3 :: {
+    x: float;                 // Vector x component
+    y: float;                 // Vector y component
+    z: float;                 // Vector z component
 }
 
 // Vector4, 4 components
 Vector4 :: {
+    x: float;                 // Vector x component
+    y: float;                 // Vector y component
+    z: float;                 // Vector z component
+    w: float;                 // Vector w component
 }
 
 // Quaternion, 4 components (Vector4 alias)
 
 // Matrix, 4x4 components, column major, OpenGL style, right-handed
 Matrix :: {
+    m0, m4, m8, m12: float;   // Matrix first row (4 components)
+    m1, m5, m9, m13: float;   // Matrix second row (4 components)
+    m2, m6, m10, m14: float;  // Matrix third row (4 components)
+    m3, m7, m11, m15: float;  // Matrix fourth row (4 components)
 }
 
 // Color, 4 components, R8G8B8A8 (32bit)
 Color :: {
+    r: u8;         // Color red value
+    g: u8;         // Color green value
+    b: u8;         // Color blue value
+    a: u8;         // Color alpha value
 }
 
 // Rectangle, 4 components
 Rectangle :: {
+    x: float;                 // Rectangle top-left corner position x
+    y: float;                 // Rectangle top-left corner position y
+    width: float;             // Rectangle width
+    height: float;            // Rectangle height
 }
 
 // Image, pixel data stored in CPU memory (RAM)
 Image :: {
+    data: *void;              // Image raw data
+    width: s32;               // Image base width
+    height: s32;              // Image base height
+    mipmaps: s32;             // Mipmap levels, 1 by default
+    format: s32;              // Data format (PixelFormat type)
 }
 
 // Texture, tex data stored in GPU memory (VRAM)
 Texture :: {
+    id: u32;         // OpenGL texture id
+    width: s32;               // Texture base width
+    height: s32;              // Texture base height
+    mipmaps: s32;             // Mipmap levels, 1 by default
+    format: s32;              // Data format (PixelFormat type)
 }
 
 // Texture2D, same as Texture
@@ -152,122 +183,248 @@ Texture :: {
 
 // RenderTexture, fbo for texture rendering
 RenderTexture :: {
+    id: u32;         // OpenGL framebuffer object id
+    texture: Texture;         // Color buffer attachment texture
+    depth: Texture;           // Depth buffer attachment texture
 }
 
 // RenderTexture2D, same as RenderTexture
 
 // NPatchInfo, n-patch layout info
 NPatchInfo :: {
+    source: Rectangle;        // Texture source rectangle
+    left: s32;                // Left border offset
+    top: s32;                 // Top border offset
+    right: s32;               // Right border offset
+    bottom: s32;              // Bottom border offset
+    layout: s32;              // Layout of the n-patch: 3x3, 1x3 or 3x1
 }
 
 // GlyphInfo, font characters glyphs info
 GlyphInfo :: {
+    value: s32;               // Character value (Unicode)
+    offsetX: s32;             // Character offset X when drawing
+    offsetY: s32;             // Character offset Y when drawing
+    advanceX: s32;            // Character advance position X
+    image: Image;             // Character image data
 }
 
 // Font, font texture and GlyphInfo array data
 Font :: {
+    baseSize: s32;            // Base size (default chars height)
+    glyphCount: s32;          // Number of glyph characters
+    glyphPadding: s32;        // Padding around the glyph characters
+    texture: Texture2D;       // Texture atlas containing the glyphs
+    recs: *Rectangle;         // Rectangles in texture for the glyphs
+    glyphs: *GlyphInfo;       // Glyphs info data
 }
 
 // Camera, defines position/orientation in 3d space
 Camera3D :: {
+    position: Vector3;        // Camera position
+    target: Vector3;          // Camera target it looks-at
+    up: Vector3;              // Camera up vector (rotation over its axis)
+    fovy: float;              // Camera field-of-view aperture in Y (degrees) in perspective, used as near plane width in orthographic
+    projection: s32;          // Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
 }
 
 
 // Camera2D, defines position/orientation in 2d space
 Camera2D :: {
+    offset: Vector2;          // Camera offset (displacement from target)
+    target: Vector2;          // Camera target (rotation and zoom origin)
+    rotation: float;          // Camera rotation in degrees
+    zoom: float;              // Camera zoom (scaling), should be 1.0f by default
 }
 
 // Mesh, vertex data and vao/vbo
 Mesh :: {
+    vertexCount: s32;         // Number of vertices stored in arrays
+    triangleCount: s32;       // Number of triangles stored (indexed or not)
 
     // Vertex attributes data
+    vertices: *float;         // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
+    texcoords: *float;        // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
+    texcoords2: *float;       // Vertex texture second coordinates (UV - 2 components per vertex) (shader-location = 5)
+    normals: *float;          // Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
+    tangents: *float;         // Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
+    colors: *u8;       // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
+    indices: *u16;     // Vertex indices (in case vertex data comes indexed)
 
     // Animation vertex data
+    animVertices: *float;     // Animated vertex positions (after bones transformations)
+    animNormals: *float;      // Animated normals (after bones transformations)
+    boneIds: *u8;  // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
+    boneWeights: *float;      // Vertex bone weight, up to 4 bones influence by vertex (skinning)
 
     // OpenGL identifiers
+    vaoId: u32;      // OpenGL Vertex Array Object id
+    vboId: *u32;     // OpenGL Vertex Buffer Objects id (default vertex data)
 }
 
 // Shader
 Shader :: {
+    id: u32;         // Shader program id
+    locs: *s32;               // Shader locations array (RL_MAX_SHADER_LOCATIONS)
 }
 
 // MaterialMap
 MaterialMap :: {
+    texture: Texture2D;       // Material map texture
+    color: Color;             // Material map color
+    value: float;             // Material map value
 }
 
 // Material, includes shader and maps
 Material :: {
+    shader: Shader;           // Material shader
+    maps: *MaterialMap;       // Material maps array (MAX_MATERIAL_MAPS)
+    params: [4]float;         // Material generic parameters (if required)
 }
 
 // Transform, vertex transformation data
 Transform :: {
+    translation: Vector3;     // Translation
+    rotation: Quaternion;     // Rotation
+    scale: Vector3;           // Scale
 }
 
 // Bone, skeletal animation bone
 BoneInfo :: {
+    name: [32]s8;           // Bone name
+    parent: s32;              // Bone parent
 }
 
 // Model, meshes, materials and animation data
 Model :: {
+    transform: Matrix4;        // Local transform matrix
 
+    meshCount: s32;           // Number of meshes
+    materialCount: s32;       // Number of materials
+    meshes: *Mesh;            // Meshes array
+    materials: *Material;     // Materials array
+    meshMaterial: *s32;       // Mesh material number
 
     // Animation data
+    boneCount: s32;           // Number of bones
+    bones: *BoneInfo;         // Bones information (skeleton)
+    bindPose: *Transform;     // Bones base transformation (pose)
 }
 
 // ModelAnimation
 ModelAnimation :: {
+    boneCount: s32;           // Number of bones
+    frameCount: s32;          // Number of animation frames
+    bones: *BoneInfo;         // Bones information (skeleton)
+    framePoses: **Transform;  // Poses array by frame
+    name: [32]s8;           // Animation name
 }
 
 // Ray, ray for raycasting
 Ray :: {
+    position: Vector3;        // Ray position (origin)
+    direction: Vector3;       // Ray direction
 }
 
 // RayCollision, ray hit information
 RayCollision :: {
+    hit: bool;                // Did the ray hit something?
+    distance: float;          // Distance to the nearest hit
+    point: Vector3;           // Point of the nearest hit
+    normal: Vector3;          // Surface normal of hit
 }
 
 // BoundingBox
 BoundingBox :: {
+    min: Vector3;             // Minimum vertex box-corner
+    max: Vector3;             // Maximum vertex box-corner
 }
 
 // Wave, audio wave data
 Wave :: {
+    frameCount: u32;     // Total number of frames (considering channels)
+    sampleRate: u32;     // Frequency (samples per second)
+    sampleSize: u32;     // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
+    channels: u32;       // Number of channels (1-mono, 2-stereo, ...)
+    data: *void;                  // Buffer data pointer
 }
 
 // Opaque structs declaration
 // NOTE: Actual structs are defined internally in raudio module
-rAudioBuffer :: {
+// TODO: parse this line. typedef struct rAudioBuffer rAudioBuffer;
+// TODO: parse this line. typedef struct rAudioProcessor rAudioProcessor;
 
 // AudioStream, custom audio stream
+AudioStream :: {
+    buffer: *rAudioBuffer;        // Pointer to internal data used by the audio system
+    processor: *rAudioProcessor;  // Pointer to internal data processor, useful for audio effects
 
+    sampleRate: u32;     // Frequency (samples per second)
+    sampleSize: u32;     // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
+    channels: u32;       // Number of channels (1-mono, 2-stereo, ...)
+}
 
 // Sound
 Sound :: {
+    stream: AudioStream;          // Audio stream
+    frameCount: u32;     // Total number of frames (considering channels)
 }
 
 // Music, audio stream, anything longer than ~10 seconds should be streamed
 Music :: {
+    stream: AudioStream;          // Audio stream
+    frameCount: u32;     // Total number of frames (considering channels)
+    looping: bool;                // Music looping enable
 
+    ctxType: s32;                 // Type of music context (audio filetype)
+    ctxData: *void;               // Audio context data, depends on type
 }
 
 // VrDeviceInfo, Head-Mounted-Display device parameters
 VrDeviceInfo :: {
+    hResolution: s32;                 // Horizontal resolution in pixels
+    vResolution: s32;                 // Vertical resolution in pixels
+    hScreenSize: float;               // Horizontal size in meters
+    vScreenSize: float;               // Vertical size in meters
+    vScreenCenter: float;             // Screen center in meters
+    eyeToScreenDistance: float;       // Distance between eye and display in meters
+    lensSeparationDistance: float;    // Lens separation distance in meters
+    interpupillaryDistance: float;    // IPD (distance between pupils) in meters
+    lensDistortionValues: [4]float;   // Lens distortion constant parameters
+    chromaAbCorrection: [4]float;     // Chromatic aberration correction parameters
 }
 
 // VrStereoConfig, VR stereo rendering configuration for simulator
 VrStereoConfig :: {
+    projection: [2]Matrix4;            // VR projection matrices (per eye)
+    viewOffset: [2]Matrix4;            // VR view offset matrices (per eye)
+    leftLensCenter: [2]float;         // VR left lens center
+    rightLensCenter: [2]float;        // VR right lens center
+    leftScreenCenter: [2]float;       // VR left screen center
+    rightScreenCenter: [2]float;      // VR right screen center
+    scale: [2]float;                  // VR distortion scale
+    scaleIn: [2]float;                // VR distortion scale in
 }
 
 // File path list
 FilePathList :: {
+    capacity: u32;           // Filepaths max entries
+    count: u32;              // Filepaths entries count
+    paths: **s8;                    // Filepaths entries
 }
 
 // Automation event
 AutomationEvent :: {
+    frame: u32;              // Event frame
+    type: u32;               // Event type (AutomationEventType)
+    params: [4]s32;                   // Event parameters (if required)
 }
 
 // Automation event list
 AutomationEventList :: {
+    capacity: u32;           // Events max entries (MAX_AUTOMATION_EVENTS)
+    count: u32;              // Events entries count
+    events: *AutomationEvent;         // Events entries
 }
 
 //----------------------------------------------------------------------------------
