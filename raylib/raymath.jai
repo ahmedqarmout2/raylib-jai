@@ -1,4 +1,5 @@
-/**********************************************************************************************
+/*
+***********************************************************************************************
 *
 *   raymath v1.5 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
 *
@@ -47,7 +48,8 @@
 *
 *     3. This notice may not be removed or altered from any source distribution.
 *
-**********************************************************************************************/
+***********************************************************************************************
+*/
 
 
 
@@ -68,20 +70,20 @@
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 // Vector2 type
-Vector2 :: {
+Vector2 :: struct {
     x: float; 
     y: float; 
 }
 
 // Vector3 type
-Vector3 :: {
+Vector3 :: struct {
     x: float; 
     y: float; 
     z: float; 
 }
 
 // Vector4 type
-Vector4 :: {
+Vector4 :: struct {
     x: float; 
     y: float; 
     z: float; 
@@ -91,7 +93,7 @@ Vector4 :: {
 // Quaternion type
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
-Matrix :: {
+Matrix :: struct {
     m0, m4, m8, m12: float;       // Matrix first row (4 components)
     m1, m5, m9, m13: float;       // Matrix second row (4 components)
     m2, m6, m10, m14: float;      // Matrix third row (4 components)
@@ -99,11 +101,11 @@ Matrix :: {
 }
 
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
-float3 :: {
+float3 :: struct {
     v: [3]float; 
 }
 
-float16 :: {
+float16 :: struct {
     v: [16]float; 
 }
 

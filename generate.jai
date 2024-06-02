@@ -121,18 +121,28 @@ is_empty_line_or_comments :: (file_lines: []string, builder: *String_Builder) ->
 }
 
 handle_comment_block :: (file_lines: []string, builder: *String_Builder) {
+    line := String.trim(file_lines[g_line_counter]);
+
+    print_to_builder(builder, "%\n", "/*");
+
+    line = String.replace(line, "/*", "**");
+    print_to_builder(builder, "%\n", line);
+
     suffix :: "*/";
     while (true) {
-        line := String.trim(file_lines[g_line_counter]);
-        print_to_builder(builder, "%\n", line);
-        if (String.ends_with(line, suffix)) {
-            return;
-        }
-
         if (!increment_line_counter()) {
             print("EOF while looking for the end of a comment block\n");
             return;
         }
+
+        line = String.trim(file_lines[g_line_counter]);
+        if (String.ends_with(line, suffix)) {
+            line = String.replace(line, "*/", "**");
+            print_to_builder(builder, "%\n", line);
+            print_to_builder(builder, "%\n", "*/");
+            return;
+        }
+        print_to_builder(builder, "%\n", line);
     }
 }
 
@@ -157,7 +167,7 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
     struct_name := definition_line_parts[2];
     struct_end  := String.join("} ", struct_name, ";");
 
-    print_to_builder(builder, "% :: {\n", struct_name);
+    print_to_builder(builder, "% :: struct {\n", struct_name);
     while (true) {
         if (!increment_line_counter()) {
             print("EOF while looking for the end of a struct: %\n", struct_name);

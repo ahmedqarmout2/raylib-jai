@@ -1,4 +1,5 @@
-/**********************************************************************************************
+/*
+***********************************************************************************************
 *
 *   raylib v5.0 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
 *
@@ -74,7 +75,8 @@
 *
 *     3. This notice may not be removed or altered from any source distribution.
 *
-**********************************************************************************************/
+***********************************************************************************************
+*/
 
 
 
@@ -113,20 +115,20 @@
 // Boolean type
 
 // Vector2, 2 components
-Vector2 :: {
+Vector2 :: struct {
     x: float;                 // Vector x component
     y: float;                 // Vector y component
 }
 
 // Vector3, 3 components
-Vector3 :: {
+Vector3 :: struct {
     x: float;                 // Vector x component
     y: float;                 // Vector y component
     z: float;                 // Vector z component
 }
 
 // Vector4, 4 components
-Vector4 :: {
+Vector4 :: struct {
     x: float;                 // Vector x component
     y: float;                 // Vector y component
     z: float;                 // Vector z component
@@ -136,7 +138,7 @@ Vector4 :: {
 // Quaternion, 4 components (Vector4 alias)
 
 // Matrix, 4x4 components, column major, OpenGL style, right-handed
-Matrix :: {
+Matrix :: struct {
     m0, m4, m8, m12: float;   // Matrix first row (4 components)
     m1, m5, m9, m13: float;   // Matrix second row (4 components)
     m2, m6, m10, m14: float;  // Matrix third row (4 components)
@@ -144,7 +146,7 @@ Matrix :: {
 }
 
 // Color, 4 components, R8G8B8A8 (32bit)
-Color :: {
+Color :: struct {
     r: u8;         // Color red value
     g: u8;         // Color green value
     b: u8;         // Color blue value
@@ -152,7 +154,7 @@ Color :: {
 }
 
 // Rectangle, 4 components
-Rectangle :: {
+Rectangle :: struct {
     x: float;                 // Rectangle top-left corner position x
     y: float;                 // Rectangle top-left corner position y
     width: float;             // Rectangle width
@@ -160,7 +162,7 @@ Rectangle :: {
 }
 
 // Image, pixel data stored in CPU memory (RAM)
-Image :: {
+Image :: struct {
     data: *void;              // Image raw data
     width: s32;               // Image base width
     height: s32;              // Image base height
@@ -169,7 +171,7 @@ Image :: {
 }
 
 // Texture, tex data stored in GPU memory (VRAM)
-Texture :: {
+Texture :: struct {
     id: u32;         // OpenGL texture id
     width: s32;               // Texture base width
     height: s32;              // Texture base height
@@ -182,7 +184,7 @@ Texture :: {
 // TextureCubemap, same as Texture
 
 // RenderTexture, fbo for texture rendering
-RenderTexture :: {
+RenderTexture :: struct {
     id: u32;         // OpenGL framebuffer object id
     texture: Texture;         // Color buffer attachment texture
     depth: Texture;           // Depth buffer attachment texture
@@ -191,7 +193,7 @@ RenderTexture :: {
 // RenderTexture2D, same as RenderTexture
 
 // NPatchInfo, n-patch layout info
-NPatchInfo :: {
+NPatchInfo :: struct {
     source: Rectangle;        // Texture source rectangle
     left: s32;                // Left border offset
     top: s32;                 // Top border offset
@@ -201,7 +203,7 @@ NPatchInfo :: {
 }
 
 // GlyphInfo, font characters glyphs info
-GlyphInfo :: {
+GlyphInfo :: struct {
     value: s32;               // Character value (Unicode)
     offsetX: s32;             // Character offset X when drawing
     offsetY: s32;             // Character offset Y when drawing
@@ -210,7 +212,7 @@ GlyphInfo :: {
 }
 
 // Font, font texture and GlyphInfo array data
-Font :: {
+Font :: struct {
     baseSize: s32;            // Base size (default chars height)
     glyphCount: s32;          // Number of glyph characters
     glyphPadding: s32;        // Padding around the glyph characters
@@ -220,7 +222,7 @@ Font :: {
 }
 
 // Camera, defines position/orientation in 3d space
-Camera3D :: {
+Camera3D :: struct {
     position: Vector3;        // Camera position
     target: Vector3;          // Camera target it looks-at
     up: Vector3;              // Camera up vector (rotation over its axis)
@@ -230,7 +232,7 @@ Camera3D :: {
 
 
 // Camera2D, defines position/orientation in 2d space
-Camera2D :: {
+Camera2D :: struct {
     offset: Vector2;          // Camera offset (displacement from target)
     target: Vector2;          // Camera target (rotation and zoom origin)
     rotation: float;          // Camera rotation in degrees
@@ -238,7 +240,7 @@ Camera2D :: {
 }
 
 // Mesh, vertex data and vao/vbo
-Mesh :: {
+Mesh :: struct {
     vertexCount: s32;         // Number of vertices stored in arrays
     triangleCount: s32;       // Number of triangles stored (indexed or not)
 
@@ -263,40 +265,40 @@ Mesh :: {
 }
 
 // Shader
-Shader :: {
+Shader :: struct {
     id: u32;         // Shader program id
     locs: *s32;               // Shader locations array (RL_MAX_SHADER_LOCATIONS)
 }
 
 // MaterialMap
-MaterialMap :: {
+MaterialMap :: struct {
     texture: Texture2D;       // Material map texture
     color: Color;             // Material map color
     value: float;             // Material map value
 }
 
 // Material, includes shader and maps
-Material :: {
+Material :: struct {
     shader: Shader;           // Material shader
     maps: *MaterialMap;       // Material maps array (MAX_MATERIAL_MAPS)
     params: [4]float;         // Material generic parameters (if required)
 }
 
 // Transform, vertex transformation data
-Transform :: {
+Transform :: struct {
     translation: Vector3;     // Translation
     rotation: Quaternion;     // Rotation
     scale: Vector3;           // Scale
 }
 
 // Bone, skeletal animation bone
-BoneInfo :: {
+BoneInfo :: struct {
     name: [32]s8;           // Bone name
     parent: s32;              // Bone parent
 }
 
 // Model, meshes, materials and animation data
-Model :: {
+Model :: struct {
     transform: Matrix4;        // Local transform matrix
 
     meshCount: s32;           // Number of meshes
@@ -312,7 +314,7 @@ Model :: {
 }
 
 // ModelAnimation
-ModelAnimation :: {
+ModelAnimation :: struct {
     boneCount: s32;           // Number of bones
     frameCount: s32;          // Number of animation frames
     bones: *BoneInfo;         // Bones information (skeleton)
@@ -321,13 +323,13 @@ ModelAnimation :: {
 }
 
 // Ray, ray for raycasting
-Ray :: {
+Ray :: struct {
     position: Vector3;        // Ray position (origin)
     direction: Vector3;       // Ray direction
 }
 
 // RayCollision, ray hit information
-RayCollision :: {
+RayCollision :: struct {
     hit: bool;                // Did the ray hit something?
     distance: float;          // Distance to the nearest hit
     point: Vector3;           // Point of the nearest hit
@@ -335,13 +337,13 @@ RayCollision :: {
 }
 
 // BoundingBox
-BoundingBox :: {
+BoundingBox :: struct {
     min: Vector3;             // Minimum vertex box-corner
     max: Vector3;             // Maximum vertex box-corner
 }
 
 // Wave, audio wave data
-Wave :: {
+Wave :: struct {
     frameCount: u32;     // Total number of frames (considering channels)
     sampleRate: u32;     // Frequency (samples per second)
     sampleSize: u32;     // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
@@ -355,7 +357,7 @@ Wave :: {
 // TODO: parse this line. typedef struct rAudioProcessor rAudioProcessor;
 
 // AudioStream, custom audio stream
-AudioStream :: {
+AudioStream :: struct {
     buffer: *rAudioBuffer;        // Pointer to internal data used by the audio system
     processor: *rAudioProcessor;  // Pointer to internal data processor, useful for audio effects
 
@@ -365,13 +367,13 @@ AudioStream :: {
 }
 
 // Sound
-Sound :: {
+Sound :: struct {
     stream: AudioStream;          // Audio stream
     frameCount: u32;     // Total number of frames (considering channels)
 }
 
 // Music, audio stream, anything longer than ~10 seconds should be streamed
-Music :: {
+Music :: struct {
     stream: AudioStream;          // Audio stream
     frameCount: u32;     // Total number of frames (considering channels)
     looping: bool;                // Music looping enable
@@ -381,7 +383,7 @@ Music :: {
 }
 
 // VrDeviceInfo, Head-Mounted-Display device parameters
-VrDeviceInfo :: {
+VrDeviceInfo :: struct {
     hResolution: s32;                 // Horizontal resolution in pixels
     vResolution: s32;                 // Vertical resolution in pixels
     hScreenSize: float;               // Horizontal size in meters
@@ -395,7 +397,7 @@ VrDeviceInfo :: {
 }
 
 // VrStereoConfig, VR stereo rendering configuration for simulator
-VrStereoConfig :: {
+VrStereoConfig :: struct {
     projection: [2]Matrix4;            // VR projection matrices (per eye)
     viewOffset: [2]Matrix4;            // VR view offset matrices (per eye)
     leftLensCenter: [2]float;         // VR left lens center
@@ -407,21 +409,21 @@ VrStereoConfig :: {
 }
 
 // File path list
-FilePathList :: {
+FilePathList :: struct {
     capacity: u32;           // Filepaths max entries
     count: u32;              // Filepaths entries count
     paths: **s8;                    // Filepaths entries
 }
 
 // Automation event
-AutomationEvent :: {
+AutomationEvent :: struct {
     frame: u32;              // Event frame
     type: u32;               // Event type (AutomationEventType)
     params: [4]s32;                   // Event parameters (if required)
 }
 
 // Automation event list
-AutomationEventList :: {
+AutomationEventList :: struct {
     capacity: u32;           // Events max entries (MAX_AUTOMATION_EVENTS)
     count: u32;              // Events entries count
     events: *AutomationEvent;         // Events entries
