@@ -115,30 +115,18 @@
 // Boolean type
 
 // Vector2, 2 components
-Vector2 :: struct {
-    x: float;                 // Vector x component
-    y: float;                 // Vector y component
-}
+// struct Vector2 is already defined in jai.
 
 // Vector3, 3 components
-Vector3 :: struct {
-    x: float;                 // Vector x component
-    y: float;                 // Vector y component
-    z: float;                 // Vector z component
-}
+// struct Vector3 is already defined in jai.
 
 // Vector4, 4 components
-Vector4 :: struct {
-    x: float;                 // Vector x component
-    y: float;                 // Vector y component
-    z: float;                 // Vector z component
-    w: float;                 // Vector w component
-}
+// struct Vector4 is already defined in jai.
 
 // Quaternion, 4 components (Vector4 alias)
 
 // Matrix, 4x4 components, column major, OpenGL style, right-handed
-Matrix :: struct {
+Matrix4 :: struct {
     m0, m4, m8, m12: float;   // Matrix first row (4 components)
     m1, m5, m9, m13: float;   // Matrix second row (4 components)
     m2, m6, m10, m14: float;  // Matrix third row (4 components)

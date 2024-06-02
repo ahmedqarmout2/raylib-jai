@@ -70,30 +70,18 @@
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 // Vector2 type
-Vector2 :: struct {
-    x: float; 
-    y: float; 
-}
+// struct Vector2 is already defined in jai.
 
 // Vector3 type
-Vector3 :: struct {
-    x: float; 
-    y: float; 
-    z: float; 
-}
+// struct Vector3 is already defined in jai.
 
 // Vector4 type
-Vector4 :: struct {
-    x: float; 
-    y: float; 
-    z: float; 
-    w: float; 
-}
+// struct Vector4 is already defined in jai.
 
 // Quaternion type
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
-Matrix :: struct {
+Matrix4 :: struct {
     m0, m4, m8, m12: float;       // Matrix first row (4 components)
     m1, m5, m9, m13: float;       // Matrix second row (4 components)
     m2, m6, m10, m14: float;      // Matrix third row (4 components)

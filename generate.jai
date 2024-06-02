@@ -20,6 +20,12 @@ TYPE_MAP :: string.[
     "Matrix",         "Matrix4"
 ];
 
+STRUCT_MAP  :: string.[
+    "Matrix", "Matrix4"
+];
+
+JAI_STRUCTS :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
+
 DOUBLE_POINTER :: "**";
 SINGLE_POINTER :: "*";
 
@@ -147,25 +153,52 @@ handle_comment_block :: (file_lines: []string, builder: *String_Builder) {
 }
 
 handle_struct :: (file_lines: []string, builder: *String_Builder) {
-    definition_line := file_lines[g_line_counter];
+    line := file_lines[g_line_counter];
 
-    if (String.contains(definition_line, ";")) {
-        print_to_builder(builder, "// TODO: parse this line. %\n", definition_line);
+    if (String.contains(line, ";")) {
+        print_to_builder(builder, "// TODO: parse this line. %\n", line);
         return;
     } 
 
-    definition_line_parts := String.split(definition_line, " ");
-    if (definition_line_parts.count < 4) {
+    success, definition_line, comment := String.split_from_left(line, "{");
+    if (!success) {
         print("--Unexpected struct definition--\n");
         print("%\n", definition_line);
         print("--Expected: typedef struct <NAME> { --\n");
         return;
     }
 
-
+    definition_line        = String.trim(definition_line);
+    definition_line_parts := String.split(definition_line, " ");
+    if (definition_line_parts.count != 3) {
+        print("--Unexpected struct definition--\n");
+        print("%\n", definition_line);
+        print("--Expected: typedef struct <NAME> { --\n");
+        return;
+    }
 
     struct_name := definition_line_parts[2];
     struct_end  := String.join("} ", struct_name, ";");
+
+    for i: 0..STRUCT_MAP.count-1 {
+        _ray_name := STRUCT_MAP[i];
+        _jai_name := STRUCT_MAP[i+1];
+        
+        // Skip the jai type in the next iteration
+        i += 1;
+
+        if (struct_name == _ray_name) {
+            struct_name = _jai_name;
+            break;
+        }
+    }
+
+    for JAI_STRUCTS {
+        if (it == struct_name) {
+            print_to_builder(builder, "// struct % is already defined in jai.\n", struct_name);
+            return;
+        }
+    }
 
     print_to_builder(builder, "% :: struct {\n", struct_name);
     while (true) {
@@ -239,7 +272,6 @@ convert_struct_element_type :: (line: string) -> (successful: bool, jai_format: 
 
     // + 1 to account for the space after the c_type
     variables := String.slice(line, c_type.count + 1, line.count - c_type.count + 1);
-
 
     // Handle single and double pointer. For example: int *meshMaterial; or Transform **framePoses;
     pointer_prefix := "";
