@@ -33,6 +33,7 @@ SINGLE_POINTER :: "*";
 STRUCT_PREFIX  :: "typedef struct";
 RLAPI_PREFIX   :: "RLAPI";
 CONST_PREFIX   :: "const";
+ENUM_PREFIX   :: "typedef enum";
 REAYLIB_HEADER ::  #string DONE
 //
 // This file was auto-generated using the following command:
@@ -54,7 +55,7 @@ DONE
 
 main :: () {
     generate_bindings("raylib",  "raylib");
-    generate_bindings("raymath", "raymath");
+    // generate_bindings("raymath", "raymath");
 }
 
 g_line_counter : int;
@@ -109,13 +110,18 @@ generate_bindings :: (input_filename: string, output_filename: string) {
             continue;
         }
 
+        if (String.starts_with(line, ENUM_PREFIX)) {
+            handle_enum(file_lines, *builder);
+            continue;
+        }
+
         if (String.starts_with(line, RLAPI_PREFIX)) {
             handle_rplai(file_lines, *builder);
             continue;
         }
 
         // Print unrecognized lines
-        // print("%\n", line);
+        print("%\n", line);
     }
 
     Basic.free(buffer);
@@ -134,20 +140,20 @@ increment_line_counter :: () -> bool {
 is_empty_line_or_comments :: (file_lines: []string, builder: *String_Builder) -> bool {
     line := file_lines[g_line_counter];
 
-    clean_line := String.trim(line);
-    if (clean_line.count == 0) {
+    trimmed_line := String.trim(line);
+    if (trimmed_line.count == 0) {
         print_to_builder(builder, "\n");
         return true;
     }
 
     prefix := "/*";
-    if (String.starts_with(clean_line, prefix)) {
+    if (String.starts_with(trimmed_line, prefix)) {
         handle_comment_block(file_lines, builder);
         return true;
     }
 
     prefix = "//";
-    if (String.starts_with(clean_line, prefix)) {
+    if (String.starts_with(trimmed_line, prefix)) {
         print_to_builder(builder, "%\n", line);
         return true;
     }
@@ -222,10 +228,12 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         }
     }
 
+    is_jai_struct := false;
     for JAI_STRUCTS {
         if (it == struct_name) {
             print_to_builder(builder, "// struct % is already defined in jai.\n", struct_name);
-            return;
+            is_jai_struct = true;
+            break;;
         }
     }
 
@@ -243,7 +251,9 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         }
 
         if (String.starts_with(line, struct_end)) {
-            print_to_builder(builder, "}\n");
+            if (!is_jai_struct) {
+                print_to_builder(builder, "}\n");
+            }
             return;
         }
 
@@ -265,8 +275,121 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
             return;
         }
 
-        print_to_builder(builder, "    %: %; %\n", remainder, jai_type, comment);
+        if (!is_jai_struct) {
+            print_to_builder(builder, "    %: %; %\n", remainder, jai_type, comment);
+        }
     }
+}
+
+handle_enum :: (file_lines: []string, builder: *String_Builder) {
+    enum_name := "";
+
+    // Look ahead for enum name
+    _g_line_counter := g_line_counter;
+    while (true) {
+        if (!increment_line_counter()) {
+            print("EOF while looking for the end of an enum.\n");
+            return;
+        }
+
+        line := file_lines[g_line_counter];
+        trimmed_line := String.trim(line);
+
+        if (!String.starts_with(trimmed_line, "}") || !String.ends_with(trimmed_line, ";")) {
+            continue;
+        }
+
+        success, definition, comment := String.split_from_left(trimmed_line, ";");
+        if (!success) {
+            print("--Unexpected enum definition--\n");
+            print("%\n", definition);
+            print("--Expected: } <NAME>; --\n");
+            return;
+        }
+
+        enum_name = String.replace(definition, "} ", "");
+        break;
+    }
+
+    // Reset the line counter and process all enum files
+    g_line_counter = _g_line_counter;
+
+    print_to_builder(builder, "% :: enum {\n", enum_name);
+    while (true) {
+        if (!increment_line_counter()) {
+            print("EOF while looking for the end of an enum.\n");
+            return;
+        }
+
+        if (is_empty_line_or_comments(file_lines, builder)) {
+            continue;
+        }
+
+        line := file_lines[g_line_counter];
+        trimmed_line := String.trim(line);
+
+        if (String.starts_with(trimmed_line, "}") && String.ends_with(trimmed_line, ";")) {
+            print_to_builder(builder, "}\n");
+            return;
+        }
+
+        print_to_builder(builder, "    %\n", trimmed_line);
+    }
+}
+
+handle_rplai :: (file_lines: []string, builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    success, definition, comment := String.split_from_left(line, ";");
+    if (!success) {
+        print("--Unexpected function definition--\n");
+        print("%\n", definition);
+        print("--Expected: RLAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
+        return;
+    }
+
+    // Remove RLAPI prefix
+    definition = String.slice(definition, RLAPI_PREFIX.count + 1, definition.count - RLAPI_PREFIX.count);
+
+    success1, c_type, jai_type, remainder := map_type(definition);
+    if (!success1) {
+        print("Unexpected function type\n");
+        print("%\n", definition);
+        return;
+    }
+
+    right_bracket_idx := String.find_index_from_right(remainder, ")");
+    left_bracket_idx  := String.find_index_from_left(remainder, "(");
+
+    function_name := String.slice(remainder, 0, left_bracket_idx);
+    print_to_builder(builder, "% :: (", function_name);
+
+    variables_combined := String.slice(remainder, left_bracket_idx + 1, right_bracket_idx - left_bracket_idx - 1);
+    if (variables_combined != "void") {
+        variables := String.split(variables_combined, ", ");
+        for i: 0..variables.count-1 {
+            variable := variables[i];
+
+            if (variable == "...") {
+                print_to_builder(builder, "args: ..*u8");
+            } else {
+                success2, variable_c_type, variable_jai_type, variable_name := map_type(variable);
+                if (!success2) {
+                    print("Unexpected function variable\n");
+                    print("%\n", function_name);
+                    print("%\n", variable);
+                    return;
+                }
+                print_to_builder(builder, "%: %", variable_name, variable_jai_type);
+            }
+
+            if (i != variables.count-1) {
+                print_to_builder(builder, ", ");
+            }
+        }
+    }
+
+    print_to_builder(builder, ")% #foreign raylib_native;\n", ifx jai_type == "void" then "" else String.join(" -> ", jai_type));
 }
 
 map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, remainder: string) {
@@ -336,57 +459,3 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
     return true, c_type, jai_type, remainder;
 }
 
-handle_rplai :: (file_lines: []string, builder: *String_Builder) {
-    line := file_lines[g_line_counter];
-
-    success, definition, comment := String.split_from_left(line, ";");
-    if (!success) {
-        print("--Unexpected function definition--\n");
-        print("%\n", definition);
-        print("--Expected: RLAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
-        return;
-    }
-
-    // Remove RLAPI prefix
-    definition = String.slice(definition, RLAPI_PREFIX.count + 1, definition.count - RLAPI_PREFIX.count);
-
-    success1, c_type, jai_type, remainder := map_type(definition);
-    if (!success1) {
-        print("Unexpected function type\n");
-        print("%\n", definition);
-        return;
-    }
-
-    right_bracket_idx := String.find_index_from_right(remainder, ")");
-    left_bracket_idx  := String.find_index_from_left(remainder, "(");
-
-    function_name := String.slice(remainder, 0, left_bracket_idx);
-    print_to_builder(builder, "% :: (", function_name);
-
-    variables_combined := String.slice(remainder, left_bracket_idx + 1, right_bracket_idx - left_bracket_idx - 1);
-    if (variables_combined != "void") {
-        variables := String.split(variables_combined, ", ");
-        for i: 0..variables.count-1 {
-            variable := variables[i];
-
-            if (variable == "...") {
-                print_to_builder(builder, "args: ..*u8");
-            } else {
-                success2, variable_c_type, variable_jai_type, variable_name := map_type(variable);
-                if (!success2) {
-                    print("Unexpected function variable\n");
-                    print("%\n", function_name);
-                    print("%\n", variable);
-                    return;
-                }
-                print_to_builder(builder, "%: %", variable_name, variable_jai_type);
-            }
-
-            if (i != variables.count-1) {
-                print_to_builder(builder, ", ");
-            }
-        }
-    }
-
-    print_to_builder(builder, ")% #foreign raylib_native;\n", ifx jai_type == "void" then "" else String.join(" -> ", jai_type));
-}
