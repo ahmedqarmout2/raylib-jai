@@ -333,8 +333,61 @@ handle_enum :: (file_lines: []string, builder: *String_Builder) {
             return;
         }
 
-        print_to_builder(builder, "    %\n", trimmed_line);
+        enum_element := convert_enum_element(trimmed_line);
+        print_to_builder(builder, "    %\n", enum_element);
     }
+}
+
+convert_enum_element :: (line: string) -> string {
+    first_space_index             := 0;
+    first_space_after_value_index := 0;
+    equals_index                  := 0;
+    comma_index                   := 0;
+    for i: 0..line.count-1 {
+        t := line[i];
+
+        if (t == #char " ") {
+            if (first_space_index == 0) {
+                first_space_index = i;
+            }
+
+            if (equals_index > 0 && i > (equals_index + 1) && first_space_after_value_index == 0) {
+                first_space_after_value_index = i;
+            }
+        }
+
+        if ((t == #char "=") && equals_index == 0) {
+            equals_index = i;
+        }
+
+        if ((t == #char ",") && comma_index == 0) {
+            comma_index = i;
+        }
+    }
+
+    split_name_on_index      := 0;
+    split_remainder_on_index := 0;
+    end_value_on_index       := 0;
+    if (equals_index > 0) {
+        split_name_on_index      = equals_index;
+        split_remainder_on_index = ifx (comma_index > 0) then comma_index + 1 else first_space_after_value_index;
+        end_value_on_index       = ifx (comma_index > 0) then comma_index - 1 else first_space_after_value_index;
+    } else if (comma_index > 0 && comma_index < first_space_index) {
+        split_name_on_index      = comma_index;
+        split_remainder_on_index = comma_index + 1;
+        } else {
+        split_name_on_index      = first_space_index;
+        split_remainder_on_index = first_space_index;
+    }
+
+    enum_element_name  := String.slice(line, 0, split_name_on_index);
+    enum_element_value := "";
+    if (equals_index > 0) {
+        enum_element_value = String.trim(String.slice(line, equals_index + 1, end_value_on_index - equals_index));
+        enum_element_value = String.join(":: ", enum_element_value); 
+    }
+    enum_element_remainder := String.slice(line, split_remainder_on_index, line.count - split_remainder_on_index);
+    return String.join(enum_element_name, enum_element_value,";",  enum_element_remainder);
 }
 
 handle_rplai :: (file_lines: []string, builder: *String_Builder) {
