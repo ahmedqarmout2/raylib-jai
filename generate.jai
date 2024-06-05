@@ -31,6 +31,7 @@ DOUBLE_POINTER :: "**";
 SINGLE_POINTER :: "*";
 STRUCT_PREFIX  :: "typedef struct";
 RLAPI_PREFIX   :: "RLAPI";
+RMAPI_PREFIX   :: "RMAPI";
 CONST_PREFIX   :: "const";
 ENUM_PREFIX    :: "typedef enum";
 DEFINE_PREFIX  :: "#define";
@@ -142,13 +143,8 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
             continue;
         }
 
-        if (String.starts_with(line, RLAPI_PREFIX)) {
-            handle_rplai(file_lines, *output_builder);
-            continue;
-        }
-
         if (String.starts_with(line, DEFINE_PREFIX)) {
-            handle_define(file_lines, *output_builder);
+            handle_define(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -157,7 +153,17 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
             continue;
         }
 
-        // Print unrecognized lines
+        if (String.starts_with(line, RLAPI_PREFIX)) {
+            handle_rplai(file_lines, *output_builder);
+            continue;
+        }
+
+        if (String.starts_with(line, RMAPI_PREFIX)) {
+            handle_rmapi(file_lines, *output_builder);
+            continue;
+        }
+
+        // Unrecognized lines
         print_to_builder(*unrecognized_builder, "%\n", line);
     }
 
@@ -221,37 +227,37 @@ increment_line_counter :: () -> bool {
     return g_line_counter < g_lines_count - 1;
 }
 
-is_empty_line_or_comments :: (file_lines: []string, builder: *String_Builder) -> bool {
+is_empty_line_or_comments :: (file_lines: []string, output_builder: *String_Builder) -> bool {
     line := file_lines[g_line_counter];
 
     trimmed_line := String.trim(line);
     if (trimmed_line.count == 0) {
-        print_to_builder(builder, "\n");
+        print_to_builder(output_builder, "\n");
         return true;
     }
 
     prefix := "/*";
     if (String.starts_with(trimmed_line, prefix)) {
-        handle_comment_block(file_lines, builder);
+        handle_comment_block(file_lines, output_builder);
         return true;
     }
 
     prefix = "//";
     if (String.starts_with(trimmed_line, prefix)) {
-        print_to_builder(builder, "%\n", line);
+        print_to_builder(output_builder, "%\n", line);
         return true;
     }
 
     return false;
 }
 
-handle_comment_block :: (file_lines: []string, builder: *String_Builder) {
+handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) {
     line := String.trim(file_lines[g_line_counter]);
 
-    print_to_builder(builder, "%\n", "/*");
+    print_to_builder(output_builder, "%\n", "/*");
 
     line = String.replace(line, "/*", "**");
-    print_to_builder(builder, "%\n", line);
+    print_to_builder(output_builder, "%\n", line);
 
     suffix :: "*/";
     while (true) {
@@ -263,21 +269,21 @@ handle_comment_block :: (file_lines: []string, builder: *String_Builder) {
         line = String.trim(file_lines[g_line_counter]);
         if (String.ends_with(line, suffix)) {
             line = String.replace(line, "*/", "**");
-            print_to_builder(builder, "%\n", line);
-            print_to_builder(builder, "%\n", "*/");
+            print_to_builder(output_builder, "%\n", line);
+            print_to_builder(output_builder, "%\n", "*/");
             return;
         }
-        print_to_builder(builder, "%\n", line);
+        print_to_builder(output_builder, "%\n", line);
     }
 }
 
-handle_struct :: (file_lines: []string, builder: *String_Builder) {
+handle_struct :: (file_lines: []string, output_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     if (String.contains(line, ";")) {
         definition_parts := String.split(line, " ");
         struct_name      := definition_parts[2];
-        print_to_builder(builder, "% :: struct { /* only used as a pointer in this header */ }\n", struct_name);
+        print_to_builder(output_builder, "% :: struct { /* only used as a pointer in this header */ }\n", struct_name);
         return;
     } 
 
@@ -304,14 +310,14 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
     is_jai_struct := false;
     for JAI_STRUCTS {
         if (it == struct_name) {
-            print_to_builder(builder, "// struct % is already defined in jai.\n", struct_name);
+            print_to_builder(output_builder, "// struct % is already defined in jai.\n", struct_name);
             is_jai_struct = true;
             break;
         }
     }
 
     if (!is_jai_struct) {
-        print_to_builder(builder, "% :: struct {\n", struct_name);
+        print_to_builder(output_builder, "% :: struct {\n", struct_name);
     }
 
     while (true) {
@@ -322,13 +328,13 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
 
         line := file_lines[g_line_counter];
 
-        if (is_empty_line_or_comments(file_lines, builder)) {
+        if (is_empty_line_or_comments(file_lines, output_builder)) {
             continue;
         }
 
         if (String.starts_with(line, struct_end)) {
             if (!is_jai_struct) {
-                print_to_builder(builder, "}\n");
+                print_to_builder(output_builder, "}\n");
             }
             return;
         }
@@ -354,12 +360,12 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         if (!is_jai_struct) {
             improved_element, found_improvement := Hash_Table.table_find(*g_improved_struct_elements, String.join(struct_name, "_", remainder));
 
-            print_to_builder(builder, "    %: %; %\n", remainder, ifx found_improvement then improved_element else jai_type, comment);
+            print_to_builder(output_builder, "    %: %; %\n", remainder, ifx found_improvement then improved_element else jai_type, comment);
         }
     }
 }
 
-handle_enum :: (file_lines: []string, builder: *String_Builder) {
+handle_enum :: (file_lines: []string, output_builder: *String_Builder) {
     enum_name := "";
 
     // Look ahead for enum name
@@ -370,14 +376,13 @@ handle_enum :: (file_lines: []string, builder: *String_Builder) {
             return;
         }
 
-        line := file_lines[g_line_counter];
-        trimmed_line := String.trim(line);
+        line := String.trim(file_lines[g_line_counter]);
 
-        if (!String.starts_with(trimmed_line, "}") || !String.ends_with(trimmed_line, ";")) {
+        if (!String.starts_with(line, "}") || !String.ends_with(line, ";")) {
             continue;
         }
 
-        success, definition, comment := String.split_from_left(trimmed_line, ";");
+        success, definition, comment := String.split_from_left(line, ";");
         if (!success) {
             print("--Unexpected enum definition--\n");
             print("%\n", definition);
@@ -392,27 +397,26 @@ handle_enum :: (file_lines: []string, builder: *String_Builder) {
     // Reset the line counter and process all enum files
     g_line_counter = _g_line_counter;
 
-    print_to_builder(builder, "% :: enum {\n", enum_name);
+    print_to_builder(output_builder, "% :: enum {\n", enum_name);
     while (true) {
         if (!increment_line_counter()) {
             print("EOF while looking for the end of an enum.\n");
             return;
         }
 
-        if (is_empty_line_or_comments(file_lines, builder)) {
+        if (is_empty_line_or_comments(file_lines, output_builder)) {
             continue;
         }
 
-        line := file_lines[g_line_counter];
-        trimmed_line := String.trim(line);
+        line := String.trim(file_lines[g_line_counter]);
 
-        if (String.starts_with(trimmed_line, "}") && String.ends_with(trimmed_line, ";")) {
-            print_to_builder(builder, "}\n");
+        if (String.starts_with(line, "}") && String.ends_with(line, ";")) {
+            print_to_builder(output_builder, "}\n");
             return;
         }
 
-        enum_element := convert_enum_element(trimmed_line);
-        print_to_builder(builder, "    %\n", enum_element);
+        enum_element := convert_enum_element(line);
+        print_to_builder(output_builder, "    %\n", enum_element);
     }
 }
 
@@ -473,8 +477,55 @@ convert_enum_element :: (line: string) -> string {
     return String.join(enum_element_name, enum_element_value, ";", enum_element_remainder);
 }
 
-handle_rplai :: (file_lines: []string, builder: *String_Builder) {
+handle_define :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
+
+    // Remove define prefix
+    line = String.slice(line, DEFINE_PREFIX.count + 1, line.count - DEFINE_PREFIX.count);
+
+    if (String.contains(line, RAYLIB_COLOR)) {
+        jai_color := String.replace(line, RAYLIB_COLOR, ":: Color.");
+        jai_color  = String.replace(jai_color, "}", "};");
+        print_to_builder(output_builder, "%\n", jai_color);
+        return;
+    }
+
+    print_to_builder(unrecognized_builder, "%\n", line);
+}
+
+handle_typedef :: (file_lines: []string, output_builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    // Remove typedef prefix
+    line = String.slice(line, TYPEDEF_PREFIX.count + 1, line.count - TYPEDEF_PREFIX.count);
+
+    found, code, remainder := String.split_from_left(line, ";");
+    if (!found) {
+        return;
+    }
+
+    code_parts := String.split(code, " ");
+
+    if (code_parts.count == 2) {
+        is_jai_struct := false;
+        struct_name   := code_parts[1];
+        for JAI_STRUCTS {
+            if (it == struct_name) {
+                print_to_builder(output_builder, "// struct % is already defined in jai.\n", struct_name);
+                is_jai_struct = true;
+                return;
+            }
+        }
+
+        print_to_builder(output_builder, "% :: %;\n", struct_name, code_parts[0]);
+    }
+}
+
+handle_rplai :: (file_lines: []string, output_builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    // Remove RLAPI prefix
+    line = String.slice(line, RLAPI_PREFIX.count + 1, line.count - RLAPI_PREFIX.count);
 
     success, definition, comment := String.split_from_left(line, ";");
     if (!success) {
@@ -484,14 +535,56 @@ handle_rplai :: (file_lines: []string, builder: *String_Builder) {
         return;
     }
 
-    // Remove RLAPI prefix
-    definition = String.slice(definition, RLAPI_PREFIX.count + 1, definition.count - RLAPI_PREFIX.count);
+    function_definition := convert_function_definition(definition);
 
-    success1, c_type, jai_type, remainder := map_type(definition);
-    if (!success1) {
-        print("Unexpected function type\n");
-        print("%\n", definition);
+    print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
+}
+
+handle_rmapi :: (file_lines: []string, output_builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    // Remove RMAPI prefix
+    line = String.slice(line, RMAPI_PREFIX.count + 1, line.count - RMAPI_PREFIX.count);
+
+    function_definition := convert_function_definition(line);
+
+    print_to_builder(output_builder, "% {\n", function_definition);
+
+    // Skip the next line as it will be just {
+    if (!increment_line_counter()) {
+        print("EOF while looking for the end of a function.\n");
         return;
+    }
+
+    while (true) {
+        if (!increment_line_counter()) {
+            print("EOF while looking for the end of a function.\n");
+            return;
+        }
+
+        if (is_empty_line_or_comments(file_lines, output_builder)) {
+            continue;
+        }
+
+        line := String.trim(file_lines[g_line_counter]);
+
+        if (String.starts_with(line, "}")) {
+            print_to_builder(output_builder, "}\n");
+            return;
+        }
+
+        line = String.replace(line, " = { 0 }", "");
+
+        print_to_builder(output_builder, "    %\n", line);
+    }
+}
+
+convert_function_definition :: (line: string) -> string {
+    success, c_type, jai_type, remainder := map_type(line);
+    if (!success) {
+        print("Unexpected function type\n");
+        print("%\n", line);
+        return "";
     }
 
     right_bracket_idx := String.find_index_from_right(remainder, ")");
@@ -501,11 +594,10 @@ handle_rplai :: (file_lines: []string, builder: *String_Builder) {
 
     improved_definition, found_improvement := Hash_Table.table_find(*g_improved_function_definitions, function_name);
     if (found_improvement) {
-        print_to_builder(builder, "% :: % #foreign raylib_native;\n", function_name, improved_definition);
-        return;
+        return String.join(function_name, " :: ", improved_definition);
     }
     
-    print_to_builder(builder, "% :: (", function_name);
+    new_definition := String.join(function_name, " :: (");
 
     variables_combined := String.slice(remainder, left_bracket_idx + 1, right_bracket_idx - left_bracket_idx - 1);
     if (variables_combined != "void") {
@@ -514,25 +606,26 @@ handle_rplai :: (file_lines: []string, builder: *String_Builder) {
             variable := String.trim(variables[i]);
 
             if (variable == "...") {
-                print_to_builder(builder, "args: ..*u8");
+                new_definition = String.join(new_definition, "args: ..*u8");
             } else {
                 success2, variable_c_type, variable_jai_type, variable_name := map_type(variable);
                 if (!success2) {
                     print("Unexpected function variable\n");
                     print("%\n", function_name);
                     print("%\n", variable);
-                    return;
+                    return "";
                 }
-                print_to_builder(builder, "%: %", variable_name, variable_jai_type);
+                new_definition = String.join(new_definition, variable_name, ": ", variable_jai_type);
             }
 
             if (i != variables.count-1) {
-                print_to_builder(builder, ", ");
+                new_definition = String.join(new_definition, ", ");
             }
         }
     }
 
-    print_to_builder(builder, ")% #foreign raylib_native;\n", ifx jai_type == "void" then "" else String.join(" -> ", jai_type));
+    
+    return String.join(new_definition, ")", ifx jai_type == "void" then "" else String.join(" -> ", jai_type));
 }
 
 map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, remainder: string) {
@@ -608,42 +701,4 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
     }
 
     return true, c_type, jai_type, remainder;
-}
-
-handle_define :: (file_lines: []string, builder: *String_Builder) {
-    line := file_lines[g_line_counter];
-
-    if (String.contains(line, RAYLIB_COLOR)) {
-        raylib_color := String.slice(line, DEFINE_PREFIX.count + 1, line.count - DEFINE_PREFIX.count);
-        jai_color    := String.replace(raylib_color, RAYLIB_COLOR, ":: Color.");
-        jai_color     = String.replace(jai_color, "}", "};");
-        print_to_builder(builder, "%\n", jai_color);
-    }
-}
-
-handle_typedef :: (file_lines: []string, builder: *String_Builder) {
-    line := file_lines[g_line_counter];
-
-    found, code, remainder := String.split_from_left(line, ";");
-    if (!found) {
-        return;
-    }
-
-    code_parts := String.split(code, " ");
-
-    if (code_parts.count == 3) {
-
-        is_jai_struct := false;
-        struct_name   := code_parts[2];
-        for JAI_STRUCTS {
-            if (it == struct_name) {
-                print_to_builder(builder, "// struct % is already defined in jai.\n", struct_name);
-                is_jai_struct = true;
-                return;
-            }
-        }
-
-        // code_parts[0] should be typedef
-        print_to_builder(builder, "% :: %;\n", struct_name, code_parts[1]);
-    }
 }
