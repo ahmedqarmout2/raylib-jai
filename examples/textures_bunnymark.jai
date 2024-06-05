@@ -60,9 +60,9 @@ main :: () {
                     bunnies[bunniesCount].position = GetMousePosition();
                     bunnies[bunniesCount].speed.x = cast(float)GetRandomValue(-250, 250)/60.0;
                     bunnies[bunniesCount].speed.y = cast(float)GetRandomValue(-250, 250)/60.0;
-                    bunnies[bunniesCount].color = make_Color(GetRandomValue(50, 240),
-                                                          GetRandomValue(80, 240),
-                                                          GetRandomValue(100, 240), 255);
+                    bunnies[bunniesCount].color = Color.{xx GetRandomValue(50, 240),
+                                                         xx GetRandomValue(80, 240),
+                                                         xx GetRandomValue(100, 240), 255};
                     bunniesCount += 1;
                 }
             }

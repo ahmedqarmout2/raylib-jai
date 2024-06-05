@@ -4,17 +4,6 @@
 // jai generate.jai && ./generate.exe
 //
 
-#import "Math";
-
-#if OS == .WINDOWS {
-    user32  :: #library,system,link_always "user32";
-    gdi32   :: #library,system,link_always "gdi32";
-    shell32 :: #library,system,link_always "shell32";
-    winmm   :: #library,system,link_always "winmm";
-
-    raylib_native :: #library,no_dll "lib/raylib";
-}
-
 /*
 ***********************************************************************************************
 *
@@ -124,7 +113,33 @@
 
 // Some Basic Colors
 // NOTE: Custom raylib color palette for amazing visuals on WHITE background
+LIGHTGRAY  :: Color.{ 200, 200, 200, 255 };   // Light Gray
+GRAY       :: Color.{ 130, 130, 130, 255 };   // Gray
+DARKGRAY   :: Color.{ 80, 80, 80, 255 };      // Dark Gray
+YELLOW     :: Color.{ 253, 249, 0, 255 };     // Yellow
+GOLD       :: Color.{ 255, 203, 0, 255 };     // Gold
+ORANGE     :: Color.{ 255, 161, 0, 255 };     // Orange
+PINK       :: Color.{ 255, 109, 194, 255 };   // Pink
+RED        :: Color.{ 230, 41, 55, 255 };     // Red
+MAROON     :: Color.{ 190, 33, 55, 255 };     // Maroon
+GREEN      :: Color.{ 0, 228, 48, 255 };      // Green
+LIME       :: Color.{ 0, 158, 47, 255 };      // Lime
+DARKGREEN  :: Color.{ 0, 117, 44, 255 };      // Dark Green
+SKYBLUE    :: Color.{ 102, 191, 255, 255 };   // Sky Blue
+BLUE       :: Color.{ 0, 121, 241, 255 };     // Blue
+DARKBLUE   :: Color.{ 0, 82, 172, 255 };      // Dark Blue
+PURPLE     :: Color.{ 200, 122, 255, 255 };   // Purple
+VIOLET     :: Color.{ 135, 60, 190, 255 };    // Violet
+DARKPURPLE :: Color.{ 112, 31, 126, 255 };    // Dark Purple
+BEIGE      :: Color.{ 211, 176, 131, 255 };   // Beige
+BROWN      :: Color.{ 127, 106, 79, 255 };    // Brown
+DARKBROWN  :: Color.{ 76, 63, 47, 255 };      // Dark Brown
 
+WHITE      :: Color.{ 255, 255, 255, 255 };   // White
+BLACK      :: Color.{ 0, 0, 0, 255 };         // Black
+BLANK      :: Color.{ 0, 0, 0, 0 };           // Blank (Transparent)
+MAGENTA    :: Color.{ 255, 0, 255, 255 };     // Magenta
+RAYWHITE   :: Color.{ 245, 245, 245, 255 };   // My own White (raylib logo)
 
 //----------------------------------------------------------------------------------
 // Structures Definition
@@ -133,25 +148,18 @@
 
 // Vector2, 2 components
 // struct Vector2 is already defined in jai.
-Vector2 :: struct {
 
 // Vector3, 3 components
 // struct Vector3 is already defined in jai.
-Vector3 :: struct {
 
 // Vector4, 4 components
 // struct Vector4 is already defined in jai.
-Vector4 :: struct {
 
 // Quaternion, 4 components (Vector4 alias)
+// struct Quaternion is already defined in jai.
 
 // Matrix, 4x4 components, column major, OpenGL style, right-handed
-Matrix4 :: struct {
-    m0, m4, m8, m12: float;   // Matrix first row (4 components)
-    m1, m5, m9, m13: float;   // Matrix second row (4 components)
-    m2, m6, m10, m14: float;  // Matrix third row (4 components)
-    m3, m7, m11, m15: float;  // Matrix fourth row (4 components)
-}
+// struct Matrix4 is already defined in jai.
 
 // Color, 4 components, R8G8B8A8 (32bit)
 Color :: struct {
@@ -188,8 +196,10 @@ Texture :: struct {
 }
 
 // Texture2D, same as Texture
+Texture2D :: Texture;
 
 // TextureCubemap, same as Texture
+TextureCubemap :: Texture;
 
 // RenderTexture, fbo for texture rendering
 RenderTexture :: struct {
@@ -199,6 +209,7 @@ RenderTexture :: struct {
 }
 
 // RenderTexture2D, same as RenderTexture
+RenderTexture2D :: RenderTexture;
 
 // NPatchInfo, n-patch layout info
 NPatchInfo :: struct {
@@ -238,6 +249,7 @@ Camera3D :: struct {
     projection: s32;          // Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
 }
 
+Camera :: Camera3D;
 
 // Camera2D, defines position/orientation in 2d space
 Camera2D :: struct {
@@ -361,8 +373,8 @@ Wave :: struct {
 
 // Opaque structs declaration
 // NOTE: Actual structs are defined internally in raudio module
-// TODO: parse this line. typedef struct rAudioBuffer rAudioBuffer;
-// TODO: parse this line. typedef struct rAudioProcessor rAudioProcessor;
+rAudioBuffer :: struct { /* only used as a pointer in this header */ }
+rAudioProcessor :: struct { /* only used as a pointer in this header */ }
 
 // AudioStream, custom audio stream
 AudioStream :: struct {
@@ -652,7 +664,7 @@ GamepadAxis :: enum {
     GAMEPAD_AXIS_RIGHT_X       :: 2;     // Gamepad right stick X axis
     GAMEPAD_AXIS_RIGHT_Y       :: 3;     // Gamepad right stick Y axis
     GAMEPAD_AXIS_LEFT_TRIGGER  :: 4;     // Gamepad back trigger left, pressure level: [1..-1]
-    GAMEPAD_AXIS_RIGHT_TRIGGER :: 5      // Gamepad back trigger right; pressure level: [1..-1]
+    GAMEPAD_AXIS_RIGHT_TRIGGER :: 5;      // Gamepad back trigger right, pressure level: [1..-1]
 }
 
 // Material map index
@@ -863,9 +875,9 @@ IsWindowMinimized :: () -> bool #foreign raylib_native;
 IsWindowMaximized :: () -> bool #foreign raylib_native;
 IsWindowFocused :: () -> bool #foreign raylib_native;
 IsWindowResized :: () -> bool #foreign raylib_native;
-IsWindowState :: (flag: u32) -> bool #foreign raylib_native;
-SetWindowState :: (flags: u32) #foreign raylib_native;
-ClearWindowState :: (flags: u32) #foreign raylib_native;
+IsWindowState :: (flag: ConfigFlags) -> bool #foreign raylib_native;
+SetWindowState :: (flags: ConfigFlags) #foreign raylib_native;
+ClearWindowState :: (flags: ConfigFlags) #foreign raylib_native;
 ToggleFullscreen :: () #foreign raylib_native;
 ToggleBorderlessWindowed :: () #foreign raylib_native;
 MaximizeWindow :: () #foreign raylib_native;
@@ -940,8 +952,8 @@ LoadShaderFromMemory :: (vsCode: *u8, fsCode: *u8) -> Shader #foreign raylib_nat
 IsShaderReady :: (shader: Shader) -> bool #foreign raylib_native;
 GetShaderLocation :: (shader: Shader, uniformName: *u8) -> s32 #foreign raylib_native;
 GetShaderLocationAttrib :: (shader: Shader, attribName: *u8) -> s32 #foreign raylib_native;
-SetShaderValue :: (shader: Shader, locIndex: s32, value: *void, uniformType: s32) #foreign raylib_native;
-SetShaderValueV :: (shader: Shader, locIndex: s32, value: *void, uniformType: s32, count: s32) #foreign raylib_native;
+SetShaderValue :: (shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType) #foreign raylib_native;
+SetShaderValueV :: (shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32) #foreign raylib_native;
 SetShaderValueMatrix :: (shader: Shader, locIndex: s32, mat: Matrix4) #foreign raylib_native;
 SetShaderValueTexture :: (shader: Shader, locIndex: s32, texture: Texture2D) #foreign raylib_native;
 UnloadShader :: (shader: Shader) #foreign raylib_native;
@@ -977,13 +989,13 @@ UnloadRandomSequence :: (sequence: *s32) #foreign raylib_native;
 
 // Misc. functions
 TakeScreenshot :: (fileName: *u8) #foreign raylib_native;
-SetConfigFlags :: (flags: u32) #foreign raylib_native;
+SetConfigFlags :: (flags: ConfigFlags) #foreign raylib_native;
 OpenURL :: (url: *u8) #foreign raylib_native;
 
 // NOTE: Following functions implemented in module [utils]
 //------------------------------------------------------------------
 TraceLog :: (logLevel: s32, text: *u8, args: ..*u8) #foreign raylib_native;
-SetTraceLogLevel :: (logLevel: s32) #foreign raylib_native;
+SetTraceLogLevel :: (logType: TraceLogLevel) #foreign raylib_native;
 MemAlloc :: (size: u32) -> *void #foreign raylib_native;
 MemRealloc :: (ptr: *void, size: u32) -> *void #foreign raylib_native;
 MemFree :: (ptr: *void) #foreign raylib_native;
@@ -1000,7 +1012,7 @@ SetSaveFileTextCallback :: (callback: SaveFileTextCallback) #foreign raylib_nati
 LoadFileData :: (fileName: *u8, dataSize: *s32) -> *u8 #foreign raylib_native;
 UnloadFileData :: (data: *u8) #foreign raylib_native;
 SaveFileData :: (fileName: *u8, data: *void, dataSize: s32) -> bool #foreign raylib_native;
-ExportDataAsCode :: (char *data: unsigned, dataSize: s32, fileName: *u8) -> bool #foreign raylib_native;
+ExportDataAsCode :: (data: *u8, dataSize: s32, fileName: *u8) -> bool #foreign raylib_native;
 LoadFileText :: (fileName: *u8) -> *s8 #foreign raylib_native;
 UnloadFileText :: (text: *s8) #foreign raylib_native;
 SaveFileText :: (fileName: *u8, text: *s8) -> bool #foreign raylib_native;
@@ -1029,10 +1041,10 @@ UnloadDroppedFiles :: (files: FilePathList) #foreign raylib_native;
 GetFileModTime :: (fileName: *u8) -> s32 #foreign raylib_native;
 
 // Compression/Encoding functionality
-CompressData :: (char *data: unsigned, dataSize: s32, compDataSize: *s32) -> *u8 #foreign raylib_native;
-DecompressData :: (char *compData: unsigned, compDataSize: s32, dataSize: *s32) -> *u8 #foreign raylib_native;
-EncodeDataBase64 :: (char *data: unsigned, dataSize: s32, outputSize: *s32) -> *s8 #foreign raylib_native;
-DecodeDataBase64 :: (char *data: unsigned, outputSize: *s32) -> *u8 #foreign raylib_native;
+CompressData :: (data: *u8, dataSize: s32, compDataSize: *s32) -> *u8 #foreign raylib_native;
+DecompressData :: (compData: *u8, compDataSize: s32, dataSize: *s32) -> *u8 #foreign raylib_native;
+EncodeDataBase64 :: (data: *u8, dataSize: s32, outputSize: *s32) -> *s8 #foreign raylib_native;
+DecodeDataBase64 :: (data: *u8, outputSize: *s32) -> *u8 #foreign raylib_native;
 
 // Automation events functionality
 LoadAutomationEventList :: (fileName: *u8) -> AutomationEventList #foreign raylib_native;
@@ -1049,32 +1061,32 @@ PlayAutomationEvent :: (event: AutomationEvent) #foreign raylib_native;
 //------------------------------------------------------------------------------------
 
 // Input-related functions: keyboard
-IsKeyPressed :: (key: s32) -> bool #foreign raylib_native;
+IsKeyPressed :: (key: KeyboardKey) -> bool #foreign raylib_native;
 IsKeyPressedRepeat :: (key: s32) -> bool #foreign raylib_native;
-IsKeyDown :: (key: s32) -> bool #foreign raylib_native;
-IsKeyReleased :: (key: s32) -> bool #foreign raylib_native;
-IsKeyUp :: (key: s32) -> bool #foreign raylib_native;
+IsKeyDown :: (key: KeyboardKey) -> bool #foreign raylib_native;
+IsKeyReleased :: (key: KeyboardKey) -> bool #foreign raylib_native;
+IsKeyUp :: (key: KeyboardKey) -> bool #foreign raylib_native;
 GetKeyPressed :: () -> s32 #foreign raylib_native;
 GetCharPressed :: () -> s32 #foreign raylib_native;
-SetExitKey :: (key: s32) #foreign raylib_native;
+SetExitKey :: (key: KeyboardKey) -> bool #foreign raylib_native;
 
 // Input-related functions: gamepads
 IsGamepadAvailable :: (gamepad: s32) -> bool #foreign raylib_native;
 GetGamepadName :: (gamepad: s32) -> *u8 #foreign raylib_native;
-IsGamepadButtonPressed :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
-IsGamepadButtonDown :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
-IsGamepadButtonReleased :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
-IsGamepadButtonUp :: (gamepad: s32, button: s32) -> bool #foreign raylib_native;
+IsGamepadButtonPressed :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonDown :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonReleased :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonUp :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
 GetGamepadButtonPressed :: () -> s32 #foreign raylib_native;
 GetGamepadAxisCount :: (gamepad: s32) -> s32 #foreign raylib_native;
-GetGamepadAxisMovement :: (gamepad: s32, axis: s32) -> float #foreign raylib_native;
+GetGamepadAxisMovement :: (gamepad: int, axis: GamepadAxis) -> float #foreign raylib_native;
 SetGamepadMappings :: (mappings: *u8) -> s32 #foreign raylib_native;
 
 // Input-related functions: mouse
-IsMouseButtonPressed :: (button: s32) -> bool #foreign raylib_native;
-IsMouseButtonDown :: (button: s32) -> bool #foreign raylib_native;
-IsMouseButtonReleased :: (button: s32) -> bool #foreign raylib_native;
-IsMouseButtonUp :: (button: s32) -> bool #foreign raylib_native;
+IsMouseButtonPressed :: (button: MouseButton) -> bool #foreign raylib_native;
+IsMouseButtonDown :: (button: MouseButton) -> bool #foreign raylib_native;
+IsMouseButtonReleased :: (button: MouseButton) -> bool #foreign raylib_native;
+IsMouseButtonUp :: (button: MouseButton) -> bool #foreign raylib_native;
 GetMouseX :: () -> s32 #foreign raylib_native;
 GetMouseY :: () -> s32 #foreign raylib_native;
 GetMousePosition :: () -> Vector2 #foreign raylib_native;
@@ -1097,7 +1109,7 @@ GetTouchPointCount :: () -> s32 #foreign raylib_native;
 // Gestures and Touch Handling Functions (Module: rgestures)
 //------------------------------------------------------------------------------------
 SetGesturesEnabled :: (flags: u32) #foreign raylib_native;
-IsGestureDetected :: (gesture: u32) -> bool #foreign raylib_native;
+IsGestureDetected :: (gesture: Gesture) -> bool #foreign raylib_native;
 GetGestureDetected :: () -> s32 #foreign raylib_native;
 GetGestureHoldDuration :: () -> float #foreign raylib_native;
 GetGestureDragVector :: () -> Vector2 #foreign raylib_native;
@@ -1108,7 +1120,7 @@ GetGesturePinchAngle :: () -> float #foreign raylib_native;
 //------------------------------------------------------------------------------------
 // Camera System Functions (Module: rcamera)
 //------------------------------------------------------------------------------------
-UpdateCamera :: (camera: *Camera, mode: s32) #foreign raylib_native;
+UpdateCamera :: (camera: Camera, mode: CameraMode) #foreign raylib_native;
 UpdateCameraPro :: (camera: *Camera, movement: Vector3, rotation: Vector3, zoom: float) #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
@@ -1198,7 +1210,7 @@ LoadImage :: (fileName: *u8) -> Image #foreign raylib_native;
 LoadImageRaw :: (fileName: *u8, width: s32, height: s32, format: s32, headerSize: s32) -> Image #foreign raylib_native;
 LoadImageSvg :: (fileNameOrString: *u8, width: s32, height: s32) -> Image #foreign raylib_native;
 LoadImageAnim :: (fileName: *u8, frames: *s32) -> Image #foreign raylib_native;
-LoadImageFromMemory :: (fileType: *u8, char *fileData: unsigned, dataSize: s32) -> Image #foreign raylib_native;
+LoadImageFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32) -> Image #foreign raylib_native;
 LoadImageFromTexture :: (texture: Texture2D) -> Image #foreign raylib_native;
 LoadImageFromScreen :: () -> Image #foreign raylib_native;
 IsImageReady :: (image: Image) -> bool #foreign raylib_native;
@@ -1232,7 +1244,7 @@ ImageAlphaMask :: (image: *Image, alphaMask: Image) #foreign raylib_native;
 ImageAlphaPremultiply :: (image: *Image) #foreign raylib_native;
 ImageBlurGaussian :: (image: *Image, blurSize: s32) #foreign raylib_native;
 ImageResize :: (image: *Image, newWidth: s32, newHeight: s32) #foreign raylib_native;
-ImageResizeNN :: (image: *Image, newWidth,int newHeight: s32) #foreign raylib_native;
+ImageResizeNN :: (image: *Image, newWidth: s32, newHeight: s32) #foreign raylib_native;
 ImageResizeCanvas :: (image: *Image, newWidth: s32, newHeight: s32, offsetX: s32, offsetY: s32, fill: Color) #foreign raylib_native;
 ImageMipmaps :: (image: *Image) #foreign raylib_native;
 ImageDither :: (image: *Image, rBpp: s32, gBpp: s32, bBpp: s32, aBpp: s32) #foreign raylib_native;
@@ -1325,9 +1337,9 @@ GetFontDefault :: () -> Font #foreign raylib_native;
 LoadFont :: (fileName: *u8) -> Font #foreign raylib_native;
 LoadFontEx :: (fileName: *u8, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
 LoadFontFromImage :: (image: Image, key: Color, firstChar: s32) -> Font #foreign raylib_native;
-LoadFontFromMemory :: (fileType: *u8, char *fileData: unsigned, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
+LoadFontFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
 IsFontReady :: (font: Font) -> bool #foreign raylib_native;
-LoadFontData :: (char *fileData: unsigned, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: s32) -> *GlyphInfo #foreign raylib_native;
+LoadFontData :: (fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: s32) -> *GlyphInfo #foreign raylib_native;
 GenImageFontAtlas :: (glyphs: *GlyphInfo, glyphRecs: **Rectangle, glyphCount: s32, fontSize: s32, padding: s32, packMethod: s32) -> Image #foreign raylib_native;
 UnloadFontData :: (glyphs: *GlyphInfo, glyphCount: s32) #foreign raylib_native;
 UnloadFont :: (font: Font) #foreign raylib_native;
@@ -1339,7 +1351,7 @@ DrawText :: (text: *u8, posX: s32, posY: s32, fontSize: s32, color: Color) #fore
 DrawTextEx :: (font: Font, text: *u8, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
 DrawTextPro :: (font: Font, text: *u8, position: Vector2, origin: Vector2, rotation: float, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
 DrawTextCodepoint :: (font: Font, codepoint: s32, position: Vector2, fontSize: float, tint: Color) #foreign raylib_native;
-DrawTextCodepoints :: (font: Font, codepoints: *int, codepointCount: s32, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
+DrawTextCodepoints :: (font: Font, codepoints: *s32, codepointCount: s32, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
 
 // Text font info functions
 SetTextLineSpacing :: (spacing: s32) #foreign raylib_native;
@@ -1350,7 +1362,7 @@ GetGlyphInfo :: (font: Font, codepoint: s32) -> GlyphInfo #foreign raylib_native
 GetGlyphAtlasRec :: (font: Font, codepoint: s32) -> Rectangle #foreign raylib_native;
 
 // Text codepoints management functions (unicode characters)
-LoadUTF8 :: (codepoints: *int, length: s32) -> *s8 #foreign raylib_native;
+LoadUTF8 :: (codepoints: *s32, length: s32) -> *s8 #foreign raylib_native;
 UnloadUTF8 :: (text: *s8) #foreign raylib_native;
 LoadCodepoints :: (text: *u8, count: *s32) -> *s32 #foreign raylib_native;
 UnloadCodepoints :: (codepoints: *s32) #foreign raylib_native;
@@ -1431,7 +1443,7 @@ UploadMesh :: (mesh: *Mesh, dynamic: bool) #foreign raylib_native;
 UpdateMeshBuffer :: (mesh: Mesh, index: s32, data: *void, dataSize: s32, offset: s32) #foreign raylib_native;
 UnloadMesh :: (mesh: Mesh) #foreign raylib_native;
 DrawMesh :: (mesh: Mesh, material: Material, transform: Matrix4) #foreign raylib_native;
-DrawMeshInstanced :: (mesh: Mesh, material: Material, transforms: *Matrix, instances: s32) #foreign raylib_native;
+DrawMeshInstanced :: (mesh: Mesh, material: Material, transforms: *Matrix4, instances: s32) #foreign raylib_native;
 ExportMesh :: (mesh: Mesh, fileName: *u8) -> bool #foreign raylib_native;
 GetMeshBoundingBox :: (mesh: Mesh) -> BoundingBox #foreign raylib_native;
 GenMeshTangents :: (mesh: *Mesh) #foreign raylib_native;
@@ -1487,7 +1499,7 @@ GetMasterVolume :: () -> float #foreign raylib_native;
 
 // Wave/Sound loading/unloading functions
 LoadWave :: (fileName: *u8) -> Wave #foreign raylib_native;
-LoadWaveFromMemory :: (fileType: *u8, char *fileData: unsigned, dataSize: s32) -> Wave #foreign raylib_native;
+LoadWaveFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32) -> Wave #foreign raylib_native;
 IsWaveReady :: (wave: Wave) -> bool #foreign raylib_native;
 LoadSound :: (fileName: *u8) -> Sound #foreign raylib_native;
 LoadSoundFromWave :: (wave: Wave) -> Sound #foreign raylib_native;
@@ -1517,7 +1529,7 @@ UnloadWaveSamples :: (samples: *float) #foreign raylib_native;
 
 // Music management functions
 LoadMusicStream :: (fileName: *u8) -> Music #foreign raylib_native;
-LoadMusicStreamFromMemory :: (fileType: *u8, char *data: unsigned, dataSize: s32) -> Music #foreign raylib_native;
+LoadMusicStreamFromMemory :: (fileType: *u8, data: *u8, dataSize: s32) -> Music #foreign raylib_native;
 IsMusicReady :: (music: Music) -> bool #foreign raylib_native;
 UnloadMusicStream :: (music: Music) #foreign raylib_native;
 PlayMusicStream :: (music: Music) #foreign raylib_native;
@@ -1556,4 +1568,29 @@ DetachAudioStreamProcessor :: (stream: AudioStream, processor: AudioCallback) #f
 AttachAudioMixedProcessor :: (processor: AudioCallback) #foreign raylib_native;
 DetachAudioMixedProcessor :: (processor: AudioCallback) #foreign raylib_native;
 
+
+#import "Math";
+
+#if OS == .WINDOWS {
+    user32  :: #library,system,link_always "user32";
+    gdi32   :: #library,system,link_always "gdi32";
+    shell32 :: #library,system,link_always "shell32";
+    winmm   :: #library,system,link_always "winmm";
+
+    raylib_native :: #library,no_dll "lib/raylib";
+}
+
+TraceLogCallback     :: #type (logType: s32, text: *u8, args: ..*u8);
+
+#scope_file
+Basic :: #import "Basic";
+
+TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
+LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
+SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
+LoadFileTextCallback :: #type (fileName: *u8) -> *u8 #c_call;
+SaveFileTextCallback :: #type (fileName: *u8, text: *u8) -> bool #c_call;
+AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
+
+#scope_file
 

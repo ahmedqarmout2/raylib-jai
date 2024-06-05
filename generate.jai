@@ -1,6 +1,7 @@
-Basic  :: #import "Basic";
-File   :: #import "File";
-String :: #import "String";
+Basic      :: #import "Basic";
+File       :: #import "File";
+Hash_Table :: #import "Hash_Table";
+String     :: #import "String";
 
 String_Builder   :: Basic.String_Builder;
 print            :: Basic.print;
@@ -22,25 +23,72 @@ TYPE_MAP :: string.[
 
 // Even values are the raylib types
 // Odd values are the jai types
-STRUCT_MAP  :: string.[
+STRUCT_MAP :: string.[
     "Matrix", "Matrix4"
 ];
 
-JAI_STRUCTS :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
+// Even values are the raylib function names
+// Odd values are the improved version of the function definition.
+// For example, replacing an int function parameter with an enum
+FUNCTION_IMPROVEMENT :: string.[
+    "IsKeyPressed"  , "(key: KeyboardKey) -> bool",
+    "IsKeyDown"     , "(key: KeyboardKey) -> bool",
+    "IsKeyReleased" , "(key: KeyboardKey) -> bool",
+    "IsKeyUp"       , "(key: KeyboardKey) -> bool",
+    "SetExitKey"    , "(key: KeyboardKey) -> bool",
+
+    "IsMouseButtonPressed"  , "(button: MouseButton) -> bool",
+    "IsMouseButtonDown"     , "(button: MouseButton) -> bool",
+    "IsMouseButtonReleased" , "(button: MouseButton) -> bool",
+    "IsMouseButtonUp"       , "(button: MouseButton) -> bool",
+
+    "IsGestureDetected", "(gesture: Gesture) -> bool",
+
+    "IsWindowState"    , "(flag: ConfigFlags) -> bool",
+    "SetWindowState"   , "(flags: ConfigFlags)",
+    "ClearWindowState" , "(flags: ConfigFlags)",
+
+    "UpdateCamera", "(camera: Camera, mode: CameraMode)",
+
+    "SetConfigFlags", "(flags: ConfigFlags)",
+
+    "SetTraceLogLevel" , "(logType: TraceLogLevel)",
+    "SetTraceLogExit"  , "(logType: TraceLogLevel)",
+
+    "SetShaderValue"  , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)",
+    "SetShaderValueV" , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)",
+
+    "IsGamepadButtonPressed"  , "(gamepad: int, button: GamepadButton) -> bool",
+    "IsGamepadButtonDown"     , "(gamepad: int, button: GamepadButton) -> bool",
+    "IsGamepadButtonReleased" , "(gamepad: int, button: GamepadButton) -> bool",
+    "IsGamepadButtonUp"       , "(gamepad: int, button: GamepadButton) -> bool",
+
+    "GetGamepadAxisMovement", "(gamepad: int, axis: GamepadAxis) -> float",
+
+    "ImageKernelConvolution", "(image: *Image, kernel: *float, kernelSize: s32)"
+];
+
+JAI_STRUCTS :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Matrix4", "Quaternion"];
 
 DOUBLE_POINTER :: "**";
 SINGLE_POINTER :: "*";
 STRUCT_PREFIX  :: "typedef struct";
 RLAPI_PREFIX   :: "RLAPI";
 CONST_PREFIX   :: "const";
-ENUM_PREFIX   :: "typedef enum";
-REAYLIB_HEADER ::  #string DONE
+ENUM_PREFIX    :: "typedef enum";
+DEFINE_PREFIX  :: "#define";
+RAYLIB_COLOR   :: "CLITERAL(Color)";
+TYPEDEF_PREFIX :: "typedef";
+
+GENERAL_HEADER ::  #string DONE
 //
 // This file was auto-generated using the following command:
 //
 // jai generate.jai && ./generate.exe
 //
+DONE
 
+REAYLIB_FOOTER ::  #string DONE
 #import "Math";
 
 #if OS == .WINDOWS {
@@ -51,17 +99,31 @@ REAYLIB_HEADER ::  #string DONE
 
     raylib_native :: #library,no_dll "lib/raylib";
 }
+
+TraceLogCallback     :: #type (logType: s32, text: *u8, args: ..*u8);
+
+#scope_file
+Basic :: #import "Basic";
+
+TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
+LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
+SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
+LoadFileTextCallback :: #type (fileName: *u8) -> *u8 #c_call;
+SaveFileTextCallback :: #type (fileName: *u8, text: *u8) -> bool #c_call;
+AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
+
+#scope_file
 DONE
 
 main :: () {
-    generate_bindings("raylib",  "raylib");
+    generate_bindings("raylib",  "raylib", REAYLIB_FOOTER);
     // generate_bindings("raymath", "raymath");
 }
 
 g_line_counter : int;
 g_lines_count  : int;
 
-generate_bindings :: (input_filename: string, output_filename: string) {
+generate_bindings :: (input_filename: string, output_filename: string, file_footer: string) {
     g_line_counter = -1;
     g_lines_count  = 0;
 
@@ -86,7 +148,7 @@ generate_bindings :: (input_filename: string, output_filename: string) {
     }
 
     builder: String_Builder;
-    print_to_builder(*builder, "%\n", REAYLIB_HEADER);
+    print_to_builder(*builder, "%\n", GENERAL_HEADER);
 
     file_data: string;
     file_data.data  = buffer;
@@ -120,9 +182,21 @@ generate_bindings :: (input_filename: string, output_filename: string) {
             continue;
         }
 
+        if (String.starts_with(line, DEFINE_PREFIX)) {
+            handle_define(file_lines, *builder);
+            continue;
+        }
+
+        if (String.starts_with(line, TYPEDEF_PREFIX)) {
+            handle_typedef(file_lines, *builder);
+            continue;
+        }
+
         // Print unrecognized lines
         print("%\n", line);
     }
+
+    print_to_builder(*builder, "%\n", file_footer);
 
     Basic.free(buffer);
     File.file_close(*file);
@@ -191,7 +265,9 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     if (String.contains(line, ";")) {
-        print_to_builder(builder, "// TODO: parse this line. %\n", line);
+        definition_parts := String.split(line, " ");
+        struct_name      := definition_parts[2];
+        print_to_builder(builder, "% :: struct { /* only used as a pointer in this header */ }%\n", struct_name);
         return;
     } 
 
@@ -233,11 +309,14 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         if (it == struct_name) {
             print_to_builder(builder, "// struct % is already defined in jai.\n", struct_name);
             is_jai_struct = true;
-            break;;
+            break;
         }
     }
 
-    print_to_builder(builder, "% :: struct {\n", struct_name);
+    if (!is_jai_struct) {
+        print_to_builder(builder, "% :: struct {\n", struct_name);
+    }
+
     while (true) {
         if (!increment_line_counter()) {
             print("EOF while looking for the end of a struct: %\n", struct_name);
@@ -344,6 +423,11 @@ convert_enum_element :: (line: string) -> string {
     equals_index                  := 0;
     comma_index                   := 0;
     for i: 0..line.count-1 {
+        // Break on at the beginning of a comment
+        if ((line[i] == #char "/") && (line[i+1] == #char "/")) {
+            break;
+        }
+
         t := line[i];
 
         if (t == #char " ") {
@@ -387,7 +471,7 @@ convert_enum_element :: (line: string) -> string {
         enum_element_value = String.join(":: ", enum_element_value); 
     }
     enum_element_remainder := String.slice(line, split_remainder_on_index, line.count - split_remainder_on_index);
-    return String.join(enum_element_name, enum_element_value,";",  enum_element_remainder);
+    return String.join(enum_element_name, enum_element_value, ";", enum_element_remainder);
 }
 
 handle_rplai :: (file_lines: []string, builder: *String_Builder) {
@@ -415,13 +499,27 @@ handle_rplai :: (file_lines: []string, builder: *String_Builder) {
     left_bracket_idx  := String.find_index_from_left(remainder, "(");
 
     function_name := String.slice(remainder, 0, left_bracket_idx);
+
+    for i: 0..FUNCTION_IMPROVEMENT.count-1 {
+        _function_name      := FUNCTION_IMPROVEMENT[i];
+        improved_definition := FUNCTION_IMPROVEMENT[i+1];
+
+        // Skip the function definition in the next iteration
+        i += 1;
+
+        if (function_name == _function_name) {
+            print_to_builder(builder, "% :: % #foreign raylib_native;\n", function_name, improved_definition);
+            return;
+        }
+    }
+    
     print_to_builder(builder, "% :: (", function_name);
 
     variables_combined := String.slice(remainder, left_bracket_idx + 1, right_bracket_idx - left_bracket_idx - 1);
     if (variables_combined != "void") {
-        variables := String.split(variables_combined, ", ");
+        variables := String.split(variables_combined, ",");
         for i: 0..variables.count-1 {
-            variable := variables[i];
+            variable := String.trim(variables[i]);
 
             if (variable == "...") {
                 print_to_builder(builder, "args: ..*u8");
@@ -460,6 +558,14 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
 
         if (String.starts_with(m_line, _c_type)) {
             c_type   = _c_type;
+            jai_type = _jai_type;
+            break;
+        }
+
+        _const_c_type := String.join(CONST_PREFIX, " ", _c_type);
+
+        if (String.starts_with(m_line, _const_c_type)) {
+            c_type   = _const_c_type;
             jai_type = _jai_type;
             break;
         }
@@ -512,3 +618,40 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
     return true, c_type, jai_type, remainder;
 }
 
+handle_define :: (file_lines: []string, builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    if (String.contains(line, RAYLIB_COLOR)) {
+        raylib_color := String.slice(line, DEFINE_PREFIX.count + 1, line.count - DEFINE_PREFIX.count);
+        jai_color    := String.replace(raylib_color, RAYLIB_COLOR, ":: Color.");
+        jai_color     = String.replace(jai_color, "}", "};");
+        print_to_builder(builder, "%\n", jai_color);
+    }
+}
+
+handle_typedef :: (file_lines: []string, builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    found, code, remainder := String.split_from_left(line, ";");
+    if (!found) {
+        return;
+    }
+
+    code_parts := String.split(code, " ");
+
+    if (code_parts.count == 3) {
+
+        is_jai_struct := false;
+        struct_name   := code_parts[2];
+        for JAI_STRUCTS {
+            if (it == struct_name) {
+                print_to_builder(builder, "// struct % is already defined in jai.\n", struct_name);
+                is_jai_struct = true;
+                return;
+            }
+        }
+
+        // code_parts[0] should be typedef
+        print_to_builder(builder, "% :: %;\n", struct_name, code_parts[1]);
+    }
+}

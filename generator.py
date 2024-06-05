@@ -375,8 +375,7 @@ def main():
     # change to script directory
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    generate_jai_bindings("include/raylib.h", "raylib/module.jai")
-    generate_jai_bindings("include/raymath.h", "raylib/raymath.jai")
+    generate_jai_bindings("include/raylib.h", "raylib/old_module.jai")
 
 if __name__ == "__main__":
     main()

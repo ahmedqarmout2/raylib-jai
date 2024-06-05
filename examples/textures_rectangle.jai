@@ -30,7 +30,7 @@ main :: () {
     defer UnloadTexture(scarfy);
 
     position := Vector2.{ 350.0, 280.0 };
-    frameRec := make_Rectangle(0, 0, cast(float)scarfy.width/6.0, cast(float)scarfy.height);
+    frameRec := Rectangle.{0, 0, cast(float)scarfy.width/6.0, cast(float)scarfy.height};
 
     currentFrame := 0;
 
