@@ -159,7 +159,7 @@ RAYWHITE   :: Color.{ 245, 245, 245, 255 };   // My own White (raylib logo)
 // struct Quaternion is already defined in jai.
 
 // Matrix, 4x4 components, column major, OpenGL style, right-handed
-// struct Matrix4 is already defined in jai.
+// struct Matrix is already defined in jai.
 
 // Color, 4 components, R8G8B8A8 (32bit)
 Color :: struct {
@@ -246,7 +246,7 @@ Camera3D :: struct {
     target: Vector3;          // Camera target it looks-at
     up: Vector3;              // Camera up vector (rotation over its axis)
     fovy: float;              // Camera field-of-view aperture in Y (degrees) in perspective, used as near plane width in orthographic
-    projection: s32;          // Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
+    projection: CameraProjection;          // Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
 }
 
 Camera :: Camera3D;

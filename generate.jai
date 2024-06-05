@@ -4,8 +4,12 @@ Hash_Table :: #import "Hash_Table";
 String     :: #import "String";
 
 String_Builder   :: Basic.String_Builder;
+Table            :: Hash_Table.Table;
 print            :: Basic.print;
 print_to_builder :: Basic.print_to_builder;
+
+g_improved_function_definitions : Table(string, string);
+g_improved_struct_elements      : Table(string, string);
 
 // Even values are the C types
 // Odd values are the jai types
@@ -21,54 +25,7 @@ TYPE_MAP :: string.[
     "Matrix",         "Matrix4"
 ];
 
-// Even values are the raylib types
-// Odd values are the jai types
-STRUCT_MAP :: string.[
-    "Matrix", "Matrix4"
-];
-
-// Even values are the raylib function names
-// Odd values are the improved version of the function definition.
-// For example, replacing an int function parameter with an enum
-FUNCTION_IMPROVEMENT :: string.[
-    "IsKeyPressed"  , "(key: KeyboardKey) -> bool",
-    "IsKeyDown"     , "(key: KeyboardKey) -> bool",
-    "IsKeyReleased" , "(key: KeyboardKey) -> bool",
-    "IsKeyUp"       , "(key: KeyboardKey) -> bool",
-    "SetExitKey"    , "(key: KeyboardKey) -> bool",
-
-    "IsMouseButtonPressed"  , "(button: MouseButton) -> bool",
-    "IsMouseButtonDown"     , "(button: MouseButton) -> bool",
-    "IsMouseButtonReleased" , "(button: MouseButton) -> bool",
-    "IsMouseButtonUp"       , "(button: MouseButton) -> bool",
-
-    "IsGestureDetected", "(gesture: Gesture) -> bool",
-
-    "IsWindowState"    , "(flag: ConfigFlags) -> bool",
-    "SetWindowState"   , "(flags: ConfigFlags)",
-    "ClearWindowState" , "(flags: ConfigFlags)",
-
-    "UpdateCamera", "(camera: Camera, mode: CameraMode)",
-
-    "SetConfigFlags", "(flags: ConfigFlags)",
-
-    "SetTraceLogLevel" , "(logType: TraceLogLevel)",
-    "SetTraceLogExit"  , "(logType: TraceLogLevel)",
-
-    "SetShaderValue"  , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)",
-    "SetShaderValueV" , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)",
-
-    "IsGamepadButtonPressed"  , "(gamepad: int, button: GamepadButton) -> bool",
-    "IsGamepadButtonDown"     , "(gamepad: int, button: GamepadButton) -> bool",
-    "IsGamepadButtonReleased" , "(gamepad: int, button: GamepadButton) -> bool",
-    "IsGamepadButtonUp"       , "(gamepad: int, button: GamepadButton) -> bool",
-
-    "GetGamepadAxisMovement", "(gamepad: int, axis: GamepadAxis) -> float",
-
-    "ImageKernelConvolution", "(image: *Image, kernel: *float, kernelSize: s32)"
-];
-
-JAI_STRUCTS :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Matrix4", "Quaternion"];
+JAI_STRUCTS :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
 
 DOUBLE_POINTER :: "**";
 SINGLE_POINTER :: "*";
@@ -116,8 +73,14 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
 DONE
 
 main :: () {
+    populate_improved_function_definitions_table();
+    defer Hash_Table.deinit(*g_improved_function_definitions);
+
+    populate_improved_struct_elements_table();
+    defer Hash_Table.deinit(*g_improved_struct_elements);
+
     generate_bindings("raylib",  "raylib", REAYLIB_FOOTER);
-    // generate_bindings("raymath", "raymath");
+    generate_bindings("raymath", "raymath", "");
 }
 
 g_line_counter : int;
@@ -147,8 +110,10 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
         return;
     }
 
-    builder: String_Builder;
-    print_to_builder(*builder, "%\n", GENERAL_HEADER);
+    output_builder       : String_Builder;
+    unrecognized_builder : String_Builder;
+
+    print_to_builder(*output_builder, "%\n", GENERAL_HEADER);
 
     file_data: string;
     file_data.data  = buffer;
@@ -161,49 +126,94 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
             break;
         }
 
-        if (is_empty_line_or_comments(file_lines, *builder)) {
+        if (is_empty_line_or_comments(file_lines, *output_builder)) {
             continue;
         }
 
         line := file_lines[g_line_counter];
 
         if (String.starts_with(line, STRUCT_PREFIX)) {
-            handle_struct(file_lines, *builder);
+            handle_struct(file_lines, *output_builder);
             continue;
         }
 
         if (String.starts_with(line, ENUM_PREFIX)) {
-            handle_enum(file_lines, *builder);
+            handle_enum(file_lines, *output_builder);
             continue;
         }
 
         if (String.starts_with(line, RLAPI_PREFIX)) {
-            handle_rplai(file_lines, *builder);
+            handle_rplai(file_lines, *output_builder);
             continue;
         }
 
         if (String.starts_with(line, DEFINE_PREFIX)) {
-            handle_define(file_lines, *builder);
+            handle_define(file_lines, *output_builder);
             continue;
         }
 
         if (String.starts_with(line, TYPEDEF_PREFIX)) {
-            handle_typedef(file_lines, *builder);
+            handle_typedef(file_lines, *output_builder);
             continue;
         }
 
         // Print unrecognized lines
-        print("%\n", line);
+        print_to_builder(*unrecognized_builder, "%\n", line);
     }
 
-    print_to_builder(*builder, "%\n", file_footer);
+    print_to_builder(*output_builder, "%\n", file_footer);
 
     Basic.free(buffer);
     File.file_close(*file);
 
     output_file := String.join("raylib/", output_filename, ".jai");
-    File.write_entire_file(output_file, *builder);
+    File.write_entire_file(output_file, *output_builder);
+
+    remainder_file := String.join("raylib/", output_filename, "_unrecognized.h");
+    File.write_entire_file(remainder_file, *unrecognized_builder);
     print("------------------------------------\n");
+}
+
+populate_improved_function_definitions_table :: () {
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"  , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"     , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased" , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"       , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"    , "(key: KeyboardKey) -> bool");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonPressed"  , "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonDown"     , "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonReleased" , "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonUp"       , "(button: MouseButton) -> bool");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGestureDetected", "(gesture: Gesture) -> bool");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "IsWindowState"    , "(flag: ConfigFlags) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetWindowState"   , "(flags: ConfigFlags)");
+    Hash_Table.table_add(*g_improved_function_definitions, "ClearWindowState" , "(flags: ConfigFlags)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "UpdateCamera", "(camera: Camera, mode: CameraMode)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "SetConfigFlags", "(flags: ConfigFlags)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogLevel" , "(logType: TraceLogLevel)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogExit"  , "(logType: TraceLogLevel)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValue"  , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValueV" , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonPressed"  , "(gamepad: int, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonDown"     , "(gamepad: int, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonReleased" , "(gamepad: int, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonUp"       , "(gamepad: int, button: GamepadButton) -> bool");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadAxisMovement", "(gamepad: int, axis: GamepadAxis) -> float");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "ImageKernelConvolution", "(image: *Image, kernel: *float, kernelSize: s32)");
+}
+
+populate_improved_struct_elements_table :: () {
+    Hash_Table.table_add(*g_improved_struct_elements, "Camera3D_projection", "CameraProjection");
 }
 
 increment_line_counter :: () -> bool {
@@ -267,7 +277,7 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
     if (String.contains(line, ";")) {
         definition_parts := String.split(line, " ");
         struct_name      := definition_parts[2];
-        print_to_builder(builder, "% :: struct { /* only used as a pointer in this header */ }%\n", struct_name);
+        print_to_builder(builder, "% :: struct { /* only used as a pointer in this header */ }\n", struct_name);
         return;
     } 
 
@@ -290,19 +300,6 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
 
     struct_name := definition_parts[2];
     struct_end  := String.join("} ", struct_name, ";");
-
-    for i: 0..STRUCT_MAP.count-1 {
-        _raylib_name := STRUCT_MAP[i];
-        _jai_name    := STRUCT_MAP[i+1];
-        
-        // Skip the jai type in the next iteration
-        i += 1;
-
-        if (struct_name == _raylib_name) {
-            struct_name = _jai_name;
-            break;
-        }
-    }
 
     is_jai_struct := false;
     for JAI_STRUCTS {
@@ -355,7 +352,9 @@ handle_struct :: (file_lines: []string, builder: *String_Builder) {
         }
 
         if (!is_jai_struct) {
-            print_to_builder(builder, "    %: %; %\n", remainder, jai_type, comment);
+            improved_element, found_improvement := Hash_Table.table_find(*g_improved_struct_elements, String.join(struct_name, "_", remainder));
+
+            print_to_builder(builder, "    %: %; %\n", remainder, ifx found_improvement then improved_element else jai_type, comment);
         }
     }
 }
@@ -500,17 +499,10 @@ handle_rplai :: (file_lines: []string, builder: *String_Builder) {
 
     function_name := String.slice(remainder, 0, left_bracket_idx);
 
-    for i: 0..FUNCTION_IMPROVEMENT.count-1 {
-        _function_name      := FUNCTION_IMPROVEMENT[i];
-        improved_definition := FUNCTION_IMPROVEMENT[i+1];
-
-        // Skip the function definition in the next iteration
-        i += 1;
-
-        if (function_name == _function_name) {
-            print_to_builder(builder, "% :: % #foreign raylib_native;\n", function_name, improved_definition);
-            return;
-        }
+    improved_definition, found_improvement := Hash_Table.table_find(*g_improved_function_definitions, function_name);
+    if (found_improvement) {
+        print_to_builder(builder, "% :: % #foreign raylib_native;\n", function_name, improved_definition);
+        return;
     }
     
     print_to_builder(builder, "% :: (", function_name);

@@ -4,17 +4,6 @@
 // jai generate.jai && ./generate.exe
 //
 
-#import "Math";
-
-#if OS == .WINDOWS {
-    user32  :: #library,system,link_always "user32";
-    gdi32   :: #library,system,link_always "gdi32";
-    shell32 :: #library,system,link_always "shell32";
-    winmm   :: #library,system,link_always "winmm";
-
-    raylib_native :: #library,no_dll "lib/raylib";
-}
-
 /*
 ***********************************************************************************************
 *
@@ -96,14 +85,10 @@
 // struct Vector4 is already defined in jai.
 
 // Quaternion type
+// struct Quaternion is already defined in jai.
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
-Matrix4 :: struct {
-    m0, m4, m8, m12: float;       // Matrix first row (4 components)
-    m1, m5, m9, m13: float;       // Matrix second row (4 components)
-    m2, m6, m10, m14: float;      // Matrix third row (4 components)
-    m3, m7, m11, m15: float;      // Matrix fourth row (4 components)
-}
+// struct Matrix is already defined in jai.
 
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
 float3 :: struct {
@@ -720,6 +705,7 @@ float16 :: struct {
 
 
 // Check whether two given quaternions are almost equal
+
 
 
 
