@@ -43,6 +43,7 @@ IF_END_PREFIX   :: "#endif";
 SWITCH_PREFIX   :: "switch";
 CASE_PREFIX     :: "case";
 NUMBERS         :: "0123456789";
+RLGL_END        :: "#endif // RLGL_H";
 
 GENERAL_HEADER ::  #string DONE
 //
@@ -89,6 +90,8 @@ DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
 
+OUTPUT_RAYMATH_FUNCTION_CODE :: false;
+
 main :: () {
     populate_improved_function_definitions_table();
     defer Hash_Table.deinit(*g_improved_function_definitions);
@@ -98,6 +101,7 @@ main :: () {
 
     generate_bindings("raylib",  "raylib", RAYLIB_HEADER, RAYLIB_FOOTER);
     generate_bindings("raymath", "raymath", RAYMATH_HEADER, "");
+    generate_bindings("rlgl", "rlgl", "", "");
 }
 
 g_line_counter : int;
@@ -108,7 +112,7 @@ generate_bindings :: (input_filename: string, output_filename: string, file_head
     g_lines_count  = 0;
 
     print("------------------------------------\n");
-    print("Generate bindings for: %\n", input_filename);
+    print("Generating bindings for: %\n", input_filename);
 
     input_file := String.join("include/", input_filename, ".h");
 
@@ -178,6 +182,10 @@ generate_bindings :: (input_filename: string, output_filename: string, file_head
         if (String.starts_with(line, RMAPI_PREFIX)) {
             handle_rmapi(file_lines, *output_builder, *unrecognized_builder);
             continue;
+        }
+
+        if (String.starts_with(line, RLGL_END)) {
+            break;
         }
 
         // Unrecognized lines
@@ -512,6 +520,11 @@ convert_enum_element :: (line: string) -> string {
         enum_element_value = String.join(":: ", enum_element_value); 
     }
     enum_element_remainder := String.slice(line, split_remainder_on_index, line.count - split_remainder_on_index);
+    
+    if (first_space_index == 0) {
+        enum_element_value     = enum_element_remainder;
+        enum_element_remainder = "";
+    }
     return String.join(enum_element_name, enum_element_value, ";", enum_element_remainder);
 }
 
@@ -568,7 +581,7 @@ handle_rplai :: (file_lines: []string, output_builder: *String_Builder, unrecogn
     success, definition, comment := String.split_from_left(line, ";");
     if (!success) {
         print("--Unexpected function definition--\n");
-        print("%\n", definition);
+        print("% %\n", RLAPI_PREFIX, definition);
         print("--Expected: RLAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
         return;
     }
@@ -586,7 +599,11 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
 
     function_definition := convert_function_definition(line);
 
-    print_to_builder(output_builder, "% {\n", function_definition);
+    if (OUTPUT_RAYMATH_FUNCTION_CODE) {
+        print_to_builder(output_builder, "% {\n", function_definition);
+    } else {
+        print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
+    }
 
     // Skip the next line as it will be just {
     if (!increment_line_counter()) {
@@ -639,7 +656,9 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
             open_brackets -= 1;
         }
 
-        print_to_builder(output_builder, "%\n", generate_indentation(line, open_brackets));
+        if (OUTPUT_RAYMATH_FUNCTION_CODE) {
+            print_to_builder(output_builder, "%\n", generate_indentation(line, open_brackets));
+        }
 
         if (String.contains(line, "{") && !String.contains(line, "}")) {
             open_brackets += 1;
