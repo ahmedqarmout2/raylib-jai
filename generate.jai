@@ -521,6 +521,12 @@ convert_enum_element :: (line: string) -> string {
     }
     enum_element_remainder := String.slice(line, split_remainder_on_index, line.count - split_remainder_on_index);
     
+    // If there are no spaces, then the entire enum is the value.
+    // For example: 
+    // rlCullMode :: enum {
+    //     RL_CULL_FACE_FRONT :: 0;
+    //     RL_CULL_FACE_BACK;
+    //}
     if (first_space_index == 0) {
         enum_element_value     = enum_element_remainder;
         enum_element_remainder = "";
