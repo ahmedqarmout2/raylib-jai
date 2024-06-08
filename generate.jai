@@ -25,18 +25,24 @@ TYPE_MAP :: string.[
     "Matrix",         "Matrix4"
 ];
 
-JAI_STRUCTS :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
+JAI_STRUCTS   :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
+REMOVED_CASTS :: string.["(float)"];
 
-DOUBLE_POINTER :: "**";
-SINGLE_POINTER :: "*";
-STRUCT_PREFIX  :: "typedef struct";
-RLAPI_PREFIX   :: "RLAPI";
-RMAPI_PREFIX   :: "RMAPI";
-CONST_PREFIX   :: "const";
-ENUM_PREFIX    :: "typedef enum";
-DEFINE_PREFIX  :: "#define";
-RAYLIB_COLOR   :: "CLITERAL(Color)";
-TYPEDEF_PREFIX :: "typedef";
+DOUBLE_POINTER  :: "**";
+SINGLE_POINTER  :: "*";
+STRUCT_PREFIX   :: "typedef struct";
+RLAPI_PREFIX    :: "RLAPI";
+RMAPI_PREFIX    :: "RMAPI";
+CONST_PREFIX    :: "const";
+ENUM_PREFIX     :: "typedef enum";
+DEFINE_PREFIX   :: "#define";
+RAYLIB_COLOR    :: "CLITERAL(Color)";
+TYPEDEF_PREFIX  :: "typedef";
+IF_BEGIN_PREFIX :: "#if";
+IF_END_PREFIX   :: "#endif";
+SWITCH_PREFIX   :: "switch";
+CASE_PREFIX     :: "case";
+NUMBERS         :: "0123456789";
 
 GENERAL_HEADER ::  #string DONE
 //
@@ -46,7 +52,7 @@ GENERAL_HEADER ::  #string DONE
 //
 DONE
 
-REAYLIB_FOOTER ::  #string DONE
+RAYLIB_FOOTER ::  #string DONE
 #import "Math";
 
 #if OS == .WINDOWS {
@@ -73,6 +79,12 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
 #scope_file
 DONE
 
+RAYMATH_FOOTER ::  #string DONE
+EPSILON :: 0.000001;
+DEG2RAD :: (PI/180.0);
+RAD2DEG :: (180.0/PI);
+DONE
+
 main :: () {
     populate_improved_function_definitions_table();
     defer Hash_Table.deinit(*g_improved_function_definitions);
@@ -80,8 +92,8 @@ main :: () {
     populate_improved_struct_elements_table();
     defer Hash_Table.deinit(*g_improved_struct_elements);
 
-    generate_bindings("raylib",  "raylib", REAYLIB_FOOTER);
-    generate_bindings("raymath", "raymath", "");
+    generate_bindings("raylib",  "raylib", RAYLIB_FOOTER);
+    generate_bindings("raymath", "raymath", RAYMATH_FOOTER);
 }
 
 g_line_counter : int;
@@ -127,19 +139,19 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
             break;
         }
 
-        if (is_empty_line_or_comments(file_lines, *output_builder)) {
+        if (is_empty_line_or_comments_or_ignored(file_lines, *output_builder, *unrecognized_builder)) {
             continue;
         }
 
         line := file_lines[g_line_counter];
 
         if (String.starts_with(line, STRUCT_PREFIX)) {
-            handle_struct(file_lines, *output_builder);
+            handle_struct(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, ENUM_PREFIX)) {
-            handle_enum(file_lines, *output_builder);
+            handle_enum(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -149,17 +161,17 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
         }
 
         if (String.starts_with(line, TYPEDEF_PREFIX)) {
-            handle_typedef(file_lines, *output_builder);
+            handle_typedef(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, RLAPI_PREFIX)) {
-            handle_rplai(file_lines, *output_builder);
+            handle_rplai(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, RMAPI_PREFIX)) {
-            handle_rmapi(file_lines, *output_builder);
+            handle_rmapi(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -227,7 +239,7 @@ increment_line_counter :: () -> bool {
     return g_line_counter < g_lines_count - 1;
 }
 
-is_empty_line_or_comments :: (file_lines: []string, output_builder: *String_Builder) -> bool {
+is_empty_line_or_comments_or_ignored :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) -> bool {
     line := file_lines[g_line_counter];
 
     trimmed_line := String.trim(line);
@@ -245,6 +257,11 @@ is_empty_line_or_comments :: (file_lines: []string, output_builder: *String_Buil
     prefix = "//";
     if (String.starts_with(trimmed_line, prefix)) {
         print_to_builder(output_builder, "%\n", line);
+        return true;
+    }
+
+    if (String.starts_with(trimmed_line, IF_BEGIN_PREFIX)) {
+        handle_ignored(file_lines, unrecognized_builder);
         return true;
     }
 
@@ -277,7 +294,23 @@ handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) 
     }
 }
 
-handle_struct :: (file_lines: []string, output_builder: *String_Builder) {
+handle_ignored :: (file_lines: []string, unrecognized_builder: *String_Builder) {
+    while (true) {
+        line := String.trim(file_lines[g_line_counter]);
+        print_to_builder(unrecognized_builder, "%\n", line);
+
+        if (String.starts_with(line, IF_END_PREFIX)) {
+            return;
+        }
+
+        if (!increment_line_counter()) {
+            print("EOF while looking for the end of an ignored block\n");
+            return;
+        }
+    }
+}
+
+handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     if (String.contains(line, ";")) {
@@ -328,7 +361,7 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder) {
 
         line := file_lines[g_line_counter];
 
-        if (is_empty_line_or_comments(file_lines, output_builder)) {
+        if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
             continue;
         }
 
@@ -365,7 +398,7 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder) {
     }
 }
 
-handle_enum :: (file_lines: []string, output_builder: *String_Builder) {
+handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     enum_name := "";
 
     // Look ahead for enum name
@@ -404,7 +437,7 @@ handle_enum :: (file_lines: []string, output_builder: *String_Builder) {
             return;
         }
 
-        if (is_empty_line_or_comments(file_lines, output_builder)) {
+        if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
             continue;
         }
 
@@ -490,10 +523,10 @@ handle_define :: (file_lines: []string, output_builder: *String_Builder, unrecog
         return;
     }
 
-    print_to_builder(unrecognized_builder, "%\n", line);
+    print_to_builder(unrecognized_builder, "% %\n", DEFINE_PREFIX, line);
 }
 
-handle_typedef :: (file_lines: []string, output_builder: *String_Builder) {
+handle_typedef :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     // Remove typedef prefix
@@ -521,7 +554,7 @@ handle_typedef :: (file_lines: []string, output_builder: *String_Builder) {
     }
 }
 
-handle_rplai :: (file_lines: []string, output_builder: *String_Builder) {
+handle_rplai :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     // Remove RLAPI prefix
@@ -540,7 +573,7 @@ handle_rplai :: (file_lines: []string, output_builder: *String_Builder) {
     print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
 }
 
-handle_rmapi :: (file_lines: []string, output_builder: *String_Builder) {
+handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     // Remove RMAPI prefix
@@ -556,26 +589,86 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder) {
         return;
     }
 
+    open_brackets := 1;
     while (true) {
         if (!increment_line_counter()) {
             print("EOF while looking for the end of a function.\n");
             return;
         }
 
-        if (is_empty_line_or_comments(file_lines, output_builder)) {
+        if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
             continue;
         }
 
         line := String.trim(file_lines[g_line_counter]);
 
-        if (String.starts_with(line, "}")) {
-            print_to_builder(output_builder, "}\n");
-            return;
+        for REMOVED_CASTS {
+            line = String.replace(line, it, "");
         }
 
-        line = String.replace(line, " = { 0 }", "");
+        // Convert v1->x *= ilength to v1.x *= ilength;
+        line = String.replace(line, "->", ".");
 
-        print_to_builder(output_builder, "    %\n", line);
+        if (String.starts_with(line, SWITCH_PREFIX)) {
+            line = String.replace(line, SWITCH_PREFIX, "if");
+            line = String.replace(line, "(", "");
+            line = String.replace(line, ")", " ==");
+        }
+
+        // Convert case 0: to case 0; that appear in switch cases
+        if (String.starts_with(line, CASE_PREFIX)) {
+            line = String.replace(line, ":", ";");
+        }
+
+        // Remove breaks that appear in switch cases
+        line = String.replace(line, "break;", "");
+
+        remove_f_from_floats(line);
+
+        line_parts := String.split(line, " ");
+        if ((line_parts.count > 1 && line_parts[1] == "=") || (line_parts.count > 2 && line_parts[2] == "=")) {
+            line = convert_assignment(line, line_parts[1] != "=");
+        }
+
+        if (String.contains(line, "}") && !String.contains(line, "{")) {
+            open_brackets -= 1;
+        }
+
+        print_to_builder(output_builder, "%\n", generate_indentation(line, open_brackets));
+
+        if (String.contains(line, "{") && !String.contains(line, "}")) {
+            open_brackets += 1;
+        }
+
+        if (String.starts_with(line, "}")) {
+            if (open_brackets <= 0) {
+                if (open_brackets < 0) {
+                    print("Unexpected end of function\n");
+                }
+                return;
+            }
+        }
+    }
+}
+
+remove_f_from_floats :: (line: string) {
+    found_number := false;
+    found_dot    := false;
+    for i:0..line.count-1 {
+        c := line[i];
+        if (String.contains(NUMBERS, c)) {
+            found_number = true;
+            continue;
+        }
+        if (c == #char "." && found_number) {
+            found_dot = true;
+            continue;
+        }
+        if (c == #char "f" && found_number && found_dot) {
+            line[i] = #char " ";
+        }
+        found_number = false;
+        found_dot    = false;
     }
 }
 
@@ -701,4 +794,61 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
     }
 
     return true, c_type, jai_type, remainder;
+}
+
+convert_assignment :: (line: string, with_type: bool) -> string {
+    split_success, declaration, remainder := String.split_from_left(line, "=");
+    if (!split_success) {
+        print("Expected an equal sign\n");
+        print("%\n", line);
+        return "";
+    }
+
+    jai_type := "";
+    new_line := "";
+    if (with_type) {
+        map_success, c_type, _jai_type, variable := map_type(declaration);
+        if (!map_success) {
+            print("Failed to map c values to jai\n");
+            print("%\n", declaration);
+            return "";
+        }
+
+        jai_type = _jai_type;
+        variable = String.trim(variable);
+        new_line = String.join(variable, ": ", jai_type);
+    } else {
+        new_line = declaration;
+    }
+
+    if (String.contains(remainder, " { 0 }")) {
+        return String.join(new_line, ";");
+    }
+
+    remainder = String.trim(remainder);
+
+    if (String.starts_with(remainder, "{")) {
+        return String.join(new_line, " = ", jai_type, ".", remainder);
+    }
+
+    if (String.contains(remainder, "?")) {
+        question_success, left, right := String.split_from_left(remainder, "?");
+        if (!question_success) {
+            print("Failed to split on question mark\n");
+            print("%\n", remainder);
+            return "";
+        }
+        right = String.replace(right, ":", "else");
+        remainder = String.join("ifx ", left, " then ", right);
+    }
+
+    return String.join(new_line, " = ", remainder);
+}
+
+generate_indentation :: (line: string, factor: int) -> string {
+    indentation := "";
+    for i: 0..factor*4-1 {
+        indentation = String.join(indentation, " ");
+    }
+    return String.join(indentation, line);
 }
