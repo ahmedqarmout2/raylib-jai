@@ -4,6 +4,20 @@
 // jai generate.jai && ./generate.exe
 //
 
+#import "Math";
+
+#if OS == .WINDOWS {
+    user32  :: #library,system,link_always "user32";
+    gdi32   :: #library,system,link_always "gdi32";
+    shell32 :: #library,system,link_always "shell32";
+    winmm   :: #library,system,link_always "winmm";
+
+    raylib_native :: #library,no_dll "lib/raylib";
+}
+
+TraceLogCallback     :: #type (logType: s32, text: *u8, args: ..*u8);
+
+
 /*
 ***********************************************************************************************
 *
@@ -1564,18 +1578,6 @@ AttachAudioMixedProcessor :: (processor: AudioCallback) #foreign raylib_native;
 DetachAudioMixedProcessor :: (processor: AudioCallback) #foreign raylib_native;
 
 
-#import "Math";
-
-#if OS == .WINDOWS {
-    user32  :: #library,system,link_always "user32";
-    gdi32   :: #library,system,link_always "gdi32";
-    shell32 :: #library,system,link_always "shell32";
-    winmm   :: #library,system,link_always "winmm";
-
-    raylib_native :: #library,no_dll "lib/raylib";
-}
-
-TraceLogCallback     :: #type (logType: s32, text: *u8, args: ..*u8);
 
 #scope_file
 Basic :: #import "Basic";

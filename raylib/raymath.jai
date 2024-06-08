@@ -4,6 +4,10 @@
 // jai generate.jai && ./generate.exe
 //
 
+EPSILON :: 0.000001;
+DEG2RAD :: (PI/180.0);
+RAD2DEG :: (180.0/PI);
+
 /*
 ***********************************************************************************************
 *
@@ -832,10 +836,10 @@ Vector3Unproject :: (source: Vector3, projection: Matrix4, view: Matrix4) -> Vec
 
     // Calculate inverted matrix -> MatrixInvert(matViewProj);
     // Cache the matrix values (speed optimization)
-    a00: float = matViewProj.m0, a01 = matViewProj.m1, a02 = matViewProj.m2, a03 = matViewProj.m3;
-    a10: float = matViewProj.m4, a11 = matViewProj.m5, a12 = matViewProj.m6, a13 = matViewProj.m7;
-    a20: float = matViewProj.m8, a21 = matViewProj.m9, a22 = matViewProj.m10, a23 = matViewProj.m11;
-    a30: float = matViewProj.m12, a31 = matViewProj.m13, a32 = matViewProj.m14, a33 = matViewProj.m15;
+    a00: float = matViewProj.m0; a01:float = matViewProj.m1; a02:float = matViewProj.m2; a03:float = matViewProj.m3;
+    a10: float = matViewProj.m4; a11:float = matViewProj.m5; a12:float = matViewProj.m6; a13:float = matViewProj.m7;
+    a20: float = matViewProj.m8; a21:float = matViewProj.m9; a22:float = matViewProj.m10; a23:float = matViewProj.m11;
+    a30: float = matViewProj.m12; a31:float = matViewProj.m13; a32:float = matViewProj.m14; a33:float = matViewProj.m15;
 
     b00: float = a00*a11 - a01*a10;
     b01: float = a00*a12 - a02*a10;
@@ -990,10 +994,10 @@ MatrixDeterminant :: (mat: Matrix4) -> float {
     result: float = 0.0 ;
 
     // Cache the matrix values (speed optimization)
-    a00: float = mat.m0, a01 = mat.m1, a02 = mat.m2, a03 = mat.m3;
-    a10: float = mat.m4, a11 = mat.m5, a12 = mat.m6, a13 = mat.m7;
-    a20: float = mat.m8, a21 = mat.m9, a22 = mat.m10, a23 = mat.m11;
-    a30: float = mat.m12, a31 = mat.m13, a32 = mat.m14, a33 = mat.m15;
+    a00: float = mat.m0; a01:float = mat.m1; a02:float = mat.m2; a03:float = mat.m3;
+    a10: float = mat.m4; a11:float = mat.m5; a12:float = mat.m6; a13:float = mat.m7;
+    a20: float = mat.m8; a21:float = mat.m9; a22:float = mat.m10; a23:float = mat.m11;
+    a30: float = mat.m12; a31:float = mat.m13; a32:float = mat.m14; a33:float = mat.m15;
 
     result  = a30*a21*a12*a03 - a20*a31*a12*a03 - a30*a11*a22*a03 + a10*a31*a22*a03 +
     a20*a11*a32*a03 - a10*a21*a32*a03 - a30*a21*a02*a13 + a20*a31*a02*a13 +
@@ -1041,10 +1045,10 @@ MatrixInvert :: (mat: Matrix4) -> Matrix4 {
     result: Matrix4;
 
     // Cache the matrix values (speed optimization)
-    a00: float = mat.m0, a01 = mat.m1, a02 = mat.m2, a03 = mat.m3;
-    a10: float = mat.m4, a11 = mat.m5, a12 = mat.m6, a13 = mat.m7;
-    a20: float = mat.m8, a21 = mat.m9, a22 = mat.m10, a23 = mat.m11;
-    a30: float = mat.m12, a31 = mat.m13, a32 = mat.m14, a33 = mat.m15;
+    a00: float = mat.m0; a01:float = mat.m1; a02:float = mat.m2; a03:float = mat.m3;
+    a10: float = mat.m4; a11:float = mat.m5; a12:float = mat.m6; a13:float = mat.m7;
+    a20: float = mat.m8; a21:float = mat.m9; a22:float = mat.m10; a23:float = mat.m11;
+    a30: float = mat.m12; a31:float = mat.m13; a32:float = mat.m14; a33:float = mat.m15;
 
     b00: float = a00*a11 - a01*a10;
     b01: float = a00*a12 - a02*a10;
@@ -1180,7 +1184,7 @@ MatrixTranslate :: (x: float, y: float, z: float) -> Matrix4 {
 MatrixRotate :: (axis: Vector3, angle: float) -> Matrix4 {
     result: Matrix4;
 
-    x: float = axis.x, y = axis.y, z = axis.z;
+    x: float = axis.x; y:float = axis.y; z:float = axis.z;
 
     lengthSquared: float = x*x + y*y + z*z;
 
@@ -1600,8 +1604,8 @@ QuaternionInvert :: (q: Quaternion) -> Quaternion {
 QuaternionMultiply :: (q1: Quaternion, q2: Quaternion) -> Quaternion {
     result: Quaternion;
 
-    qax: float = q1.x, qay = q1.y, qaz = q1.z, qaw = q1.w;
-    qbx: float = q2.x, qby = q2.y, qbz = q2.z, qbw = q2.w;
+    qax: float = q1.x; qay:float = q1.y; qaz:float = q1.z; qaw:float = q1.w;
+    qbx: float = q2.x; qby:float = q2.y; qbz:float = q2.z; qbw:float = q2.w;
 
     result.x  = qax*qbw + qaw*qbx + qay*qbz - qaz*qby;
     result.y  = qay*qbw + qaw*qby + qaz*qbx - qax*qbz;
@@ -1982,7 +1986,4 @@ QuaternionEquals :: (p: Quaternion, q: Quaternion) -> s32 {
     return result;
 }
 
-EPSILON :: 0.000001;
-DEG2RAD :: (PI/180.0);
-RAD2DEG :: (180.0/PI);
 

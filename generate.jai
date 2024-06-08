@@ -52,7 +52,7 @@ GENERAL_HEADER ::  #string DONE
 //
 DONE
 
-RAYLIB_FOOTER ::  #string DONE
+RAYLIB_HEADER ::  #string DONE
 #import "Math";
 
 #if OS == .WINDOWS {
@@ -65,6 +65,10 @@ RAYLIB_FOOTER ::  #string DONE
 }
 
 TraceLogCallback     :: #type (logType: s32, text: *u8, args: ..*u8);
+
+DONE
+
+RAYLIB_FOOTER ::  #string DONE
 
 #scope_file
 Basic :: #import "Basic";
@@ -79,7 +83,7 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
 #scope_file
 DONE
 
-RAYMATH_FOOTER ::  #string DONE
+RAYMATH_HEADER ::  #string DONE
 EPSILON :: 0.000001;
 DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
@@ -92,14 +96,14 @@ main :: () {
     populate_improved_struct_elements_table();
     defer Hash_Table.deinit(*g_improved_struct_elements);
 
-    generate_bindings("raylib",  "raylib", RAYLIB_FOOTER);
-    generate_bindings("raymath", "raymath", RAYMATH_FOOTER);
+    generate_bindings("raylib",  "raylib", RAYLIB_HEADER, RAYLIB_FOOTER);
+    generate_bindings("raymath", "raymath", RAYMATH_HEADER, "");
 }
 
 g_line_counter : int;
 g_lines_count  : int;
 
-generate_bindings :: (input_filename: string, output_filename: string, file_footer: string) {
+generate_bindings :: (input_filename: string, output_filename: string, file_header: string, file_footer: string) {
     g_line_counter = -1;
     g_lines_count  = 0;
 
@@ -127,6 +131,7 @@ generate_bindings :: (input_filename: string, output_filename: string, file_foot
     unrecognized_builder : String_Builder;
 
     print_to_builder(*output_builder, "%\n", GENERAL_HEADER);
+    print_to_builder(*output_builder, "%\n", file_header);
 
     file_data: string;
     file_data.data  = buffer;
@@ -819,6 +824,22 @@ convert_assignment :: (line: string, with_type: bool) -> string {
         new_line = String.join(variable, ": ", jai_type);
     } else {
         new_line = declaration;
+    }
+
+    // Handle a multi assign. For example:
+    //   float a00 = matViewProj.m0, a01 = matViewProj.m1, a02 = matViewProj.m2, a03 = matViewProj.m3;
+    multi_assign_parts := String.split(remainder, "=");
+    if (multi_assign_parts.count > 2 && with_type) {
+        remainder = " ";
+        for i:0..multi_assign_parts.count-1 {
+            t := String.trim(multi_assign_parts[i]);
+            if (i < multi_assign_parts.count - 1) {
+                t = String.replace(t, ",", ";");
+                remainder = String.join(remainder, t, ":", jai_type, " = ");
+            } else {
+                remainder = String.join(remainder, t);
+            }
+        }
     }
 
     if (String.contains(remainder, " { 0 }")) {
