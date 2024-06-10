@@ -91,6 +91,7 @@ RAD2DEG :: (180.0/PI);
 DONE
 
 OUTPUT_RAYMATH_FUNCTION_CODE :: false;
+OUTPUT_UNRECOGNIZED_CODE     :: false;
 
 main :: () {
     populate_improved_function_definitions_table();
@@ -200,8 +201,10 @@ generate_bindings :: (input_filename: string, output_filename: string, file_head
     output_file := String.join("raylib/", output_filename, ".jai");
     File.write_entire_file(output_file, *output_builder);
 
-    remainder_file := String.join("raylib/", output_filename, "_unrecognized.h");
-    File.write_entire_file(remainder_file, *unrecognized_builder);
+    if (OUTPUT_UNRECOGNIZED_CODE) {
+        remainder_file := String.join("raylib/", output_filename, "_unrecognized.h");
+        File.write_entire_file(remainder_file, *unrecognized_builder);
+    }
     print("------------------------------------\n");
 }
 
