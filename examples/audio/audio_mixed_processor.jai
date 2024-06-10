@@ -1,8 +1,6 @@
 #import "raylib";
 #import "Basic";
 #import "Math";
-#import "String";
-#import "System";
 
 exponent: float = 1.0;       // Audio exponentiation value
 averageVolume: [400]float;   // Average volume history
@@ -20,9 +18,7 @@ main :: () {
 
     AttachAudioMixedProcessor(ProcessAudio);
 
-    path := path_strip_filename(get_path_of_running_executable());
-    set_working_directory(path);
-
+    set_working_directory(#filepath);
     music: Music = LoadMusicStream("resources/country.mp3");
     sound: Sound = LoadSound("resources/coin.wav");
 
