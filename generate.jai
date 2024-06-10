@@ -79,7 +79,7 @@ LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
 SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
 LoadFileTextCallback :: #type (fileName: *u8) -> *u8 #c_call;
 SaveFileTextCallback :: #type (fileName: *u8, text: *u8) -> bool #c_call;
-AudioCallback        :: #type (bufferData: *void, frames: u32) -> bool #c_call;
+AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 
 #scope_file
 DONE

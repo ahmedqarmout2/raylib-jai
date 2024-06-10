@@ -20,13 +20,11 @@ main :: () {
 
     SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
 
-    while (!WindowShouldClose()) // Detect window close button or ESC key
-    {
+    while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
         // Translate based on mouse right click
-        if (IsMouseButtonDown(.MOUSE_BUTTON_RIGHT))
-        {
+        if (IsMouseButtonDown(.MOUSE_BUTTON_RIGHT)) {
             delta: Vector2 = GetMouseDelta();
             delta = Vector2Scale(delta, -1.0/camera.zoom);
 
@@ -35,8 +33,7 @@ main :: () {
 
         // Zoom based on mouse wheel
         wheel: float = GetMouseWheelMove();
-        if (wheel != 0)
-        {
+        if (wheel != 0) {
             // Get the world point that is under the mouse
             mouseWorldPos: Vector2 = GetScreenToWorld2D(GetMousePosition(), camera);
             

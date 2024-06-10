@@ -16,8 +16,7 @@ main :: () {
 
     SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
 
-    while (!WindowShouldClose()) // Detect window close button or ESC key
-    {
+    while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
         // Update your variables here

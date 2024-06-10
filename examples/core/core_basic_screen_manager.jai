@@ -26,8 +26,7 @@ main :: () {
     currentScreen: GameScreen = .LOGO;
     framesCounter: int = 0;
 
-    while (!WindowShouldClose()) // Detect window close button or ESC key
-    {
+    while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
         if currentScreen == {
