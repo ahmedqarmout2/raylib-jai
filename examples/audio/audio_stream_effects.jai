@@ -27,7 +27,7 @@ main :: () {
 
     // Allocate buffer for the delay effect
     delayBufferSize = 48000*2;      // 1 second delay (device sampleRate*channels)
-    delayBuffer = cast(*float)alloc(delayBufferSize);
+    delayBuffer = cast(*float)alloc(delayBufferSize * size_of(float));
 
     PlayMusicStream(music);
 
@@ -141,22 +141,22 @@ AudioProcessEffectDelay :: (buffer: *void, frames: u32) #c_call {
     while (i < frames*2) {
         defer i += 2;
 
-        delayReadIndex += 1;
         leftDelay  := delayBuffer[delayReadIndex];    // ERROR: Reading buffer -> WHY??? Maybe thread related???
-        
         delayReadIndex += 1;
+
         rightDelay := delayBuffer[delayReadIndex];
+        delayReadIndex += 1;
 
         if (delayReadIndex == delayBufferSize) delayReadIndex = 0;
 
         _buffer[i]     = 0.5*_buffer[i]     + 0.5*leftDelay;
         _buffer[i + 1] = 0.5*_buffer[i + 1] + 0.5*rightDelay;
 
-        delayWriteIndex += 1;
         delayBuffer[delayWriteIndex] = _buffer[i];
-
         delayWriteIndex += 1;
+
         delayBuffer[delayWriteIndex] = _buffer[i + 1];
+        delayWriteIndex += 1;
 
         if (delayWriteIndex == delayBufferSize) delayWriteIndex = 0;
     }
