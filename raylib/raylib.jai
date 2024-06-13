@@ -6,6 +6,12 @@
 
 #import "Math";
 
+RAYLIB_VERSION_MAJOR :: 5;
+RAYLIB_VERSION_MINOR :: 0;
+RAYLIB_VERSION_PATCH :: 0;
+
+RAYLIB_VERSION :: "5.0";
+
 #if OS == .WINDOWS {
     user32  :: #library,system,link_always "user32";
     gdi32   :: #library,system,link_always "gdi32";

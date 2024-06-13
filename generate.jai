@@ -56,6 +56,12 @@ DONE
 RAYLIB_HEADER ::  #string DONE
 #import "Math";
 
+RAYLIB_VERSION_MAJOR :: 5;
+RAYLIB_VERSION_MINOR :: 0;
+RAYLIB_VERSION_PATCH :: 0;
+
+RAYLIB_VERSION :: "5.0";
+
 #if OS == .WINDOWS {
     user32  :: #library,system,link_always "user32";
     gdi32   :: #library,system,link_always "gdi32";
@@ -85,6 +91,7 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 DONE
 
 RAYMATH_HEADER ::  #string DONE
+RL_PI   :: 3.14159265358979323846;
 EPSILON :: 0.000001;
 DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
