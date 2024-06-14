@@ -12,11 +12,11 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    defer CloseWindow();         // Close window and OpenGL context
+    defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    InitAudioDevice();              // Initialize audio device
-    defer CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
+    InitAudioDevice();             // Initialize audio device
+    defer CloseAudioDevice();      // Close audio device (music streaming is automatically stopped)
 
     set_working_directory(#filepath);
     music := LoadMusicStream("resources/country.mp3");

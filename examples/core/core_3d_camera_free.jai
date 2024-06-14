@@ -12,7 +12,7 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    defer CloseWindow();         // Close window and OpenGL context
+    defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     // Define the camera to look into our 3d world

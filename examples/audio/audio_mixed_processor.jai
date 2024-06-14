@@ -24,7 +24,7 @@ main :: () {
 
     PlayMusicStream(music);
 
-    SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update

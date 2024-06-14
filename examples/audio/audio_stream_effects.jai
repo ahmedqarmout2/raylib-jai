@@ -17,27 +17,27 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    defer CloseWindow();         // Close window and OpenGL context
+    defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    InitAudioDevice();              // Initialize audio device
+    InitAudioDevice();             // Initialize audio device
 
     set_working_directory(#filepath);
     music := LoadMusicStream("resources/country.mp3");
 
     // Allocate buffer for the delay effect
-    delayBufferSize = 48000*2;      // 1 second delay (device sampleRate*channels)
+    delayBufferSize = 48000*2;     // 1 second delay (device sampleRate*channels)
     delayBuffer = cast(*float)alloc(delayBufferSize * size_of(float));
 
     PlayMusicStream(music);
 
-    timePlayed := 0.0;        // Time played normalized [0.0f..1.0f]
+    timePlayed := 0.0;          // Time played normalized [0.0f..1.0f]
     pause := false;             // Music playing paused
     
     enableEffectLPF   := false; // Enable effect low-pass-filter
     enableEffectDelay := false; // Enable effect delay (1 second)
 
-    SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update

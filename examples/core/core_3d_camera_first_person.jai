@@ -15,7 +15,7 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    defer CloseWindow();         // Close window and OpenGL context
+    defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     // Define the camera to look into our 3d world (position, target, up vector)
@@ -39,9 +39,9 @@ main :: () {
         colors[i]    = Color.{ xx GetRandomValue(20, 255), xx GetRandomValue(10, 55), 30, 255 };
     }
 
-    DisableCursor();                    // Limit cursor to relative movement inside the window
+    DisableCursor();               // Limit cursor to relative movement inside the window
 
-    SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update

@@ -14,7 +14,7 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    defer CloseWindow();         // Close window and OpenGL context
+    defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     player1 := Rectangle.{ 200, 200, PLAYER_SIZE, PLAYER_SIZE };
@@ -41,7 +41,7 @@ main :: () {
     // Build a flipped rectangle the size of the split view to use for drawing later
     splitScreenRect := Rectangle.{ 0.0, 0.0, xx screenCamera1.texture.width, xx -screenCamera1.texture.height };
 
-    SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update

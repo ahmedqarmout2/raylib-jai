@@ -29,7 +29,7 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    defer CloseWindow();         // Close window and OpenGL context
+    defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     player: Player;
@@ -70,7 +70,7 @@ main :: () {
         "Player push camera on getting too close to screen edge"
     ];
 
-    SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update

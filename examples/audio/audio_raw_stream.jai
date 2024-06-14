@@ -64,7 +64,7 @@ main :: () {
 
     position := Vector2.{ 0.0, 0.0 };
 
-    SetTargetFPS(30);            // Set our game to run at 30 frames-per-second
+    SetTargetFPS(30);              // Set our game to run at 30 frames-per-second
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -169,7 +169,7 @@ main :: () {
     free(data);                 // Unload sine wave data
     free(writeBuf);             // Unload write buffer
 
-    UnloadAudioStream(stream);   // Close raw audio stream and delete buffers from RAM
+    UnloadAudioStream(stream);  // Close raw audio stream and delete buffers from RAM
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 
     CloseWindow();              // Close window and OpenGL context
