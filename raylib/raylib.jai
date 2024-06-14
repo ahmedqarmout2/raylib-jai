@@ -997,7 +997,7 @@ OpenURL :: (url: *u8) #foreign raylib_native;
 
 // NOTE: Following functions implemented in module [utils]
 //------------------------------------------------------------------
-TraceLog :: (logLevel: s32, text: *u8, args: ..*u8) #foreign raylib_native;
+TraceLog :: (logLevel: TraceLogLevel, text: *u8, args: ..*u8) #foreign raylib_native;
 SetTraceLogLevel :: (logType: TraceLogLevel) #foreign raylib_native;
 MemAlloc :: (size: u32) -> *void #foreign raylib_native;
 MemRealloc :: (ptr: *void, size: u32) -> *void #foreign raylib_native;

@@ -232,6 +232,7 @@ populate_improved_function_definitions_table :: () {
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogLevel" , "(logType: TraceLogLevel)");
     Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogExit"  , "(logType: TraceLogLevel)");
+    Hash_Table.table_add(*g_improved_function_definitions, "TraceLog"         , "(logLevel: TraceLogLevel, text: *u8, args: ..*u8)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValue"  , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)");
     Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValueV" , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
