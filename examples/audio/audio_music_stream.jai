@@ -35,15 +35,13 @@ main :: () {
         UpdateMusicStream(music);   // Update music buffer with new stream data
         
         // Restart music playing (stop and play)
-        if (IsKeyPressed(.KEY_SPACE))
-        {
+        if (IsKeyPressed(.KEY_SPACE)) {
             StopMusicStream(music);
             PlayMusicStream(music);
         }
 
         // Pause/Resume music playing
-        if (IsKeyPressed(.KEY_P))
-        {
+        if (IsKeyPressed(.KEY_P)) {
             pause = !pause;
 
             if (pause) PauseMusicStream(music);

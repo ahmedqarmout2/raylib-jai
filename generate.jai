@@ -44,6 +44,7 @@ SWITCH_PREFIX   :: "switch";
 CASE_PREFIX     :: "case";
 NUMBERS         :: "0123456789";
 RLGL_END        :: "#endif // RLGL_H";
+RCAMERA_END     :: "#endif // RCAMERA_H";
 
 GENERAL_HEADER ::  #string DONE
 //
@@ -61,6 +62,15 @@ RAYLIB_VERSION_MINOR :: 0;
 RAYLIB_VERSION_PATCH :: 0;
 
 RAYLIB_VERSION :: "5.0";
+DONE
+
+RAYLIB_FOOTER ::  #string DONE
+TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
+LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
+SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
+LoadFileTextCallback :: #type (fileName: *u8) -> *u8 #c_call;
+SaveFileTextCallback :: #type (fileName: *u8, text: *u8) -> bool #c_call;
+AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 
 #if OS == .WINDOWS {
     user32  :: #library,system,link_always "user32";
@@ -70,24 +80,6 @@ RAYLIB_VERSION :: "5.0";
 
     raylib_native :: #library,no_dll "lib/raylib";
 }
-
-TraceLogCallback     :: #type (logType: s32, text: *u8, args: ..*u8);
-
-DONE
-
-RAYLIB_FOOTER ::  #string DONE
-
-#scope_file
-Basic :: #import "Basic";
-
-TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
-LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
-SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
-LoadFileTextCallback :: #type (fileName: *u8) -> *u8 #c_call;
-SaveFileTextCallback :: #type (fileName: *u8, text: *u8) -> bool #c_call;
-AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
-
-#scope_file
 DONE
 
 RAYMATH_HEADER ::  #string DONE
@@ -107,15 +99,16 @@ main :: () {
     populate_improved_struct_elements_table();
     defer Hash_Table.deinit(*g_improved_struct_elements);
 
-    generate_bindings("raylib",  "raylib", RAYLIB_HEADER, RAYLIB_FOOTER);
-    generate_bindings("raymath", "raymath", RAYMATH_HEADER, "");
-    generate_bindings("rlgl", "rlgl", "", "");
+    generate_bindings("raylib", RAYLIB_HEADER, RAYLIB_FOOTER);
+    generate_bindings("raymath", RAYMATH_HEADER, "");
+    generate_bindings("rlgl", "", "");
+    generate_bindings("rcamera", "", "");
 }
 
 g_line_counter : int;
 g_lines_count  : int;
 
-generate_bindings :: (input_filename: string, output_filename: string, file_header: string, file_footer: string) {
+generate_bindings :: (input_filename: string, file_header: string, file_footer: string) {
     g_line_counter = -1;
     g_lines_count  = 0;
 
@@ -192,7 +185,7 @@ generate_bindings :: (input_filename: string, output_filename: string, file_head
             continue;
         }
 
-        if (String.starts_with(line, RLGL_END)) {
+        if (String.starts_with(line, RLGL_END) || String.starts_with(line, RCAMERA_END)) {
             break;
         }
 
@@ -205,11 +198,11 @@ generate_bindings :: (input_filename: string, output_filename: string, file_head
     Basic.free(buffer);
     File.file_close(*file);
 
-    output_file := String.join("raylib/", output_filename, ".jai");
+    output_file := String.join("raylib/", input_filename, ".jai");
     File.write_entire_file(output_file, *output_builder);
 
     if (OUTPUT_UNRECOGNIZED_CODE) {
-        remainder_file := String.join("raylib/", output_filename, "_unrecognized.h");
+        remainder_file := String.join("raylib/", input_filename, "_unrecognized.h");
         File.write_entire_file(remainder_file, *unrecognized_builder);
     }
     print("------------------------------------\n");
@@ -233,7 +226,7 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "SetWindowState"   , "(flags: ConfigFlags)");
     Hash_Table.table_add(*g_improved_function_definitions, "ClearWindowState" , "(flags: ConfigFlags)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "UpdateCamera", "(camera: Camera, mode: CameraMode)");
+    Hash_Table.table_add(*g_improved_function_definitions, "UpdateCamera", "(camera: *Camera, mode: CameraMode)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetConfigFlags", "(flags: ConfigFlags)");
 
@@ -812,12 +805,22 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
     pointer_prefix := "";
     if (String.starts_with(remainder, DOUBLE_POINTER)) {
         pointer_prefix = DOUBLE_POINTER;              
+        remainder = String.slice(remainder, pointer_prefix.count, remainder.count - pointer_prefix.count);
     } else if (String.starts_with(remainder, SINGLE_POINTER)) {
         pointer_prefix = SINGLE_POINTER;
+        remainder = String.slice(remainder, pointer_prefix.count, remainder.count - pointer_prefix.count);
     }
 
-    jai_type  = String.join(pointer_prefix, jai_type);
-    remainder = String.slice(remainder, pointer_prefix.count, remainder.count - pointer_prefix.count);
+    // Handle single and double pointer in the variable name. For example: Camera* camera
+    if (String.ends_with(jai_type, DOUBLE_POINTER)) {
+        pointer_prefix = DOUBLE_POINTER; 
+        jai_type = String.slice(jai_type, 0, jai_type.count - DOUBLE_POINTER.count);
+    } else if (String.ends_with(jai_type, SINGLE_POINTER)) {
+        pointer_prefix = SINGLE_POINTER;
+        jai_type = String.slice(jai_type, 0, jai_type.count - SINGLE_POINTER.count);
+    }
+
+    jai_type = String.join(pointer_prefix, jai_type);
 
     // Handle array types. For example: float v[3];
     right_bracket_idx := String.find_index_from_right(remainder, "]");
