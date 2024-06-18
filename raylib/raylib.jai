@@ -316,7 +316,7 @@ Transform :: struct {
 
 // Bone, skeletal animation bone
 BoneInfo :: struct {
-    name: [32]s8;           // Bone name
+    name: [32]u8;           // Bone name
     parent: s32;              // Bone parent
 }
 
@@ -342,7 +342,7 @@ ModelAnimation :: struct {
     frameCount: s32;          // Number of animation frames
     bones: *BoneInfo;         // Bones information (skeleton)
     framePoses: **Transform;  // Poses array by frame
-    name: [32]s8;           // Animation name
+    name: [32]u8;           // Animation name
 }
 
 // Ray, ray for raycasting
@@ -435,7 +435,7 @@ VrStereoConfig :: struct {
 FilePathList :: struct {
     capacity: u32;           // Filepaths max entries
     count: u32;              // Filepaths entries count
-    paths: **s8;                    // Filepaths entries
+    paths: **u8;                    // Filepaths entries
 }
 
 // Automation event
@@ -1016,9 +1016,9 @@ LoadFileData :: (fileName: *u8, dataSize: *s32) -> *u8 #foreign raylib_native;
 UnloadFileData :: (data: *u8) #foreign raylib_native;
 SaveFileData :: (fileName: *u8, data: *void, dataSize: s32) -> bool #foreign raylib_native;
 ExportDataAsCode :: (data: *u8, dataSize: s32, fileName: *u8) -> bool #foreign raylib_native;
-LoadFileText :: (fileName: *u8) -> *s8 #foreign raylib_native;
-UnloadFileText :: (text: *s8) #foreign raylib_native;
-SaveFileText :: (fileName: *u8, text: *s8) -> bool #foreign raylib_native;
+LoadFileText :: (fileName: *u8) -> *u8 #foreign raylib_native;
+UnloadFileText :: (text: *u8) #foreign raylib_native;
+SaveFileText :: (fileName: *u8, text: *u8) -> bool #foreign raylib_native;
 //------------------------------------------------------------------
 
 // File system functions
@@ -1046,7 +1046,7 @@ GetFileModTime :: (fileName: *u8) -> s32 #foreign raylib_native;
 // Compression/Encoding functionality
 CompressData :: (data: *u8, dataSize: s32, compDataSize: *s32) -> *u8 #foreign raylib_native;
 DecompressData :: (compData: *u8, compDataSize: s32, dataSize: *s32) -> *u8 #foreign raylib_native;
-EncodeDataBase64 :: (data: *u8, dataSize: s32, outputSize: *s32) -> *s8 #foreign raylib_native;
+EncodeDataBase64 :: (data: *u8, dataSize: s32, outputSize: *s32) -> *u8 #foreign raylib_native;
 DecodeDataBase64 :: (data: *u8, outputSize: *s32) -> *u8 #foreign raylib_native;
 
 // Automation events functionality
@@ -1365,8 +1365,8 @@ GetGlyphInfo :: (font: Font, codepoint: s32) -> GlyphInfo #foreign raylib_native
 GetGlyphAtlasRec :: (font: Font, codepoint: s32) -> Rectangle #foreign raylib_native;
 
 // Text codepoints management functions (unicode characters)
-LoadUTF8 :: (codepoints: *s32, length: s32) -> *s8 #foreign raylib_native;
-UnloadUTF8 :: (text: *s8) #foreign raylib_native;
+LoadUTF8 :: (codepoints: *s32, length: s32) -> *u8 #foreign raylib_native;
+UnloadUTF8 :: (text: *u8) #foreign raylib_native;
 LoadCodepoints :: (text: *u8, count: *s32) -> *s32 #foreign raylib_native;
 UnloadCodepoints :: (codepoints: *s32) #foreign raylib_native;
 GetCodepointCount :: (text: *u8) -> s32 #foreign raylib_native;
@@ -1377,16 +1377,16 @@ CodepointToUTF8 :: (codepoint: s32, utf8Size: *s32) -> *u8 #foreign raylib_nativ
 
 // Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!
-TextCopy :: (dst: *s8, src: *u8) -> s32 #foreign raylib_native;
+TextCopy :: (dst: *u8, src: *u8) -> s32 #foreign raylib_native;
 TextIsEqual :: (text1: *u8, text2: *u8) -> bool #foreign raylib_native;
 TextLength :: (text: *u8) -> u32 #foreign raylib_native;
 TextFormat :: (text: *u8, args: ..*u8) -> *u8 #foreign raylib_native;
 TextSubtext :: (text: *u8, position: s32, length: s32) -> *u8 #foreign raylib_native;
-TextReplace :: (text: *s8, replace: *u8, by: *u8) -> *s8 #foreign raylib_native;
-TextInsert :: (text: *u8, insert: *u8, position: s32) -> *s8 #foreign raylib_native;
+TextReplace :: (text: *u8, replace: *u8, by: *u8) -> *u8 #foreign raylib_native;
+TextInsert :: (text: *u8, insert: *u8, position: s32) -> *u8 #foreign raylib_native;
 TextJoin :: (textList: **u8, count: s32, delimiter: *u8) -> *u8 #foreign raylib_native;
-TextSplit :: (text: *u8, delimiter: s8, count: *s32) -> **u8 #foreign raylib_native;
-TextAppend :: (text: *s8, append: *u8, position: *s32) #foreign raylib_native;
+TextSplit :: (text: *u8, delimiter: u8, count: *s32) -> **u8 #foreign raylib_native;
+TextAppend :: (text: *u8, append: *u8, position: *s32) #foreign raylib_native;
 TextFindIndex :: (text: *u8, find: *u8) -> s32 #foreign raylib_native;
 TextToUpper :: (text: *u8) -> *u8 #foreign raylib_native;
 TextToLower :: (text: *u8) -> *u8 #foreign raylib_native;

@@ -14,11 +14,10 @@ g_improved_struct_elements      : Table(string, string);
 // Even values are the C types
 // Odd values are the jai types
 TYPE_MAP :: string.[
-    "const char",     "u8",
     "unsigned short", "u16",
     "unsigned int",   "u32",
     "unsigned char",  "u8",
-    "char",           "s8",
+    "char",           "u8",
     "long",           "s32",
     "double",         "float64",
     "int",            "s32",
