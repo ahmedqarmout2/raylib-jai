@@ -71,6 +71,8 @@ main :: () {
             BeginDrawing();
             defer EndDrawing();
 
+            ClearBackground(RAYWHITE);
+
             if currentScreen == {
                 case .LOGO;
                 {
