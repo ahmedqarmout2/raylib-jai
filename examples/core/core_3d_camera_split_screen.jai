@@ -23,7 +23,7 @@ main :: () {
     cameraPlayer1.position.z = -3.0;
     cameraPlayer1.position.y = 1.0;
 
-    screenPlayer1 := LoadRenderTexture(screenWidth/2, screenHeight);
+    screenPlayer1 : RenderTexture2D = LoadRenderTexture(screenWidth/2, screenHeight);
     defer UnloadRenderTexture(screenPlayer1); // Unload render texture
 
     // Setup player two camera and screen
@@ -34,14 +34,14 @@ main :: () {
     cameraPlayer2.position.x = -3.0;
     cameraPlayer2.position.y = 3.0;
 
-    screenPlayer2 := LoadRenderTexture(screenWidth / 2, screenHeight);
+    screenPlayer2 : RenderTexture2D = LoadRenderTexture(screenWidth / 2, screenHeight);
     defer UnloadRenderTexture(screenPlayer2); // Unload render texture
 
     // Build a flipped rectangle the size of the split view to use for drawing later
-    splitScreenRect := Rectangle.{ 0.0, 0.0, xx screenPlayer1.texture.width, xx -screenPlayer1.texture.height };
+    splitScreenRect : Rectangle = .{ 0.0, 0.0, xx screenPlayer1.texture.width, xx -screenPlayer1.texture.height };
     
     // Grid data
-    count   : int   = 5;
+    count   : s32   = 5;
     spacing : float = 4;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
@@ -84,11 +84,11 @@ main :: () {
             // Draw scene: grid of cube trees on a plane to make a "world"
             DrawPlane(Vector3.{ 0, 0, 0 }, Vector2.{ 50, 50 }, BEIGE); // Simple world plane
 
-            x := -count*spacing;
+            x : float = -count*spacing;
             while (x <= count*spacing) {
                 defer x += spacing;
 
-                z := -count*spacing;
+                z : float = -count*spacing;
                 while (z <= count*spacing) {
                     defer z += spacing;
 
@@ -119,11 +119,11 @@ main :: () {
             // Draw scene: grid of cube trees on a plane to make a "world"
             DrawPlane(Vector3.{ 0, 0, 0 }, Vector2.{ 50, 50 }, BEIGE); // Simple world plane
 
-            x := -count*spacing;
+            x : float = -count*spacing;
             while (x <= count*spacing) {
                 defer x += spacing;
 
-                z := -count*spacing;
+                z : float = -count*spacing;
                 while (z <= count*spacing) {
                     defer z += spacing;
 

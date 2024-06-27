@@ -209,7 +209,7 @@ rlRenderBatch :: struct {
 }
 
 // OpenGL version
-rlGlVersion :: enum {
+rlGlVersion :: enum s32 {
     RL_OPENGL_11 :: 1;           // OpenGL 1.1
     RL_OPENGL_21;               // OpenGL 2.1 (GLSL 120)
     RL_OPENGL_33;               // OpenGL 3.3 (GLSL 330)
@@ -220,7 +220,7 @@ rlGlVersion :: enum {
 
 // Trace log level
 // NOTE: Organized by priority level
-rlTraceLogLevel :: enum {
+rlTraceLogLevel :: enum s32 {
     RL_LOG_ALL :: 0;             // Display all logs
     RL_LOG_TRACE;               // Trace logging, intended for internal use only
     RL_LOG_DEBUG;               // Debug logging, used for internal debugging, it should be disabled on release builds
@@ -233,7 +233,7 @@ rlTraceLogLevel :: enum {
 
 // Texture pixel formats
 // NOTE: Support depends on OpenGL version
-rlPixelFormat :: enum {
+rlPixelFormat :: enum s32 {
     RL_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE :: 1;     // 8 bit per pixel (no alpha)
     RL_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;        // 8*2 bpp (2 channels)
     RL_PIXELFORMAT_UNCOMPRESSED_R5G6B5;            // 16 bpp
@@ -263,7 +263,7 @@ rlPixelFormat :: enum {
 // Texture parameters: filter mode
 // NOTE 1: Filtering considers mipmaps if available in the texture
 // NOTE 2: Filter is accordingly set for minification and magnification
-rlTextureFilter :: enum {
+rlTextureFilter :: enum s32 {
     RL_TEXTURE_FILTER_POINT :: 0;        // No filter, just pixel approximation
     RL_TEXTURE_FILTER_BILINEAR;         // Linear filtering
     RL_TEXTURE_FILTER_TRILINEAR;        // Trilinear filtering (linear with mipmaps)
@@ -273,7 +273,7 @@ rlTextureFilter :: enum {
 }
 
 // Color blending modes (pre-defined)
-rlBlendMode :: enum {
+rlBlendMode :: enum s32 {
     RL_BLEND_ALPHA :: 0;                 // Blend textures considering alpha (default)
     RL_BLEND_ADDITIVE;                  // Blend textures adding colors
     RL_BLEND_MULTIPLIED;                // Blend textures multiplying colors
@@ -285,7 +285,7 @@ rlBlendMode :: enum {
 }
 
 // Shader location point type
-rlShaderLocationIndex :: enum {
+rlShaderLocationIndex :: enum s32 {
     RL_SHADER_LOC_VERTEX_POSITION :: 0;  // Shader location: vertex attribute: position
     RL_SHADER_LOC_VERTEX_TEXCOORD01;    // Shader location: vertex attribute: texcoord01
     RL_SHADER_LOC_VERTEX_TEXCOORD02;    // Shader location: vertex attribute: texcoord02
@@ -316,7 +316,7 @@ rlShaderLocationIndex :: enum {
 
 
 // Shader uniform data type
-rlShaderUniformDataType :: enum {
+rlShaderUniformDataType :: enum s32 {
     RL_SHADER_UNIFORM_FLOAT :: 0;        // Shader uniform type: float
     RL_SHADER_UNIFORM_VEC2;             // Shader uniform type: vec2 (2 float)
     RL_SHADER_UNIFORM_VEC3;             // Shader uniform type: vec3 (3 float)
@@ -329,7 +329,7 @@ rlShaderUniformDataType :: enum {
 }
 
 // Shader attribute data types
-rlShaderAttributeDataType :: enum {
+rlShaderAttributeDataType :: enum s32 {
     RL_SHADER_ATTRIB_FLOAT :: 0;         // Shader attribute type: float
     RL_SHADER_ATTRIB_VEC2;              // Shader attribute type: vec2 (2 float)
     RL_SHADER_ATTRIB_VEC3;              // Shader attribute type: vec3 (3 float)
@@ -338,7 +338,7 @@ rlShaderAttributeDataType :: enum {
 
 // Framebuffer attachment type
 // NOTE: By default up to 8 color channels defined, but it can be more
-rlFramebufferAttachType :: enum {
+rlFramebufferAttachType :: enum s32 {
     RL_ATTACHMENT_COLOR_CHANNEL0 :: 0;       // Framebuffer attachment type: color 0
     RL_ATTACHMENT_COLOR_CHANNEL1 :: 1;       // Framebuffer attachment type: color 1
     RL_ATTACHMENT_COLOR_CHANNEL2 :: 2;       // Framebuffer attachment type: color 2
@@ -352,7 +352,7 @@ rlFramebufferAttachType :: enum {
 }
 
 // Framebuffer texture attachment type
-rlFramebufferAttachTextureType :: enum {
+rlFramebufferAttachTextureType :: enum s32 {
     RL_ATTACHMENT_CUBEMAP_POSITIVE_X :: 0;   // Framebuffer texture attachment type: cubemap, +X side
     RL_ATTACHMENT_CUBEMAP_NEGATIVE_X :: 1;   // Framebuffer texture attachment type: cubemap, -X side
     RL_ATTACHMENT_CUBEMAP_POSITIVE_Y :: 2;   // Framebuffer texture attachment type: cubemap, +Y side
@@ -364,7 +364,7 @@ rlFramebufferAttachTextureType :: enum {
 }
 
 // Face culling mode
-rlCullMode :: enum {
+rlCullMode :: enum s32 {
     RL_CULL_FACE_FRONT :: 0;
     RL_CULL_FACE_BACK;
 }

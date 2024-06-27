@@ -2,8 +2,8 @@
 #import "Basic";
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -20,10 +20,10 @@ main :: () {
 
     set_working_directory(#filepath);
 
-    fxWav := LoadSound("resources/sound.wav");         // Load WAV audio file
+    fxWav : Sound = LoadSound("resources/sound.wav");         // Load WAV audio file
     defer UnloadSound(fxWav);                          // Unload sound data
 
-    fxOgg := LoadSound("resources/target.ogg");        // Load OGG audio file
+    fxOgg : Sound = LoadSound("resources/target.ogg");        // Load OGG audio file
     defer UnloadSound(fxOgg);                          // Unload sound data
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second

@@ -23,8 +23,8 @@ main :: () {
     camera.fovy = 45.0;                             // Camera field-of-view Y
     camera.projection = .CAMERA_PERSPECTIVE;        // Camera projection type
 
-    cubePosition := Vector3.{ 0.0, 1.0, 0.0 };
-    cubeSize     := Vector3.{ 2.0, 2.0, 2.0 };
+    cubePosition : Vector3 = .{ 0.0, 1.0, 0.0 };
+    cubeSize     : Vector3 = .{ 2.0, 2.0, 2.0 };
 
     ray: Ray;                      // Picking line ray
     collision: RayCollision;       // Ray collision hit info

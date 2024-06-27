@@ -7,8 +7,8 @@ delayReadIndex  : u32 = 2;
 delayWriteIndex : u32 = 0;
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ main :: () {
     InitAudioDevice();             // Initialize audio device
 
     set_working_directory(#filepath);
-    music := LoadMusicStream("resources/country.mp3");
+    music : Music = LoadMusicStream("resources/country.mp3");
 
     // Allocate buffer for the delay effect
     delayBufferSize = 48000*2;     // 1 second delay (device sampleRate*channels)
@@ -31,11 +31,11 @@ main :: () {
 
     PlayMusicStream(music);
 
-    timePlayed := 0.0;          // Time played normalized [0.0f..1.0f]
-    pause := false;             // Music playing paused
+    timePlayed : float = 0.0;          // Time played normalized [0.0f..1.0f]
+    pause      : bool  = false;             // Music playing paused
     
-    enableEffectLPF   := false; // Enable effect low-pass-filter
-    enableEffectDelay := false; // Enable effect delay (1 second)
+    enableEffectLPF   : bool = false; // Enable effect low-pass-filter
+    enableEffectDelay : bool = false; // Enable effect delay (1 second)
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
@@ -95,11 +95,11 @@ main :: () {
             DrawText("PRESS SPACE TO RESTART MUSIC", 215, 230, 20, LIGHTGRAY);
             DrawText("PRESS P TO PAUSE/RESUME MUSIC", 208, 260, 20, LIGHTGRAY);
             
-            t1 := to_c_string(ifx enableEffectLPF then "ON" else "OFF");
+            t1 : *u8 = to_c_string(ifx enableEffectLPF then "ON" else "OFF");
             defer free(t1);
             DrawText(TextFormat("PRESS F TO TOGGLE LPF EFFECT: %s", t1), 200, 320, 20, GRAY);
 
-            t2 := to_c_string(ifx enableEffectDelay then "ON" else "OFF");
+            t2 : *u8 = to_c_string(ifx enableEffectDelay then "ON" else "OFF");
             defer free(t2);
             DrawText(TextFormat("PRESS D TO TOGGLE DELAY EFFECT: %s", t2), 180, 350, 20, GRAY);
         }
@@ -113,14 +113,14 @@ main :: () {
 //------------------------------------------------------------------------------------
 // Audio effect: lowpass filter
 AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {
-    low: [2]float = float.[ 0.0, 0.0 ];
+    low: [2]float = .[ 0.0, 0.0 ];
     
     cutoff : float : 70.0 / 44100.0; // 70 Hz lowpass filter
     k      : float : xx (cutoff / (cutoff + 0.1591549431)); // RC filter formula
 
     _buffer: *float = cast(*float)buffer;
 
-    i := 0;
+    i : u32 = 0;
     while (i < frames*2) {
         defer i += 2;
 
@@ -137,14 +137,14 @@ AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {
 AudioProcessEffectDelay :: (buffer: *void, frames: u32) #c_call {
     _buffer: *float = cast(*float)buffer;
 
-    i := 0;
+    i : u32 = 0;
     while (i < frames*2) {
         defer i += 2;
 
-        leftDelay  := delayBuffer[delayReadIndex];    // ERROR: Reading buffer -> WHY??? Maybe thread related???
+        leftDelay : float = delayBuffer[delayReadIndex];    // ERROR: Reading buffer -> WHY??? Maybe thread related???
         delayReadIndex += 1;
 
-        rightDelay := delayBuffer[delayReadIndex];
+        rightDelay : float = delayBuffer[delayReadIndex];
         delayReadIndex += 1;
 
         if (delayReadIndex == delayBufferSize) delayReadIndex = 0;

@@ -4,8 +4,8 @@
 
 short :: s16;
 
-MAX_SAMPLES            :: 512;
-MAX_SAMPLES_PER_UPDATE :: 4096;
+MAX_SAMPLES            : s32 : 512;
+MAX_SAMPLES_PER_UPDATE : s32 : 4096;
 
 // Cycles per second (hz)
 frequency: float = 440.0;
@@ -33,7 +33,7 @@ main :: () {
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
 
     // Init raw audio stream (sample rate: 44100, sample size: 16bit-short, channels: 1-mono)
-    stream := LoadAudioStream(44100, 16, 1);
+    stream : AudioStream = LoadAudioStream(44100, 16, 1);
 
     SetAudioStreamCallback(stream, AudioInputCallback);
 
@@ -46,7 +46,7 @@ main :: () {
     PlayAudioStream(stream);        // Start processing stream buffer (no data loaded currently)
 
     // Position read in to determine next frequency
-    mousePosition := Vector2.{ -100.0, -100.0 };
+    mousePosition : Vector2 = .{ -100.0, -100.0 };
 
     /*
     // Cycles per second (hz)
@@ -62,7 +62,7 @@ main :: () {
     // Computed size in samples of the sine wave
     waveLength: s32 = 1;
 
-    position := Vector2.{ 0.0, 0.0 };
+    position : Vector2 = .{ 0.0, 0.0 };
 
     SetTargetFPS(30);              // Set our game to run at 30 frames-per-second
 

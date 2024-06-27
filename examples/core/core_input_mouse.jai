@@ -15,8 +15,8 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    ballPosition := Vector2.{ -100.0, -100.0 };
-    ballColor    := DARKBLUE;
+    ballPosition : Vector2 = .{ -100.0, -100.0 };
+    ballColor    : Color   = DARKBLUE;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

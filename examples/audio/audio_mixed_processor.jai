@@ -6,8 +6,8 @@ exponent: float = 1.0;       // Audio exponentiation value
 averageVolume: [400]float;   // Average volume history
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------

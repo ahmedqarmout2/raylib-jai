@@ -236,18 +236,24 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValue"  , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)");
     Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValueV" , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonPressed"  , "(gamepad: int, button: GamepadButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonDown"     , "(gamepad: int, button: GamepadButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonReleased" , "(gamepad: int, button: GamepadButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonUp"       , "(gamepad: int, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonPressed"  , "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonDown"     , "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonReleased" , "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonUp"       , "(gamepad: s32, button: GamepadButton) -> bool");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadAxisMovement", "(gamepad: int, axis: GamepadAxis) -> float");
+    Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadAxisMovement", "(gamepad: s32, axis: GamepadAxis) -> float");
 
     Hash_Table.table_add(*g_improved_function_definitions, "ImageKernelConvolution", "(image: *Image, kernel: *float, kernelSize: s32)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTextureFilter", "(texture: Texture2D, filter: TextureFilter)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTextureWrap"  , "(texture: Texture2D, wrap: TextureWrap)");
 }
 
 populate_improved_struct_elements_table :: () {
     Hash_Table.table_add(*g_improved_struct_elements, "Camera3D_projection", "CameraProjection");
+
+    Hash_Table.table_add(*g_improved_struct_elements, "Image_format"  , "PixelFormat");
+    Hash_Table.table_add(*g_improved_struct_elements, "Texture_format", "PixelFormat");
 }
 
 increment_line_counter :: () -> bool {
@@ -446,7 +452,7 @@ handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecogni
     // Reset the line counter and process all enum files
     g_line_counter = _g_line_counter;
 
-    print_to_builder(output_builder, "% :: enum {\n", enum_name);
+    print_to_builder(output_builder, "% :: enum s32 {\n", enum_name);
     while (true) {
         if (!increment_line_counter()) {
             print("EOF while looking for the end of an enum.\n");

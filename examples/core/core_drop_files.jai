@@ -15,7 +15,7 @@ main :: () {
     InitWindow(screenWidth, screenHeight, "raylib [core] example - drop files");
     //--------------------------------------------------------------------------------------
 
-    filePathCounter: int = 0;
+    filePathCounter: s32 = 0;
     filePaths: [MAX_FILEPATH_RECORDED]*char; // We will register a maximum of filepaths
 
     // Allocate space for the required file paths
@@ -31,9 +31,9 @@ main :: () {
         if (IsFileDropped()) {
             droppedFiles: FilePathList = LoadDroppedFiles();
 
-            i: int = 0;
-            offset: int = filePathCounter;
-            while (i < cast(int)droppedFiles.count) {
+            i: s32 = 0;
+            offset: s32 = filePathCounter;
+            while (i < cast(s32)droppedFiles.count) {
                 defer i += 1;
 
                 if (filePathCounter < (MAX_FILEPATH_RECORDED - 1)) {

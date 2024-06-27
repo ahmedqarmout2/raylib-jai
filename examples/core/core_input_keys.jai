@@ -15,7 +15,7 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    ballPosition := Vector2.{ cast(float)screenWidth/2, cast(float)screenHeight/2 };
+    ballPosition : Vector2 = .{ cast(float)screenWidth/2, cast(float)screenHeight/2 };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

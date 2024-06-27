@@ -14,8 +14,8 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    boxPositionY : int = screenHeight/2 - 40;
-    scrollSpeed  : int = 4;        // Scrolling speed in pixels
+    boxPositionY : s32 = screenHeight/2 - 40;
+    scrollSpeed  : s32 = 4;        // Scrolling speed in pixels
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

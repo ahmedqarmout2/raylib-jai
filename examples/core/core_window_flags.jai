@@ -26,11 +26,11 @@ main :: () {
     //SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
     InitWindow(screenWidth, screenHeight, "raylib [core] example - window flags");
 
-    ballPosition := Vector2.{ GetScreenWidth() / 2.0, GetScreenHeight() / 2.0 };
-    ballSpeed    := Vector2.{ 5.0, 4.0 };
-    ballRadius   := 20.0;
+    ballPosition : Vector2 = .{ GetScreenWidth() / 2.0, GetScreenHeight() / 2.0 };
+    ballSpeed    : Vector2 = .{ 5.0, 4.0 };
+    ballRadius   : float = 20.0;
 
-    framesCounter := 0;
+    framesCounter : s32 = 0;
 
     //SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //----------------------------------------------------------

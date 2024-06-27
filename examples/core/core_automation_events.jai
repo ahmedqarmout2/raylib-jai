@@ -16,7 +16,7 @@ Player :: struct {
 
 EnvElement :: struct {
     rect     : Rectangle;
-    blocking : int;
+    blocking : s32;
     color    : Color;
 };
 
@@ -61,8 +61,8 @@ main :: () {
     // Automation events
     aelist: AutomationEventList = LoadAutomationEventList("automation_events.txt");  // Initialize list of automation events to record new events
     SetAutomationEventList(*aelist);
-    eventRecording := false;
-    eventPlaying := false;
+    eventRecording : bool = false;
+    eventPlaying   : bool = false;
 
     frameCounter: u32 = 0;
     playFrameCounter: u32 = 0;
@@ -73,7 +73,7 @@ main :: () {
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
-        deltaTime := 0.015; //GetFrameTime();
+        deltaTime : float = 0.015; //GetFrameTime();
 
         // Dropped files logic
         //----------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ main :: () {
             player.canJump = false;
         }
 
-        hitObstacle: int = 0;
+        hitObstacle: s32 = 0;
         for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
             element: EnvElement = envElements[i];
             if (element.blocking &&

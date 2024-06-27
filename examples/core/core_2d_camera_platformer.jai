@@ -14,7 +14,7 @@ Player :: struct {
 
 EnvItem :: struct {
     rect: Rectangle;
-    blocking: int;
+    blocking: s32;
     color: Color;
 }
 
@@ -36,7 +36,7 @@ main :: () {
     player.position = Vector2.{ 400, 280 };
     player.speed = 0;
     player.canJump = false;
-    envItems:= EnvItem.[
+    envItems: [5]EnvItem = .[
         EnvItem.{ Rectangle.{ 0, 0, 1000, 400 },   0, LIGHTGRAY },
         EnvItem.{ Rectangle.{ 0, 400, 1000, 200 }, 1, GRAY },
         EnvItem.{ Rectangle.{ 300, 200, 400, 10 }, 1, GRAY },
@@ -50,9 +50,9 @@ main :: () {
     camera.rotation = 0.0;
     camera.zoom = 1.0;
 
-    CameraFunc :: #type (camera: *Camera2D, player: *Player, items: []EnvItem, delta: float, w: int, h: int);
+    CameraFunc :: #type (camera: *Camera2D, player: *Player, items: []EnvItem, delta: float, w: s32, h: s32);
 
-    cameraUpdaters: []CameraFunc = .[
+    cameraUpdaters: [5]CameraFunc = .[
         UpdateCameraCenter,
         UpdateCameraCenterInsideMap,
         UpdateCameraCenterSmoothFollow,
@@ -60,9 +60,10 @@ main :: () {
         UpdateCameraPlayerBoundsPush
     ];
     
-    cameraOption := 0;
+    cameraOption         : s32 = 0;
+    cameraUpdatersLength : s32 = 5;
     
-    cameraDescriptions := string.[
+    cameraDescriptions : [5]string = .[
         "Follow player center",
         "Follow player center, but clamp to map edges",
         "Follow player center; smoothed",
@@ -75,7 +76,7 @@ main :: () {
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
-        deltaTime := GetFrameTime();
+        deltaTime : float = GetFrameTime();
         
         UpdatePlayer(*player, envItems, deltaTime);
 
@@ -89,7 +90,7 @@ main :: () {
             player.position = Vector2.{ 400, 280 };
         }
 
-        if IsKeyPressed(.KEY_C) cameraOption = (cameraOption + 1) % cameraUpdaters.count;
+        if IsKeyPressed(.KEY_C) cameraOption = (cameraOption + 1) % cameraUpdatersLength;
 
         // Call update camera function by its pointer
         cameraUpdaters[cameraOption](*camera, *player, envItems, deltaTime, screenWidth, screenHeight);
@@ -119,7 +120,7 @@ main :: () {
         DrawText("- C to change camera mode", 40, 100, 10, DARKGRAY);
         DrawText("Current camera mode:", 20, 120, 10, BLACK);
 
-        desc := to_c_string(cameraDescriptions[cameraOption]);
+        desc : *u8 = to_c_string(cameraDescriptions[cameraOption]);
         defer free(desc);
         DrawText(desc, 40, 140, 10, DARKGRAY);
 
@@ -136,9 +137,9 @@ UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float) {
         player.canJump = false;
     }
 
-    hitObstacle: int = 0;
+    hitObstacle: s32 = 0;
     for * envItems {
-        p := *player.position;
+        p : *Vector2 = *player.position;
         if (it.blocking &&
             it.rect.x <= p.x &&
             it.rect.x + it.rect.width >= p.x &&
@@ -157,12 +158,12 @@ UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float) {
     } else player.canJump = true;
 }
 
-UpdateCameraCenter :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int) {
+UpdateCameraCenter :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
     camera.offset = Vector2.{ width/2.0, height/2.0 };
     camera.target = player.position;
 }
 
-UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int) {
+UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
     camera.target = player.position;
     camera.offset = Vector2.{ width/2.0, height/2.0 };
     minX: float = 1000;
@@ -177,8 +178,8 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
         maxY = max(it.rect.y + it.rect.height, maxY);
     }
 
-    max_val := GetWorldToScreen2D(Vector2.{maxX, maxY}, << camera);
-    min_val := GetWorldToScreen2D(Vector2.{minX, minY}, << camera);
+    max_val : Vector2 = GetWorldToScreen2D(Vector2.{maxX, maxY}, << camera);
+    min_val : Vector2 = GetWorldToScreen2D(Vector2.{minX, minY}, << camera);
     
     if max_val.x < cast(float)width camera.offset.x = width - (max_val.x - width/2);
     if max_val.y < cast(float)height camera.offset.y = height - (max_val.y - height/2);
@@ -186,7 +187,7 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
     if min_val.y > 0 camera.offset.y = height/2 - min_val.y;
 }
 
-UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int) {
+UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
     minSpeed: float = 30;
     minEffectLength: float = 10;
     fractionSpeed: float = 0.8;
@@ -201,7 +202,7 @@ UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems:
     }
 }
 
-UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int) {
+UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
     evenOutSpeed  : float = 700;
     eveningOut    : bool = false;
     evenOutTarget : float;
@@ -233,8 +234,8 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
     }
 }
 
-UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: int, height: int) {
-    bbox := Vector2.{ 0.2, 0.2 };
+UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
+    bbox : Vector2 = .{ 0.2, 0.2 };
 
     bboxWorldMin: Vector2 = GetScreenToWorld2D(Vector2.{ (1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height }, << camera);
     bboxWorldMax: Vector2 = GetScreenToWorld2D(Vector2.{ (1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height }, << camera);

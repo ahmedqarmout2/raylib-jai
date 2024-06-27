@@ -17,8 +17,8 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    player1 := Rectangle.{ 200, 200, PLAYER_SIZE, PLAYER_SIZE };
-    player2 := Rectangle.{ 250, 200, PLAYER_SIZE, PLAYER_SIZE };
+    player1 : Rectangle = .{ 200, 200, PLAYER_SIZE, PLAYER_SIZE };
+    player2 : Rectangle = .{ 250, 200, PLAYER_SIZE, PLAYER_SIZE };
 
     camera1: Camera2D;
     camera1.target   = Vector2.{ player1.x, player1.y };
@@ -39,7 +39,7 @@ main :: () {
     defer UnloadRenderTexture(screenCamera2); // Unload render texture
 
     // Build a flipped rectangle the size of the split view to use for drawing later
-    splitScreenRect := Rectangle.{ 0.0, 0.0, xx screenCamera1.texture.width, xx -screenCamera1.texture.height };
+    splitScreenRect : Rectangle = .{ 0.0, 0.0, xx screenCamera1.texture.width, xx -screenCamera1.texture.height };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

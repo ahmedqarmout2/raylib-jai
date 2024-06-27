@@ -24,20 +24,20 @@ main :: () {
 
     target: RenderTexture2D = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight); // This is where we'll draw all our objects.
 
-    rec01 := Rectangle.{ 70.0, 35.0, 20.0, 20.0 };
-    rec02 := Rectangle.{ 90.0, 55.0, 30.0, 10.0 };
-    rec03 := Rectangle.{ 80.0, 65.0, 15.0, 25.0 };
+    rec01 : Rectangle = .{ 70.0, 35.0, 20.0, 20.0 };
+    rec02 : Rectangle = .{ 90.0, 55.0, 30.0, 10.0 };
+    rec03 : Rectangle = .{ 80.0, 65.0, 15.0, 25.0 };
 
     // The target's height is flipped (in the source Rectangle), due to OpenGL reasons
-    sourceRec := Rectangle.{ 0.0, 0.0, cast(float)target.texture.width, -cast(float)target.texture.height };
-    destRec   := Rectangle.{ -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+    sourceRec : Rectangle = .{ 0.0, 0.0, cast(float)target.texture.width, -cast(float)target.texture.height };
+    destRec   : Rectangle = .{ -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
 
-    origin := Vector2.{ 0.0, 0.0 };
+    origin : Vector2 = .{ 0.0, 0.0 };
 
-    rotation := 0.0;
+    rotation : float = 0.0;
 
-    cameraX := 0.0;
-    cameraY := 0.0;
+    cameraX : float = 0.0;
+    cameraY : float = 0.0;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

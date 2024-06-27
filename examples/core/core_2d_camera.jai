@@ -17,11 +17,11 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    player := Rectangle.{400, 280, 40, 40};
+    player : Rectangle = .{400, 280, 40, 40};
     buildings: [MAX_BUILDINGS]Rectangle;
     buildColors: [MAX_BUILDINGS]Color;
 
-    spacing := 0;
+    spacing : s32 = 0;
 
     for i: 0..MAX_BUILDINGS-1 {
         buildings[i].width  = xx GetRandomValue(50, 200);

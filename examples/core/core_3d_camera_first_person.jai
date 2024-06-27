@@ -162,14 +162,14 @@ main :: () {
 
             DrawText("Camera status:", 610, 15, 10, BLACK);
 
-            t1 := to_c_string(ifx (cameraMode == .CAMERA_FREE) then "FREE" else
+            t1 : *u8 = to_c_string(ifx (cameraMode == .CAMERA_FREE) then "FREE" else
                               ifx (cameraMode == .CAMERA_FIRST_PERSON) then "FIRST_PERSON" else
                               ifx (cameraMode == .CAMERA_THIRD_PERSON) then "THIRD_PERSON" else
                               ifx (cameraMode == .CAMERA_ORBITAL) then "ORBITAL" else "CUSTOM");
             defer free(t1);
             DrawText(TextFormat("- Mode: %s", t1), 610, 30, 10, BLACK);
 
-            t2 := to_c_string(ifx (camera.projection == .CAMERA_PERSPECTIVE) then "PERSPECTIVE" else
+            t2 : *u8 = to_c_string(ifx (camera.projection == .CAMERA_PERSPECTIVE) then "PERSPECTIVE" else
                               ifx (camera.projection == .CAMERA_ORTHOGRAPHIC) then "ORTHOGRAPHIC" else "CUSTOM");
             defer free(t2);
             DrawText(TextFormat("- Projection: %s", t2), 610, 45, 10, BLACK);

@@ -186,7 +186,7 @@ Image :: struct {
     width: s32;               // Image base width
     height: s32;              // Image base height
     mipmaps: s32;             // Mipmap levels, 1 by default
-    format: s32;              // Data format (PixelFormat type)
+    format: PixelFormat;              // Data format (PixelFormat type)
 }
 
 // Texture, tex data stored in GPU memory (VRAM)
@@ -195,7 +195,7 @@ Texture :: struct {
     width: s32;               // Texture base width
     height: s32;              // Texture base height
     mipmaps: s32;             // Mipmap levels, 1 by default
-    format: s32;              // Data format (PixelFormat type)
+    format: PixelFormat;              // Data format (PixelFormat type)
 }
 
 // Texture2D, same as Texture
@@ -458,7 +458,7 @@ AutomationEventList :: struct {
 // System/Window config flags
 // NOTE: Every bit registers one state (use it with bit masks)
 // By default all flags are set to 0
-ConfigFlags :: enum {
+ConfigFlags :: enum s32 {
     FLAG_VSYNC_HINT         :: 0x00000040;   // Set to try enabling V-Sync on GPU
     FLAG_FULLSCREEN_MODE    :: 0x00000002;   // Set to run program in fullscreen
     FLAG_WINDOW_RESIZABLE   :: 0x00000004;   // Set to allow resizable window
@@ -479,7 +479,7 @@ ConfigFlags :: enum {
 
 // Trace log level
 // NOTE: Organized by priority level
-TraceLogLevel :: enum {
+TraceLogLevel :: enum s32 {
     LOG_ALL :: 0;        // Display all logs
     LOG_TRACE;          // Trace logging, intended for internal use only
     LOG_DEBUG;          // Debug logging, used for internal debugging, it should be disabled on release builds
@@ -493,7 +493,7 @@ TraceLogLevel :: enum {
 // Keyboard keys (US keyboard layout)
 // NOTE: Use GetKeyPressed() to allow redefining
 // required keys for alternative layouts
-KeyboardKey :: enum {
+KeyboardKey :: enum s32 {
     KEY_NULL            :: 0;        // Key: NULL, used for no key pressed
     // Alphanumeric keys
     KEY_APOSTROPHE      :: 39;       // Key: '
@@ -613,7 +613,7 @@ KeyboardKey :: enum {
 // Add backwards compatibility support for deprecated names
 
 // Mouse buttons
-MouseButton :: enum {
+MouseButton :: enum s32 {
     MOUSE_BUTTON_LEFT    :: 0;       // Mouse button left
     MOUSE_BUTTON_RIGHT   :: 1;       // Mouse button right
     MOUSE_BUTTON_MIDDLE  :: 2;       // Mouse button middle (pressed wheel)
@@ -624,7 +624,7 @@ MouseButton :: enum {
 }
 
 // Mouse cursor
-MouseCursor :: enum {
+MouseCursor :: enum s32 {
     MOUSE_CURSOR_DEFAULT       :: 0;     // Default pointer shape
     MOUSE_CURSOR_ARROW         :: 1;     // Arrow shape
     MOUSE_CURSOR_IBEAM         :: 2;     // Text writing cursor shape
@@ -639,7 +639,7 @@ MouseCursor :: enum {
 }
 
 // Gamepad buttons
-GamepadButton :: enum {
+GamepadButton :: enum s32 {
     GAMEPAD_BUTTON_UNKNOWN :: 0;         // Unknown button, just for error checking
     GAMEPAD_BUTTON_LEFT_FACE_UP;        // Gamepad left DPAD up button
     GAMEPAD_BUTTON_LEFT_FACE_RIGHT;     // Gamepad left DPAD right button
@@ -661,7 +661,7 @@ GamepadButton :: enum {
 }
 
 // Gamepad axis
-GamepadAxis :: enum {
+GamepadAxis :: enum s32 {
     GAMEPAD_AXIS_LEFT_X        :: 0;     // Gamepad left stick X axis
     GAMEPAD_AXIS_LEFT_Y        :: 1;     // Gamepad left stick Y axis
     GAMEPAD_AXIS_RIGHT_X       :: 2;     // Gamepad right stick X axis
@@ -671,7 +671,7 @@ GamepadAxis :: enum {
 }
 
 // Material map index
-MaterialMapIndex :: enum {
+MaterialMapIndex :: enum s32 {
     MATERIAL_MAP_ALBEDO :: 0;        // Albedo material (same as: MATERIAL_MAP_DIFFUSE)
     MATERIAL_MAP_METALNESS;         // Metalness material (same as: MATERIAL_MAP_SPECULAR)
     MATERIAL_MAP_NORMAL;            // Normal material
@@ -687,7 +687,7 @@ MaterialMapIndex :: enum {
 
 
 // Shader location index
-ShaderLocationIndex :: enum {
+ShaderLocationIndex :: enum s32 {
     SHADER_LOC_VERTEX_POSITION :: 0; // Shader location: vertex attribute: position
     SHADER_LOC_VERTEX_TEXCOORD01;   // Shader location: vertex attribute: texcoord01
     SHADER_LOC_VERTEX_TEXCOORD02;   // Shader location: vertex attribute: texcoord02
@@ -718,7 +718,7 @@ ShaderLocationIndex :: enum {
 
 
 // Shader uniform data type
-ShaderUniformDataType :: enum {
+ShaderUniformDataType :: enum s32 {
     SHADER_UNIFORM_FLOAT :: 0;       // Shader uniform type: float
     SHADER_UNIFORM_VEC2;            // Shader uniform type: vec2 (2 float)
     SHADER_UNIFORM_VEC3;            // Shader uniform type: vec3 (3 float)
@@ -731,7 +731,7 @@ ShaderUniformDataType :: enum {
 }
 
 // Shader attribute data types
-ShaderAttributeDataType :: enum {
+ShaderAttributeDataType :: enum s32 {
     SHADER_ATTRIB_FLOAT :: 0;        // Shader attribute type: float
     SHADER_ATTRIB_VEC2;             // Shader attribute type: vec2 (2 float)
     SHADER_ATTRIB_VEC3;             // Shader attribute type: vec3 (3 float)
@@ -740,7 +740,7 @@ ShaderAttributeDataType :: enum {
 
 // Pixel formats
 // NOTE: Support depends on OpenGL version and platform
-PixelFormat :: enum {
+PixelFormat :: enum s32 {
     PIXELFORMAT_UNCOMPRESSED_GRAYSCALE :: 1; // 8 bit per pixel (no alpha)
     PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;    // 8*2 bpp (2 channels)
     PIXELFORMAT_UNCOMPRESSED_R5G6B5;        // 16 bpp
@@ -770,7 +770,7 @@ PixelFormat :: enum {
 // Texture parameters: filter mode
 // NOTE 1: Filtering considers mipmaps if available in the texture
 // NOTE 2: Filter is accordingly set for minification and magnification
-TextureFilter :: enum {
+TextureFilter :: enum s32 {
     TEXTURE_FILTER_POINT :: 0;               // No filter, just pixel approximation
     TEXTURE_FILTER_BILINEAR;                // Linear filtering
     TEXTURE_FILTER_TRILINEAR;               // Trilinear filtering (linear with mipmaps)
@@ -780,7 +780,7 @@ TextureFilter :: enum {
 }
 
 // Texture parameters: wrap mode
-TextureWrap :: enum {
+TextureWrap :: enum s32 {
     TEXTURE_WRAP_REPEAT :: 0;                // Repeats texture in tiled mode
     TEXTURE_WRAP_CLAMP;                     // Clamps texture to edge pixel in tiled mode
     TEXTURE_WRAP_MIRROR_REPEAT;             // Mirrors and repeats the texture in tiled mode
@@ -788,7 +788,7 @@ TextureWrap :: enum {
 }
 
 // Cubemap layouts
-CubemapLayout :: enum {
+CubemapLayout :: enum s32 {
     CUBEMAP_LAYOUT_AUTO_DETECT :: 0;         // Automatically detect layout type
     CUBEMAP_LAYOUT_LINE_VERTICAL;           // Layout is defined by a vertical line with faces
     CUBEMAP_LAYOUT_LINE_HORIZONTAL;         // Layout is defined by a horizontal line with faces
@@ -798,14 +798,14 @@ CubemapLayout :: enum {
 }
 
 // Font type, defines generation method
-FontType :: enum {
+FontType :: enum s32 {
     FONT_DEFAULT :: 0;               // Default font generation, anti-aliased
     FONT_BITMAP;                    // Bitmap font generation, no anti-aliasing
     FONT_SDF;                        // SDF font generation, requires external shader
 }
 
 // Color blending modes (pre-defined)
-BlendMode :: enum {
+BlendMode :: enum s32 {
     BLEND_ALPHA :: 0;                // Blend textures considering alpha (default)
     BLEND_ADDITIVE;                 // Blend textures adding colors
     BLEND_MULTIPLIED;               // Blend textures multiplying colors
@@ -818,7 +818,7 @@ BlendMode :: enum {
 
 // Gesture
 // NOTE: Provided as bit-wise flags to enable only desired gestures
-Gesture :: enum {
+Gesture :: enum s32 {
     GESTURE_NONE        :: 0;        // No gesture
     GESTURE_TAP         :: 1;        // Tap gesture
     GESTURE_DOUBLETAP   :: 2;        // Double tap gesture
@@ -833,7 +833,7 @@ Gesture :: enum {
 }
 
 // Camera system modes
-CameraMode :: enum {
+CameraMode :: enum s32 {
     CAMERA_CUSTOM :: 0;              // Custom camera
     CAMERA_FREE;                    // Free camera
     CAMERA_ORBITAL;                 // Orbital camera
@@ -842,13 +842,13 @@ CameraMode :: enum {
 }
 
 // Camera projection
-CameraProjection :: enum {
+CameraProjection :: enum s32 {
     CAMERA_PERSPECTIVE :: 0;         // Perspective projection
     CAMERA_ORTHOGRAPHIC;             // Orthographic projection
 }
 
 // N-patch layout
-NPatchLayout :: enum {
+NPatchLayout :: enum s32 {
     NPATCH_NINE_PATCH :: 0;          // Npatch layout: 3x3 tiles
     NPATCH_THREE_PATCH_VERTICAL;    // Npatch layout: 1x3 tiles
     NPATCH_THREE_PATCH_HORIZONTAL;   // Npatch layout: 3x1 tiles
@@ -1076,13 +1076,13 @@ SetExitKey :: (key: KeyboardKey) -> bool #foreign raylib_native;
 // Input-related functions: gamepads
 IsGamepadAvailable :: (gamepad: s32) -> bool #foreign raylib_native;
 GetGamepadName :: (gamepad: s32) -> *u8 #foreign raylib_native;
-IsGamepadButtonPressed :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
-IsGamepadButtonDown :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
-IsGamepadButtonReleased :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
-IsGamepadButtonUp :: (gamepad: int, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonPressed :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonDown :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonReleased :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
+IsGamepadButtonUp :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
 GetGamepadButtonPressed :: () -> s32 #foreign raylib_native;
 GetGamepadAxisCount :: (gamepad: s32) -> s32 #foreign raylib_native;
-GetGamepadAxisMovement :: (gamepad: int, axis: GamepadAxis) -> float #foreign raylib_native;
+GetGamepadAxisMovement :: (gamepad: s32, axis: GamepadAxis) -> float #foreign raylib_native;
 SetGamepadMappings :: (mappings: *u8) -> s32 #foreign raylib_native;
 
 // Input-related functions: mouse
@@ -1303,8 +1303,8 @@ UpdateTextureRec :: (texture: Texture2D, rec: Rectangle, pixels: *void) #foreign
 
 // Texture configuration functions
 GenTextureMipmaps :: (texture: *Texture2D) #foreign raylib_native;
-SetTextureFilter :: (texture: Texture2D, filter: s32) #foreign raylib_native;
-SetTextureWrap :: (texture: Texture2D, wrap: s32) #foreign raylib_native;
+SetTextureFilter :: (texture: Texture2D, filter: TextureFilter) #foreign raylib_native;
+SetTextureWrap :: (texture: Texture2D, wrap: TextureWrap) #foreign raylib_native;
 
 // Texture drawing functions
 DrawTexture :: (texture: Texture2D, posX: s32, posY: s32, tint: Color) #foreign raylib_native;

@@ -2,8 +2,8 @@
 #import "Basic";
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -19,13 +19,13 @@ main :: () {
     defer CloseAudioDevice();      // Close audio device (music streaming is automatically stopped)
 
     set_working_directory(#filepath);
-    music := LoadMusicStream("resources/country.mp3");
+    music : Music = LoadMusicStream("resources/country.mp3");
     defer UnloadMusicStream(music);   // Unload music stream buffers from RAM
 
     PlayMusicStream(music);
 
-    timePlayed := 0.0;             // Time played normalized [0.0..1.0]
-    pause      := false;           // Music playing paused
+    timePlayed : float = 0.0;             // Time played normalized [0.0..1.0]
+    pause      : bool  = false;           // Music playing paused
 
     SetTargetFPS(30);              // Set our game to run at 30 frames-per-second
 

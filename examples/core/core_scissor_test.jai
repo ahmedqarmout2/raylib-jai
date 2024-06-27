@@ -14,8 +14,8 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    scissorArea := Rectangle.{ 0, 0, 300, 300 };
-    scissorMode := true;
+    scissorArea : Rectangle = .{ 0, 0, 300, 300 };
+    scissorMode : bool      = true;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

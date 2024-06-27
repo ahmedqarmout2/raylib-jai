@@ -23,7 +23,7 @@ main :: () {
     camera.fovy = 45.0;                             // Camera field-of-view Y
     camera.projection = .CAMERA_PERSPECTIVE;        // Camera projection type
 
-    cubePosition := Vector3.{ 0.0, 0.0, 0.0 };
+    cubePosition : Vector3 = .{ 0.0, 0.0, 0.0 };
 
     DisableCursor();               // Limit cursor to relative movement inside the window
 

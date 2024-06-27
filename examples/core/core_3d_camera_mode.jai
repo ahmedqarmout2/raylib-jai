@@ -23,7 +23,7 @@ main :: () {
     camera.fovy = 45.0;                             // Camera field-of-view Y
     camera.projection = .CAMERA_PERSPECTIVE;        // Camera mode type
 
-    cubePosition := Vector3.{ 0.0, 0.0, 0.0 };
+    cubePosition : Vector3 = .{ 0.0, 0.0, 0.0 };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 

@@ -4,11 +4,11 @@
 MAX_SOUNDS :: 10;
 
 soundArray   : [MAX_SOUNDS]Sound;
-currentSound : int ;
+currentSound : s32;
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------

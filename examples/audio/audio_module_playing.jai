@@ -13,8 +13,8 @@ CircleWave :: struct {
 };
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);  // NOTE: Try to enable MSAA 4X
 
@@ -50,12 +50,12 @@ main :: () {
     defer UnloadMusicStream(music);          // Unload music stream buffers from RAM
 
     music.looping = false; 
-    pitch := 1.0;
+    pitch : float = 1.0;
 
     PlayMusicStream(music);
 
-    timePlayed := 0.0;
-    pause      := false;
+    timePlayed : float = 0.0;
+    pause      : bool  = false;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
