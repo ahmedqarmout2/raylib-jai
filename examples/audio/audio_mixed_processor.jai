@@ -52,8 +52,11 @@ main :: () {
         DrawText(TextFormat("EXPONENT = %.2f", exponent), 215, 180, 20, LIGHTGRAY);
 
         DrawRectangle(199, 199, 402, 34, LIGHTGRAY);
-        for i: 0..399 {
-            DrawLine(xx (201 + i), xx (232 - averageVolume[i] * 32), xx (201 + i), 232, MAROON);
+        
+        i: s32 = 0;
+        while (i < 400) {
+            defer i += 1;
+            DrawLine(201 + i, 232 - cast(s32)averageVolume[i] * 32, 201 + i, 232, MAROON);
         }
         DrawRectangleLines(199, 199, 402, 34, GRAY);
 

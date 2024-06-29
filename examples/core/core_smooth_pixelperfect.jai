@@ -2,13 +2,13 @@
 #import "Math";
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
-    virtualScreenWidth  :: 160;
-    virtualScreenHeight :: 90;
+    virtualScreenWidth  : s32 : 160;
+    virtualScreenHeight : s32 : 90;
 
-    virtualRatio :: cast(float)screenWidth/cast(float)virtualScreenWidth;
+    virtualRatio : float : cast(float)screenWidth/cast(float)virtualScreenWidth;
 
 
     // Initialization
@@ -47,8 +47,8 @@ main :: () {
         rotation += 60.0*GetFrameTime();   // Rotate the rectangles, 60 degrees per second
 
         // Make the camera move to demonstrate the effect
-        cameraX = xx sin(GetTime())*50.0 - 10.0;
-        cameraY = xx cos(GetTime())*30.0;
+        cameraX = cast(float)sin(GetTime())*50.0 - 10.0;
+        cameraY = cast(float)cos(GetTime())*30.0;
 
         // Set the camera's target to the values computed above
         screenSpaceCamera.target = Vector2.{ cameraX, cameraY };

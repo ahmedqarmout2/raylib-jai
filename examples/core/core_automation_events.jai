@@ -2,11 +2,11 @@
 #import "Basic";
 #import "Math";
 
-GRAVITY         :: 400;
-PLAYER_JUMP_SPD :: 350.0;
-PLAYER_HOR_SPD  :: 200.0;
+GRAVITY         : s32 : 400;
+PLAYER_JUMP_SPD : float : 350.0;
+PLAYER_HOR_SPD  : float : 200.0;
 
-MAX_ENVIRONMENT_ELEMENTS :: 5;
+MAX_ENVIRONMENT_ELEMENTS : s32 : 5;
 
 Player :: struct {
     position : Vector2;
@@ -21,8 +21,8 @@ EnvElement :: struct {
 };
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -81,17 +81,17 @@ main :: () {
             droppedFiles: FilePathList = LoadDroppedFiles();
 
             // Supports loading .rgs style files (text or binary) and .png style palette images
-            if (IsFileExtension(xx droppedFiles.paths[0], ".txt;.rae")) {
+            if (IsFileExtension(droppedFiles.paths[0], ".txt;.rae")) {
                 UnloadAutomationEventList(*aelist);
-                aelist = LoadAutomationEventList(xx droppedFiles.paths[0]);
-                
+                aelist = LoadAutomationEventList(droppedFiles.paths[0]);
+
                 eventRecording = false;
-                
+
                 // Reset scene state to play
                 eventPlaying = true;
                 playFrameCounter = 0;
                 currentPlayFrame = 0;
-                
+
                 player.position = Vector2.{ 400, 280 };
                 player.speed = 0;
                 player.canJump = false;
@@ -174,8 +174,8 @@ main :: () {
         _max: Vector2 = GetWorldToScreen2D(Vector2.{ maxX, maxY }, camera);
         _min: Vector2 = GetWorldToScreen2D(Vector2.{ minX, minY }, camera);
 
-        if (_max.x < screenWidth)  camera.offset.x = screenWidth  - (_max.x - screenWidth/2);
-        if (_max.y < screenHeight) camera.offset.y = screenHeight - (_max.y - screenHeight/2);
+        if (_max.x < cast(float)screenWidth)  camera.offset.x = screenWidth  - (_max.x - screenWidth/2);
+        if (_max.y < cast(float)screenHeight) camera.offset.y = screenHeight - (_max.y - screenHeight/2);
         if (_min.x > 0) camera.offset.x = screenWidth/2  - _min.x;
         if (_min.y > 0) camera.offset.y = screenHeight/2 - _min.y;
         //----------------------------------------------------------------------------------

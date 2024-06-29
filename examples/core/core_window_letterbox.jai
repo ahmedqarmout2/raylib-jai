@@ -19,7 +19,7 @@ main :: () {
     SetTextureFilter(target.texture, .TEXTURE_FILTER_BILINEAR);  // Texture scale filter to use
 
     colors: [10]Color;
-    for 0..9 colors[it] = Color.{ xx GetRandomValue(100, 250), xx GetRandomValue(50, 150), xx GetRandomValue(10, 100), 255 };
+    for 0..9 colors[it] = Color.{ cast(u8)GetRandomValue(100, 250), cast(u8)GetRandomValue(50, 150), cast(u8)GetRandomValue(10, 100), 255 };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
@@ -31,7 +31,7 @@ main :: () {
 
         if (IsKeyPressed(.KEY_SPACE)) {
             // Recalculate random colors for the bars
-            for 0..9 colors[it] = Color.{ xx GetRandomValue(100, 250), xx GetRandomValue(50, 150), xx GetRandomValue(10, 100), 255 };
+            for 0..9 colors[it] = Color.{ cast(u8)GetRandomValue(100, 250), cast(u8)GetRandomValue(50, 150), cast(u8)GetRandomValue(10, 100), 255 };
         }
 
         // Update virtual mouse (clamped mouse value behind game screen)

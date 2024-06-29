@@ -2,8 +2,8 @@
 #import "Math";
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ main :: () {
     defer UnloadRenderTexture(screenPlayer2); // Unload render texture
 
     // Build a flipped rectangle the size of the split view to use for drawing later
-    splitScreenRect : Rectangle = .{ 0.0, 0.0, xx screenPlayer1.texture.width, xx -screenPlayer1.texture.height };
+    splitScreenRect : Rectangle = .{ 0.0, 0.0, cast(float)screenPlayer1.texture.width, cast(float)-screenPlayer1.texture.height };
     
     // Grid data
     count   : s32   = 5;

@@ -2,9 +2,9 @@
 #import "Basic";
 #import "Math";
 
-G :: 400;
-PLAYER_JUMP_SPD :: 350;
-PLAYER_HOR_SPD :: 200;
+G : s32 : 400;
+PLAYER_JUMP_SPD : float : 350;
+PLAYER_HOR_SPD  : float : 200;
 
 Player :: struct {
     position: Vector2;
@@ -19,8 +19,8 @@ EnvItem :: struct {
 }
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------

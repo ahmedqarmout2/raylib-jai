@@ -1,7 +1,7 @@
 #import "raylib";
 #import "Basic";
 
-MAX_SOUNDS :: 10;
+MAX_SOUNDS : s32 : 10;
 
 soundArray   : [MAX_SOUNDS]Sound;
 currentSound : s32;

@@ -1,11 +1,11 @@
 #import "raylib";
 #import "Math";
 
-MAX_BUILDINGS :: 100;
+MAX_BUILDINGS : s32 : 100;
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -24,14 +24,14 @@ main :: () {
     spacing : s32 = 0;
 
     for i: 0..MAX_BUILDINGS-1 {
-        buildings[i].width  = xx GetRandomValue(50, 200);
-        buildings[i].height = xx GetRandomValue(100, 800);
+        buildings[i].width  = cast(float)GetRandomValue(50, 200);
+        buildings[i].height = cast(float)GetRandomValue(100, 800);
         buildings[i].y = screenHeight - 130.0 - buildings[i].height;
         buildings[i].x = -6000.0 + spacing;
 
-        spacing += xx buildings[i].width;
+        spacing += cast(s32)buildings[i].width;
 
-        buildColors[i] = Color.{xx GetRandomValue(200, 240), xx GetRandomValue(200, 240), xx GetRandomValue(200, 250), 255};
+        buildColors[i] = Color.{ cast(u8)GetRandomValue(200, 240), cast(u8)GetRandomValue(200, 240), cast(u8)GetRandomValue(200, 250), 255 };
     }
 
     camera: Camera2D;
@@ -61,7 +61,7 @@ main :: () {
         else if (camera.rotation < -40) camera.rotation = -40;
 
         // Camera zoom controls
-        camera.zoom += (xx GetMouseWheelMove() * 0.05);
+        camera.zoom += cast(s32)(GetMouseWheelMove() * 0.05);
 
         if (camera.zoom > 3.0) camera.zoom = 3.0;
         else if (camera.zoom < 0.1) camera.zoom = 0.1;
@@ -91,8 +91,8 @@ main :: () {
 
             DrawRectangleRec(player, RED);
 
-            DrawLine(xx camera.target.x, -screenHeight * 10, xx camera.target.x, screenHeight * 10, GREEN);
-            DrawLine(-screenWidth * 10, xx camera.target.y, screenWidth * 10, xx camera.target.y, GREEN);
+            DrawLine(cast(s32)camera.target.x, -screenHeight * 10, cast(s32)camera.target.x, screenHeight * 10, GREEN);
+            DrawLine(-screenWidth * 10, cast(s32)camera.target.y, screenWidth * 10, cast(s32)camera.target.y, GREEN);
 
             EndMode2D();
 

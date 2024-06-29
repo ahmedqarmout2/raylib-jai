@@ -89,7 +89,7 @@ main :: () {
             DrawText("MUSIC SHOULD BE PLAYING!", 245, 150, 20, LIGHTGRAY);
 
             DrawRectangle(200, 180, 400, 12, LIGHTGRAY);
-            DrawRectangle(200, 180, xx (timePlayed*400.0), 12, MAROON);
+            DrawRectangle(200, 180, cast(s32)(timePlayed*400.0), 12, MAROON);
             DrawRectangleLines(200, 180, 400, 12, GRAY);
 
             DrawText("PRESS SPACE TO RESTART MUSIC", 215, 230, 20, LIGHTGRAY);
@@ -116,7 +116,7 @@ AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {
     low: [2]float = .[ 0.0, 0.0 ];
     
     cutoff : float : 70.0 / 44100.0; // 70 Hz lowpass filter
-    k      : float : xx (cutoff / (cutoff + 0.1591549431)); // RC filter formula
+    k      : float : cast(float)(cutoff / (cutoff + 0.1591549431)); // RC filter formula
 
     _buffer: *float = cast(*float)buffer;
 

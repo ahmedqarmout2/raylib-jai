@@ -65,7 +65,7 @@ main :: () {
             DrawText("MUSIC SHOULD BE PLAYING!", 255, 150, 20, LIGHTGRAY);
 
             DrawRectangle(200, 200, 400, 12, LIGHTGRAY);
-            DrawRectangle(200, 200, xx (timePlayed*400.0), 12, MAROON);
+            DrawRectangle(200, 200, cast(s32)(timePlayed*400.0), 12, MAROON);
             DrawRectangleLines(200, 200, 400, 12, GRAY);
 
             DrawText("PRESS SPACE TO RESTART MUSIC", 215, 250, 20, LIGHTGRAY);

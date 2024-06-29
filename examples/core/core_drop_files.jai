@@ -1,14 +1,14 @@
 #import "raylib";
 #import "Basic";
 
-MAX_FILEPATH_RECORDED :: 4096;
-MAX_FILEPATH_SIZE     :: 2048;
+MAX_FILEPATH_RECORDED : s32 : 4096;
+MAX_FILEPATH_SIZE     : s32 : 2048;
 
 char :: u8;
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -56,14 +56,17 @@ main :: () {
         else {
             DrawText("Dropped files:", 100, 40, 20, DARKGRAY);
 
-            for i: 0..filePathCounter-1 {
-                if (i%2 == 0) DrawRectangle(0, xx (85 + 40*i), screenWidth, 40, Fade(LIGHTGRAY, 0.5));
-                else DrawRectangle(0, xx (85 + 40*i), screenWidth, 40, Fade(LIGHTGRAY, 0.3));
+            i: s32 = 0;
+            while (i < filePathCounter) {
+                defer i += 1;
 
-                DrawText(filePaths[i], 120, xx (100 + 40*i), 10, GRAY);
+                if (i%2 == 0) DrawRectangle(0, 85 + 40*i, screenWidth, 40, Fade(LIGHTGRAY, 0.5));
+                else DrawRectangle(0, 85 + 40*i, screenWidth, 40, Fade(LIGHTGRAY, 0.3));
+
+                DrawText(filePaths[i], 120, 100 + 40*i, 10, GRAY);
             }
 
-            DrawText("Drop new files...", 100, xx (110 + 40*filePathCounter), 20, DARKGRAY);
+            DrawText("Drop new files...", 100, 110 + 40*filePathCounter, 20, DARKGRAY);
         }
 
         EndDrawing();

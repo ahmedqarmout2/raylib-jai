@@ -2,11 +2,11 @@
 #import "Basic";
 #import "Math";
 
-MAX_COLUMNS :: 20;
+MAX_COLUMNS : s32 : 20;
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -34,9 +34,9 @@ main :: () {
     colors    : [MAX_COLUMNS]Color;
 
     for i: 0..MAX_COLUMNS-1 {
-        heights[i]   = xx GetRandomValue(1, 12);
-        positions[i] = Vector3.{ xx GetRandomValue(-15, 15), heights[i]/2.0, xx GetRandomValue(-15, 15) };
-        colors[i]    = Color.{ xx GetRandomValue(20, 255), xx GetRandomValue(10, 55), 30, 255 };
+        heights[i]   = cast(float)GetRandomValue(1, 12);
+        positions[i] = Vector3.{ cast(float)GetRandomValue(-15, 15), heights[i]/2.0, cast(float)GetRandomValue(-15, 15) };
+        colors[i]    = Color.{ cast(u8)GetRandomValue(20, 255), cast(u8)GetRandomValue(10, 55), 30, 255 };
     }
 
     DisableCursor();               // Limit cursor to relative movement inside the window

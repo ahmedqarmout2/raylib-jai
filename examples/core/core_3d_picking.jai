@@ -2,8 +2,8 @@
 #import "Math";
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ main :: () {
 
         DrawText("Try clicking on the box with your mouse!", 240, 10, 20, DARKGRAY);
 
-        if (collision.hit) DrawText("BOX SELECTED", (screenWidth - MeasureText("BOX SELECTED", 30)) / 2, xx (screenHeight * 0.1), 30, GREEN);
+        if (collision.hit) DrawText("BOX SELECTED", (screenWidth - MeasureText("BOX SELECTED", 30)) / 2, cast(s32)(screenHeight * 0.1), 30, GREEN);
 
         DrawText("Right click mouse to toggle camera controls", 10, 430, 10, GRAY);
 

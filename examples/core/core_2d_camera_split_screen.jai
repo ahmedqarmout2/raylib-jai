@@ -1,11 +1,12 @@
 #import "raylib";
+#import "Basic";
 #import "Math";
 
-PLAYER_SIZE :: 40;
+PLAYER_SIZE : s32 : 40;
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -17,8 +18,8 @@ main :: () {
     defer CloseWindow();           // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    player1 : Rectangle = .{ 200, 200, PLAYER_SIZE, PLAYER_SIZE };
-    player2 : Rectangle = .{ 250, 200, PLAYER_SIZE, PLAYER_SIZE };
+    player1 : Rectangle = .{ 200, 200, cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE };
+    player2 : Rectangle = .{ 250, 200, cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE };
 
     camera1: Camera2D;
     camera1.target   = Vector2.{ player1.x, player1.y };
@@ -39,7 +40,7 @@ main :: () {
     defer UnloadRenderTexture(screenCamera2); // Unload render texture
 
     // Build a flipped rectangle the size of the split view to use for drawing later
-    splitScreenRect : Rectangle = .{ 0.0, 0.0, xx screenCamera1.texture.width, xx -screenCamera1.texture.height };
+    splitScreenRect : Rectangle = .{ 0.0, 0.0, cast(float)screenCamera1.texture.width, cast(float)-screenCamera1.texture.height };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
 
@@ -67,18 +68,21 @@ main :: () {
 
         BeginMode2D(camera1);
 
+        s1: s32 : screenWidth/PLAYER_SIZE;
+        s2: s32 : screenHeight/PLAYER_SIZE;
+
         // Draw full scene with first camera
-        for i: 0..screenWidth/PLAYER_SIZE {
-            DrawLineV(Vector2.{ xx (PLAYER_SIZE*i), 0 }, Vector2.{ xx (PLAYER_SIZE*i), screenHeight }, LIGHTGRAY);
+        for i: 0..s1 {
+            DrawLineV(Vector2.{ cast(float)(PLAYER_SIZE*i), 0 }, Vector2.{ cast(float)(PLAYER_SIZE*i), cast(float)screenHeight }, LIGHTGRAY);
         }
 
-        for i: 0..screenHeight/PLAYER_SIZE {
-            DrawLineV(Vector2.{ 0, xx (PLAYER_SIZE*i) }, Vector2.{ screenWidth, xx (PLAYER_SIZE*i) }, LIGHTGRAY);
+        for i: 0..s2 {
+            DrawLineV(Vector2.{ 0, cast(float)(PLAYER_SIZE*i) }, Vector2.{ cast(float)screenWidth, cast(float)(PLAYER_SIZE*i) }, LIGHTGRAY);
         }
 
-        for i: 0..screenWidth/PLAYER_SIZE-1 {
-            for j: 0..screenHeight/PLAYER_SIZE-1 {
-                DrawText(TextFormat("[%i,%i]", i, j), xx (10 + PLAYER_SIZE*i), xx (15 + PLAYER_SIZE*j), 10, LIGHTGRAY);
+        for i: 0..s1-1 {
+            for j: 0..s2-1 {
+                DrawText(TextFormat("[%i,%i]", i, j), 10 + PLAYER_SIZE*i, 15 + PLAYER_SIZE*j, 10, LIGHTGRAY);
             }
         }
 
@@ -98,16 +102,16 @@ main :: () {
 
         // Draw full scene with second camera
         for i: 0..screenWidth/PLAYER_SIZE {
-            DrawLineV(Vector2.{ xx (PLAYER_SIZE*i), 0 }, Vector2.{ xx (PLAYER_SIZE*i), screenHeight }, LIGHTGRAY);
+            DrawLineV(Vector2.{ cast(float)(PLAYER_SIZE*i), 0 }, Vector2.{ cast(float)(PLAYER_SIZE*i), cast(float)screenHeight }, LIGHTGRAY);
         }
 
         for i: 0..screenHeight/PLAYER_SIZE {
-            DrawLineV(Vector2.{ 0, xx (PLAYER_SIZE*i) }, Vector2.{ screenWidth, xx (PLAYER_SIZE*i) }, LIGHTGRAY);
+            DrawLineV(Vector2.{ 0, cast(float)(PLAYER_SIZE*i) }, Vector2.{ cast(float)screenWidth, cast(float)(PLAYER_SIZE*i) }, LIGHTGRAY);
         }
 
         for i: 0..screenWidth/PLAYER_SIZE-1 {
             for j: 0..screenHeight/PLAYER_SIZE-1 {
-                DrawText(TextFormat("[%i,%i]", i, j), xx (10 + PLAYER_SIZE*i), xx (15 + PLAYER_SIZE*j), 10, LIGHTGRAY);
+                DrawText(TextFormat("[%i,%i]", i, j), 10 + PLAYER_SIZE*i, 15 + PLAYER_SIZE*j, 10, LIGHTGRAY);
             }
         }
 

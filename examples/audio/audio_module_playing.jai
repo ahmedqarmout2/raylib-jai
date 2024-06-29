@@ -2,7 +2,7 @@
 #import "Basic";
 #import "Math";
 
-MAX_CIRCLES :: 64;
+MAX_CIRCLES : s32 : 64;
 
 CircleWave :: struct {
     position : Vector2;
@@ -37,10 +37,11 @@ main :: () {
     circles: [MAX_CIRCLES]CircleWave;
 
     for < i: MAX_CIRCLES - 1..0 {
+        r: s32 = GetRandomValue(10, 40);
         circles[i].alpha      = 0.0;
-        circles[i].radius     = xx GetRandomValue(10, 40);
-        circles[i].position.x = xx GetRandomValue(xx circles[i].radius, xx (screenWidth - circles[i].radius));
-        circles[i].position.y = xx GetRandomValue(xx circles[i].radius, xx (screenHeight - circles[i].radius));
+        circles[i].radius     = cast(float)r;
+        circles[i].position.x = cast(float)GetRandomValue(r, screenWidth  - r);
+        circles[i].position.y = cast(float)GetRandomValue(r, screenHeight - r);
         circles[i].speed      = GetRandomValue(1, 100)/2000.0;
         circles[i].color      = colors[GetRandomValue(0, 13)];
     }
@@ -97,10 +98,11 @@ main :: () {
             if (circles[i].alpha > 1.0) circles[i].speed *= -1;
 
             if (circles[i].alpha <= 0.0) {
+                r: s32 = GetRandomValue(10, 40);
                 circles[i].alpha      = 0.0;
-                circles[i].radius     = xx GetRandomValue(10, 40);
-                circles[i].position.x = xx GetRandomValue(xx circles[i].radius, xx (screenWidth - circles[i].radius));
-                circles[i].position.y = xx GetRandomValue(xx circles[i].radius, xx (screenHeight - circles[i].radius));
+                circles[i].radius     = cast(float)r;
+                circles[i].position.x = cast(float)GetRandomValue(r, screenWidth  - r);
+                circles[i].position.y = cast(float)GetRandomValue(r, screenHeight - r);
                 circles[i].speed      = GetRandomValue(1, 100)/2000.0;
                 circles[i].color      = colors[GetRandomValue(0, 13)];
             }
@@ -121,7 +123,7 @@ main :: () {
 
             // Draw time bar
             DrawRectangle(20, screenHeight - 20 - 12, screenWidth - 40, 12, LIGHTGRAY);
-            DrawRectangle(20, screenHeight - 20 - 12, xx timePlayed, 12, MAROON);
+            DrawRectangle(20, screenHeight - 20 - 12, cast(s32)timePlayed, 12, MAROON);
             DrawRectangleLines(20, screenHeight - 20 - 12, screenWidth - 40, 12, GRAY);
 
             // Draw help instructions

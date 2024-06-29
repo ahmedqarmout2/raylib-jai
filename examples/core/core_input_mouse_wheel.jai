@@ -1,8 +1,8 @@
 #import "raylib";
 
 main :: () {
-    screenWidth  :: 800;
-    screenHeight :: 450;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ main :: () {
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
-        boxPositionY -= xx (GetMouseWheelMove()*scrollSpeed);
+        boxPositionY -= cast(s32)(GetMouseWheelMove()*scrollSpeed);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -32,7 +32,7 @@ main :: () {
 
         ClearBackground(RAYWHITE);
 
-        DrawRectangle(screenWidth/2 - 40, xx boxPositionY, 80, 80, MAROON);
+        DrawRectangle(screenWidth/2 - 40, boxPositionY, 80, 80, MAROON);
 
         DrawText("Use mouse wheel to move the cube up and down!", 10, 10, 20, GRAY);
         DrawText(TextFormat("Box position Y: %03i", boxPositionY), 10, 40, 20, LIGHTGRAY);
