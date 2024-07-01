@@ -1,7 +1,6 @@
 @echo off
 setlocal
 
-
 pushd examples
 
 pushd audio

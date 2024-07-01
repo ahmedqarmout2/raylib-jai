@@ -35,7 +35,8 @@ main :: () {
         // NOTE: Texture is scaled twice its size, so it sould be considered on scrolling
         if (scrollingBack <= cast(float)-background.width*2) scrollingBack = 0;
         if (scrollingMid  <= cast(float)-midground.width*2)  scrollingMid  = 0;
-        if (scrollingFore <= cast(float)-foreground.width*2) scrollingFore = 0;        //----------------------------------------------------------------------------------
+        if (scrollingFore <= cast(float)-foreground.width*2) scrollingFore = 0;
+        //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------

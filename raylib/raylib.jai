@@ -937,7 +937,7 @@ BeginTextureMode :: (target: RenderTexture2D) #foreign raylib_native;
 EndTextureMode :: () #foreign raylib_native;
 BeginShaderMode :: (shader: Shader) #foreign raylib_native;
 EndShaderMode :: () #foreign raylib_native;
-BeginBlendMode :: (mode: s32) #foreign raylib_native;
+BeginBlendMode :: (mode: BlendMode) #foreign raylib_native;
 EndBlendMode :: () #foreign raylib_native;
 BeginScissorMode :: (x: s32, y: s32, width: s32, height: s32) #foreign raylib_native;
 EndScissorMode :: () #foreign raylib_native;
