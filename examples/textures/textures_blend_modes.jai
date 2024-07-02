@@ -1,6 +1,5 @@
 #import "raylib";
 #import "Basic";
-#import "Math";
 
 main :: () {
     screenWidth  : s32 : 800;
