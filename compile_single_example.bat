@@ -3,6 +3,6 @@ setlocal
 
 pushd examples
 pushd textures
-jai -import_dir ../.. -x64 textures_draw_tiled.jai || exit /b
+jai -import_dir ../.. -x64 textures_fog_of_war.jai || exit /b
 popd
 popd
