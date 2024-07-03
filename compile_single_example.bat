@@ -3,6 +3,6 @@ setlocal
 
 pushd examples
 pushd textures
-jai -import_dir ../.. -x64 textures_gif_player.jai || exit /b
+jai -import_dir ../.. -x64 textures_image_drawing.jai || exit /b
 popd
 popd
