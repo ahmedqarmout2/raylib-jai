@@ -1238,7 +1238,7 @@ ImageCopy :: (image: Image) -> Image #foreign raylib_native;
 ImageFromImage :: (image: Image, rec: Rectangle) -> Image #foreign raylib_native;
 ImageText :: (text: *u8, fontSize: s32, color: Color) -> Image #foreign raylib_native;
 ImageTextEx :: (font: Font, text: *u8, fontSize: float, spacing: float, tint: Color) -> Image #foreign raylib_native;
-ImageFormat :: (image: *Image, newFormat: s32) #foreign raylib_native;
+ImageFormat :: (image: *Image, newFormat: PixelFormat) #foreign raylib_native;
 ImageToPOT :: (image: *Image, fill: Color) #foreign raylib_native;
 ImageCrop :: (image: *Image, crop: Rectangle) #foreign raylib_native;
 ImageAlphaCrop :: (image: *Image, threshold: float) #foreign raylib_native;

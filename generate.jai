@@ -248,7 +248,9 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "SetTextureFilter", "(texture: Texture2D, filter: TextureFilter)");
     Hash_Table.table_add(*g_improved_function_definitions, "SetTextureWrap"  , "(texture: Texture2D, wrap: TextureWrap)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "BeginBlendMode"  , "(mode: BlendMode)");
+    Hash_Table.table_add(*g_improved_function_definitions, "BeginBlendMode", "(mode: BlendMode)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "ImageFormat", "(image: *Image, newFormat: PixelFormat)");
 }
 
 populate_improved_struct_elements_table :: () {
