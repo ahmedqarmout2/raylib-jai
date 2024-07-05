@@ -1,29 +1,42 @@
 #import "raylib";
 #import "Basic";
 
+NUM_TEXTURES: s32 : 3;
+
 main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image loading");
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture rotation");
     //--------------------------------------------------------------------------------------
 
     set_working_directory(#filepath);
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
+    image45    : Image = LoadImage("resources/raylib_logo.png");
+    image90    : Image = LoadImage("resources/raylib_logo.png");
+    imageNeg90 : Image = LoadImage("resources/raylib_logo.png");
 
-    image: Image = LoadImage("resources/raylib_logo.png");     // Loaded in CPU memory (RAM)
-    texture: Texture2D = LoadTextureFromImage(image);          // Image converted to texture, GPU memory (VRAM)
-    UnloadImage(image);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
+    ImageRotate(*image45, 45);
+    ImageRotate(*image90, 90);
+    ImageRotate(*imageNeg90, -90);
 
-    SetTargetFPS(60);     // Set our game to run at 60 frames-per-second
+    textures: [NUM_TEXTURES]Texture2D;
+
+    textures[0] = LoadTextureFromImage(image45);
+    textures[1] = LoadTextureFromImage(image90);
+    textures[2] = LoadTextureFromImage(imageNeg90);
+
+    currentTexture: s32 = 0;
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
-        // Nothing to do
+        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT) || IsKeyPressed(.KEY_RIGHT)) {
+            currentTexture = (currentTexture + 1)%NUM_TEXTURES; // Cycle between the textures
+        }
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -32,9 +45,9 @@ main :: () {
 
         ClearBackground(RAYWHITE);
 
-        DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
+        DrawTexture(textures[currentTexture], screenWidth/2 - textures[currentTexture].width/2, screenHeight/2 - textures[currentTexture].height/2, WHITE);
 
-        DrawText("this IS a texture loaded from an image!", 300, 370, 10, GRAY);
+        DrawText("Press LEFT MOUSE BUTTON to rotate the image clockwise", 250, 420, 10, DARKGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -42,7 +55,7 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);       // Texture unloading
+    for textures UnloadTexture(it);
 
     CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
