@@ -219,7 +219,8 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonReleased" , "(button: MouseButton) -> bool");
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonUp"       , "(button: MouseButton) -> bool");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGestureDetected", "(gesture: Gesture) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGestureDetected"  , "(gesture: Gesture) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "GetGestureDetected" , "() -> Gesture");
 
     Hash_Table.table_add(*g_improved_function_definitions, "IsWindowState"    , "(flag: ConfigFlags) -> bool");
     Hash_Table.table_add(*g_improved_function_definitions, "SetWindowState"   , "(flags: ConfigFlags)");

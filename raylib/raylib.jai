@@ -1113,7 +1113,7 @@ GetTouchPointCount :: () -> s32 #foreign raylib_native;
 //------------------------------------------------------------------------------------
 SetGesturesEnabled :: (flags: u32) #foreign raylib_native;
 IsGestureDetected :: (gesture: Gesture) -> bool #foreign raylib_native;
-GetGestureDetected :: () -> s32 #foreign raylib_native;
+GetGestureDetected :: () -> Gesture #foreign raylib_native;
 GetGestureHoldDuration :: () -> float #foreign raylib_native;
 GetGestureDragVector :: () -> Vector2 #foreign raylib_native;
 GetGestureDragAngle :: () -> float #foreign raylib_native;
