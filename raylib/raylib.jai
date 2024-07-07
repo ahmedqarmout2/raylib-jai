@@ -221,7 +221,7 @@ NPatchInfo :: struct {
     top: s32;                 // Top border offset
     right: s32;               // Right border offset
     bottom: s32;              // Bottom border offset
-    layout: s32;              // Layout of the n-patch: 3x3, 1x3 or 3x1
+    layout: NPatchLayout;              // Layout of the n-patch: 3x3, 1x3 or 3x1
 }
 
 // GlyphInfo, font characters glyphs info

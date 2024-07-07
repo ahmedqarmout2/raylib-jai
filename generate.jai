@@ -259,6 +259,8 @@ populate_improved_struct_elements_table :: () {
 
     Hash_Table.table_add(*g_improved_struct_elements, "Image_format"  , "PixelFormat");
     Hash_Table.table_add(*g_improved_struct_elements, "Texture_format", "PixelFormat");
+
+    Hash_Table.table_add(*g_improved_struct_elements, "NPatchInfo_layout", "NPatchLayout");
 }
 
 increment_line_counter :: () -> bool {
