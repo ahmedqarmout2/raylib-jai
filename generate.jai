@@ -10,6 +10,7 @@ print_to_builder :: Basic.print_to_builder;
 
 g_improved_function_definitions : Table(string, string);
 g_improved_struct_elements      : Table(string, string);
+g_improved_definitions          : Table(string, string);
 
 // Even values are the C types
 // Odd values are the jai types
@@ -37,7 +38,7 @@ ENUM_PREFIX     :: "typedef enum";
 DEFINE_PREFIX   :: "#define";
 RAYLIB_COLOR    :: "CLITERAL(Color)";
 TYPEDEF_PREFIX  :: "typedef";
-IF_BEGIN_PREFIX :: "#if";
+IF_BEGIN_PREFIX :: "#if ";
 IF_END_PREFIX   :: "#endif";
 SWITCH_PREFIX   :: "switch";
 CASE_PREFIX     :: "case";
@@ -55,12 +56,6 @@ DONE
 
 RAYLIB_HEADER ::  #string DONE
 #import "Math";
-
-RAYLIB_VERSION_MAJOR :: 5;
-RAYLIB_VERSION_MINOR :: 0;
-RAYLIB_VERSION_PATCH :: 0;
-
-RAYLIB_VERSION :: "5.0";
 DONE
 
 RAYLIB_FOOTER ::  #string DONE
@@ -97,6 +92,9 @@ main :: () {
 
     populate_improved_struct_elements_table();
     defer Hash_Table.deinit(*g_improved_struct_elements);
+
+    populate_improved_definitions();
+    defer Hash_Table.deinit(*g_improved_definitions);
 
     generate_bindings("raylib", RAYLIB_HEADER, RAYLIB_FOOTER);
     generate_bindings("raymath", RAYMATH_HEADER, "");
@@ -252,6 +250,8 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "BeginBlendMode", "(mode: BlendMode)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "ImageFormat", "(image: *Image, newFormat: PixelFormat)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "LoadImageRaw", "(fileName: *u8, width: s32, height: s32, format: PixelFormat, headerSize: s32) -> Image");
 }
 
 populate_improved_struct_elements_table :: () {
@@ -261,6 +261,21 @@ populate_improved_struct_elements_table :: () {
     Hash_Table.table_add(*g_improved_struct_elements, "Texture_format", "PixelFormat");
 
     Hash_Table.table_add(*g_improved_struct_elements, "NPatchInfo_layout", "NPatchLayout");
+}
+
+populate_improved_definitions :: () {
+    Hash_Table.table_add(*g_improved_definitions, "MOUSE_LEFT_BUTTON"   , "MOUSE_LEFT_BUTTON   :: MouseButton.MOUSE_BUTTON_LEFT");
+    Hash_Table.table_add(*g_improved_definitions, "MOUSE_RIGHT_BUTTON"  , "MOUSE_RIGHT_BUTTON  :: MouseButton.MOUSE_BUTTON_RIGHT");
+    Hash_Table.table_add(*g_improved_definitions, "MOUSE_MIDDLE_BUTTON" , "MOUSE_MIDDLE_BUTTON :: MouseButton.MOUSE_BUTTON_MIDDLE");
+
+    Hash_Table.table_add(*g_improved_definitions, "MATERIAL_MAP_DIFFUSE"  , "MATERIAL_MAP_DIFFUSE  :: MaterialMapIndex.MATERIAL_MAP_ALBEDO");
+    Hash_Table.table_add(*g_improved_definitions, "MATERIAL_MAP_SPECULAR" , "MATERIAL_MAP_SPECULAR :: MaterialMapIndex.MATERIAL_MAP_METALNESS");
+
+    Hash_Table.table_add(*g_improved_definitions, "SHADER_LOC_MAP_DIFFUSE"  , "SHADER_LOC_MAP_DIFFUSE  :: ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO");
+    Hash_Table.table_add(*g_improved_definitions, "SHADER_LOC_MAP_SPECULAR" , "SHADER_LOC_MAP_SPECULAR :: ShaderLocationIndex.SHADER_LOC_MAP_METALNESS");
+
+    Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_DIFFUSE"  , "RL_SHADER_LOC_MAP_DIFFUSE  :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_ALBEDO");
+    Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_SPECULAR" , "RL_SHADER_LOC_MAP_SPECULAR :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_METALNESS");
 }
 
 increment_line_counter :: () -> bool {
@@ -324,12 +339,22 @@ handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) 
 }
 
 handle_ignored :: (file_lines: []string, unrecognized_builder: *String_Builder) {
+    open_ifs := 0;
     while (true) {
         line := String.trim(file_lines[g_line_counter]);
+
+        if (String.starts_with(line, IF_BEGIN_PREFIX)) {
+            open_ifs += 1;
+        }
+
         print_to_builder(unrecognized_builder, "%\n", line);
 
         if (String.starts_with(line, IF_END_PREFIX)) {
-            return;
+            open_ifs -= 1;
+
+            if (open_ifs == 0) {
+                return;
+            }
         }
 
         if (!increment_line_counter()) {
@@ -563,7 +588,51 @@ handle_define :: (file_lines: []string, output_builder: *String_Builder, unrecog
         return;
     }
 
-    print_to_builder(unrecognized_builder, "% %\n", DEFINE_PREFIX, line);
+    if (!String.contains(line, " ")) {
+        // For example: #define RL_COLOR_TYPE
+        print_to_builder(unrecognized_builder, "% %\n", DEFINE_PREFIX, line);
+        return;
+    }
+
+    line = String.trim(line);
+
+    found, definition, remainder := String.split_from_left(line, " ");
+    improved_definition, found_improvement := Hash_Table.table_find(*g_improved_definitions, definition);
+    if (found_improvement) {
+        print_to_builder(output_builder, "%;\n", improved_definition);
+        return;
+    }
+
+    first_replacement      := false; // first space after some characters
+    second_replacement     := false; // second space after some characters
+    found_space_after_char := false;
+    new_line := "";
+    for i: 0..line.count-1 {
+        c := String.slice(line, i, 1);
+        if (c == " ") {
+            if (!first_replacement) {
+                new_line = String.join(new_line, " :: ");
+                first_replacement = true;
+                continue;
+            } else if (found_space_after_char && !second_replacement) {
+                new_line = String.join(new_line, ";");
+                second_replacement = true;
+                continue;
+            }
+        } else if (first_replacement) {
+            found_space_after_char = true;
+        }
+
+        if (!second_replacement && line[i] == #char "/" && line[i+1] == #char "/" ) {
+            new_line = String.join(new_line, ";");
+            second_replacement = true;
+        }
+        new_line = String.join(new_line, c);
+    }
+    if (!second_replacement) {
+        new_line = String.join(new_line, ";");
+    }
+    print_to_builder(output_builder, "%\n", new_line);
 }
 
 handle_typedef :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
@@ -700,7 +769,7 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
 remove_f_from_floats :: (line: string) {
     found_number := false;
     found_dot    := false;
-    for i:0..line.count-1 {
+    for i: 0..line.count-1 {
         c := line[i];
         if (String.contains(NUMBERS, c)) {
             found_number = true;
@@ -882,7 +951,7 @@ convert_assignment :: (line: string, with_type: bool) -> string {
     multi_assign_parts := String.split(remainder, "=");
     if (multi_assign_parts.count > 2 && with_type) {
         remainder = " ";
-        for i:0..multi_assign_parts.count-1 {
+        for i: 0..multi_assign_parts.count-1 {
             t := String.trim(multi_assign_parts[i]);
             if (i < multi_assign_parts.count - 1) {
                 t = String.replace(t, ",", ";");

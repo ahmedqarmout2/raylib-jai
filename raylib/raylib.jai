@@ -6,12 +6,6 @@
 
 #import "Math";
 
-RAYLIB_VERSION_MAJOR :: 5;
-RAYLIB_VERSION_MINOR :: 0;
-RAYLIB_VERSION_PATCH :: 0;
-
-RAYLIB_VERSION :: "5.0";
-
 /*
 ***********************************************************************************************
 *
@@ -92,6 +86,15 @@ RAYLIB_VERSION :: "5.0";
 ***********************************************************************************************
 */
 
+
+
+RAYLIB_VERSION_MAJOR :: 5;
+RAYLIB_VERSION_MINOR :: 0;
+RAYLIB_VERSION_PATCH :: 0;
+RAYLIB_VERSION ::  "5.0";
+
+// Function specifiers in case library is build/used as a shared library (Windows)
+// NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
 
 
 //----------------------------------------------------------------------------------
@@ -611,6 +614,9 @@ KeyboardKey :: enum s32 {
 }
 
 // Add backwards compatibility support for deprecated names
+MOUSE_LEFT_BUTTON   :: MouseButton.MOUSE_BUTTON_LEFT;
+MOUSE_RIGHT_BUTTON  :: MouseButton.MOUSE_BUTTON_RIGHT;
+MOUSE_MIDDLE_BUTTON :: MouseButton.MOUSE_BUTTON_MIDDLE;
 
 // Mouse buttons
 MouseButton :: enum s32 {
@@ -685,6 +691,8 @@ MaterialMapIndex :: enum s32 {
     MATERIAL_MAP_BRDF;               // Brdf material
 }
 
+MATERIAL_MAP_DIFFUSE  :: MaterialMapIndex.MATERIAL_MAP_ALBEDO;
+MATERIAL_MAP_SPECULAR :: MaterialMapIndex.MATERIAL_MAP_METALNESS;
 
 // Shader location index
 ShaderLocationIndex :: enum s32 {
@@ -716,6 +724,8 @@ ShaderLocationIndex :: enum s32 {
     SHADER_LOC_MAP_BRDF;             // Shader location: sampler2d texture: brdf
 }
 
+SHADER_LOC_MAP_DIFFUSE  :: ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO;
+SHADER_LOC_MAP_SPECULAR :: ShaderLocationIndex.SHADER_LOC_MAP_METALNESS;
 
 // Shader uniform data type
 ShaderUniformDataType :: enum s32 {
@@ -1210,7 +1220,7 @@ GetCollisionRec :: (rec1: Rectangle, rec2: Rectangle) -> Rectangle #foreign rayl
 // Image loading functions
 // NOTE: These functions do not require GPU access
 LoadImage :: (fileName: *u8) -> Image #foreign raylib_native;
-LoadImageRaw :: (fileName: *u8, width: s32, height: s32, format: s32, headerSize: s32) -> Image #foreign raylib_native;
+LoadImageRaw :: (fileName: *u8, width: s32, height: s32, format: PixelFormat, headerSize: s32) -> Image #foreign raylib_native;
 LoadImageSvg :: (fileNameOrString: *u8, width: s32, height: s32) -> Image #foreign raylib_native;
 LoadImageAnim :: (fileName: *u8, frames: *s32) -> Image #foreign raylib_native;
 LoadImageFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32) -> Image #foreign raylib_native;
