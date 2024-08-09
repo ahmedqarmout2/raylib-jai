@@ -3,15 +3,21 @@
 #import "Math";
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - background scrolling");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // NOTE: Be careful, background width must be equal or bigger than screen width
     // if not, texture should be draw more than two times for scrolling effect
@@ -70,7 +76,5 @@ main :: () {
     UnloadTexture(background);  // Unload background texture
     UnloadTexture(midground);   // Unload midground texture
     UnloadTexture(foreground);  // Unload foreground texture
-
-    CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

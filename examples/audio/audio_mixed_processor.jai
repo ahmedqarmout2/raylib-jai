@@ -6,19 +6,27 @@ exponent: float = 1.0;       // Audio exponentiation value
 averageVolume: [400]float;   // Average volume history
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - processing mixed output");
+    defer CloseWindow(); // Close window and OpenGL context
+
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
     //--------------------------------------------------------------------------------------
 
     InitAudioDevice();              // Initialize audio device
 
     AttachAudioMixedProcessor(ProcessAudio);
 
-    set_working_directory(#filepath);
+
     music: Music = LoadMusicStream("resources/country.mp3");
     sound: Sound = LoadSound("resources/coin.wav");
 
@@ -74,8 +82,6 @@ main :: () {
     DetachAudioMixedProcessor(ProcessAudio);  // Disconnect audio processor
 
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
-
-    CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }
 

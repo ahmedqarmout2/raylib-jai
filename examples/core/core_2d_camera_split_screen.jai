@@ -5,17 +5,20 @@
 PLAYER_SIZE : s32 : 40;
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera split screen");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    defer CloseWindow();           // Close window and OpenGL context
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
     //--------------------------------------------------------------------------------------
 
     player1 : Rectangle = .{ 200, 200, cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE };

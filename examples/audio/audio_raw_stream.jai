@@ -20,12 +20,20 @@ oldFrequency: float = 1.0;
 sineIdx: float = 0.0;
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - raw audio streaming");
+    defer CloseWindow(); // Close window and OpenGL context
+
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
     //--------------------------------------------------------------------------------------
 
     InitAudioDevice();              // Initialize audio device
@@ -171,8 +179,6 @@ main :: () {
 
     UnloadAudioStream(stream);  // Close raw audio stream and delete buffers from RAM
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
-
-    CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }
 

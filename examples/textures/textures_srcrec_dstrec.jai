@@ -3,15 +3,21 @@
 #import "Math";
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] examples - texture source and destination rectangles");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
@@ -64,7 +70,5 @@ main :: () {
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(scarfy);        // Texture unloading
-
-    CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

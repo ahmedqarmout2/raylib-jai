@@ -5,15 +5,21 @@
 MAX_POINTS: s32 : 11;      // 10 points and back to the start
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - textured polygon");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // Define texture coordinates to map our texture to poly
     texcoords: [MAX_POINTS]Vector2 = .[
@@ -80,8 +86,6 @@ main :: () {
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(texture); // Unload texture
-
-    CloseWindow();          // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }
 

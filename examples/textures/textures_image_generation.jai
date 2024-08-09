@@ -4,12 +4,20 @@
 NUM_TEXTURES: s32 : 9;      // Currently we have 8 generation algorithms but some are have multiple purposes (Linear and Square Gradients)
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - procedural images generation");
+    defer CloseWindow(); // Close window and OpenGL context
+
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
     //--------------------------------------------------------------------------------------
 
     verticalGradient   : Image = GenImageGradientLinear(screenWidth, screenHeight, 0, RED, BLUE);
@@ -89,7 +97,5 @@ main :: () {
     //--------------------------------------------------------------------------------------
     // Unload textures data (GPU VRAM)
     for textures UnloadTexture(it);
-
-    CloseWindow();            // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

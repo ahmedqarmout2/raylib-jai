@@ -5,15 +5,21 @@ MAX_FRAME_DELAY: s32 : 20;
 MIN_FRAME_DELAY: s32 : 1;
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - gif playing");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     animFrames: s32 = 0;
 
@@ -95,7 +101,5 @@ main :: () {
     //--------------------------------------------------------------------------------------
     UnloadTexture(texScarfyAnim);   // Unload texture
     UnloadImage(imScarfyAnim);      // Unload image (contains all frames)
-
-    CloseWindow();            // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

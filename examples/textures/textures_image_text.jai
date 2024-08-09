@@ -3,15 +3,21 @@
 #import "Math";
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [texture] example - image text drawing");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     parrots: Image = LoadImage("resources/parrots.png"); // Load image in CPU memory (RAM)
 
@@ -62,7 +68,5 @@ main :: () {
     UnloadTexture(texture);     // Texture unloading
 
     UnloadFont(font);           // Unload custom font
-
-    CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

@@ -1,17 +1,21 @@
 #import "raylib";
+#import "Basic";
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - window should close");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    defer CloseWindow();           // Close window and OpenGL context
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
     //--------------------------------------------------------------------------------------
 
     SetExitKey(.KEY_NULL);       // Disable KEY_ESCAPE to close window, X-button still works

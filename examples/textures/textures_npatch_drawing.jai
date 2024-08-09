@@ -3,15 +3,21 @@
 #import "Math";
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - N-patch drawing");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     nPatchTexture: Texture2D = LoadTexture("resources/ninepatch_button.png");
@@ -87,7 +93,5 @@ main :: () {
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(nPatchTexture);  // Texture unloading
-
-    CloseWindow();                 // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

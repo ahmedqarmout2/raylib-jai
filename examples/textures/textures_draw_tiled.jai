@@ -7,6 +7,8 @@ MARGIN_SIZE : s32 : 8;         // Size for the margins
 COLOR_SIZE  : s32 : 16;        // Size of the color select buttons
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
@@ -14,9 +16,13 @@ main :: () {
     //--------------------------------------------------------------------------------------
     SetConfigFlags(.FLAG_WINDOW_RESIZABLE); // Make the window resizable
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - Draw part of a texture tiled");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     texPattern: Texture = LoadTexture("resources/patterns.png");
@@ -157,8 +163,6 @@ main :: () {
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(texPattern);  // Unload texture
-
-    CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }
 

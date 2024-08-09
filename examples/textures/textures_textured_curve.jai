@@ -18,6 +18,8 @@ curveEndPositionTangent : Vector2;
 curveSelectedPoint: *Vector2;
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
@@ -25,9 +27,13 @@ main :: () {
     //--------------------------------------------------------------------------------------
     SetConfigFlags(.FLAG_VSYNC_HINT | .FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [textures] examples - textured curve");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // Load the road texture
     texRoad = LoadTexture("resources/road.png");
@@ -114,8 +120,7 @@ main :: () {
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(texRoad);
-    
-    CloseWindow();              // Close window and OpenGL context
+
     //--------------------------------------------------------------------------------------
 }
 

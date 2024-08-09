@@ -13,6 +13,8 @@ CircleWave :: struct {
 };
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
@@ -21,11 +23,12 @@ main :: () {
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - module playing (streaming)");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    defer CloseWindow();          // Close window and OpenGL context
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
     //--------------------------------------------------------------------------------------
 
     InitAudioDevice();            // Initialize audio device
@@ -46,7 +49,6 @@ main :: () {
         circles[i].color      = colors[GetRandomValue(0, 13)];
     }
 
-    set_working_directory(#filepath);
     music: Music = LoadMusicStream("resources/mini1111.xm");
     defer UnloadMusicStream(music);          // Unload music stream buffers from RAM
 

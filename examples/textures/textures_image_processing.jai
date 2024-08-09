@@ -28,15 +28,21 @@ processText: [9]*u8: .[
 ];
 
 main :: () {
+    set_working_directory(#filepath);
+
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - image processing");
-    //--------------------------------------------------------------------------------------
+    defer CloseWindow(); // Close window and OpenGL context
 
-    set_working_directory(#filepath);
+    icon: Image = LoadImage("../raylib_16x16.png");
+    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    defer UnloadImage(icon);
+    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
@@ -150,7 +156,5 @@ main :: () {
     UnloadTexture(texture);       // Unload texture from VRAM
     UnloadImage(imOrigin);        // Unload image-origin from RAM
     UnloadImage(imCopy);          // Unload image-copy from RAM
-
-    CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }
