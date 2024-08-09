@@ -2,7 +2,7 @@
 setlocal
 
 pushd examples
-pushd audio
-jai -import_dir ../.. -x64  -plug Icon -icon ../raylib.ico audio_mixed_processor.jai || exit /b
+pushd text
+jai -import_dir ../.. -x64  -plug Icon -icon ../raylib.ico text_codepoints_loading.jai || exit /b
 popd
 popd
