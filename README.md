@@ -2,7 +2,7 @@
 
 [Raylib](https://www.raylib.com/) is a minimal gamedev library for C and this repository has a script for automatically generating Jai bindings from `raylib.h`, `raymath.h` and `rlgl.h`.
 
-> Tested with Jai version: beta 0.1.091
+> Tested with Jai version: beta 0.1.093
 
 > Raylib version: 5.0
  
