@@ -7,19 +7,13 @@ MAX_COLORS_COUNT: s32 : 23;          // Number of colors available
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - mouse painting");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Colors to choose from
     colors: [MAX_COLORS_COUNT]Color = .[
@@ -70,6 +64,7 @@ main :: () {
 
     // Create a RenderTexture2D to use as a canvas
     target: RenderTexture2D = LoadRenderTexture(screenWidth, screenHeight);
+    defer UnloadRenderTexture(target);    // Unload render texture
 
     // Clear render texture before entering the game loop
     BeginTextureMode(target);
@@ -77,6 +72,7 @@ main :: () {
     EndTextureMode();
 
     SetTargetFPS(120);              // Set our game to run at 120 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -169,6 +165,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -210,13 +207,6 @@ main :: () {
             DrawRectangle(0, 150, GetScreenWidth(), 80, BLACK);
             DrawText("IMAGE SAVED:  my_amazing_texture_painting.png", 150, 180, 20, RAYWHITE);
         }
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadRenderTexture(target);    // Unload render texture
-    //--------------------------------------------------------------------------------------
 }

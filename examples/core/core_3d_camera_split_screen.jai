@@ -5,19 +5,13 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera split screen");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Setup player 1 camera and screen
     cameraPlayer1: Camera;
@@ -49,6 +43,7 @@ main :: () {
     spacing : float = 4;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -81,82 +76,85 @@ main :: () {
         {
             // Draw Player1 view to the render texture
             BeginTextureMode(screenPlayer1);
+            defer EndTextureMode();
+
             ClearBackground(SKYBLUE);
 
-            BeginMode3D(cameraPlayer1);
+            {
+                BeginMode3D(cameraPlayer1);
+                defer EndMode3D();
 
-            // Draw scene: grid of cube trees on a plane to make a "world"
-            DrawPlane(Vector3.{ 0, 0, 0 }, Vector2.{ 50, 50 }, BEIGE); // Simple world plane
+                // Draw scene: grid of cube trees on a plane to make a "world"
+                DrawPlane(Vector3.{ 0, 0, 0 }, Vector2.{ 50, 50 }, BEIGE); // Simple world plane
 
-            x : float = -count*spacing;
-            while (x <= count*spacing) {
-                defer x += spacing;
+                x : float = -count*spacing;
+                while (x <= count*spacing) {
+                    defer x += spacing;
 
-                z : float = -count*spacing;
-                while (z <= count*spacing) {
-                    defer z += spacing;
+                    z : float = -count*spacing;
+                    while (z <= count*spacing) {
+                        defer z += spacing;
 
-                    DrawCube(Vector3.{ x, 1.5, z }, 1, 1, 1, LIME);
-                    DrawCube(Vector3.{ x, 0.5, z }, 0.25, 1, 0.25, BROWN);
+                        DrawCube(Vector3.{ x, 1.5, z }, 1, 1, 1, LIME);
+                        DrawCube(Vector3.{ x, 0.5, z }, 0.25, 1, 0.25, BROWN);
+                    }
                 }
+
+                // Draw a cube at each player's position
+                DrawCube(cameraPlayer1.position, 1, 1, 1, RED);
+                DrawCube(cameraPlayer2.position, 1, 1, 1, BLUE);
             }
-
-            // Draw a cube at each player's position
-            DrawCube(cameraPlayer1.position, 1, 1, 1, RED);
-            DrawCube(cameraPlayer2.position, 1, 1, 1, BLUE);
-
-            EndMode3D();
 
             DrawRectangle(0, 0, GetScreenWidth()/2, 40, Fade(RAYWHITE, 0.8));
             DrawText("PLAYER1: W/S to move", 10, 10, 20, MAROON);
-
-            EndTextureMode();
         }
 
         {
             // Draw Player2 view to the render texture
             BeginTextureMode(screenPlayer2);
+            defer EndTextureMode();
+
             ClearBackground(SKYBLUE);
 
-            BeginMode3D(cameraPlayer2);
+            {
+                BeginMode3D(cameraPlayer2);
+                defer EndMode3D();
 
-            // Draw scene: grid of cube trees on a plane to make a "world"
-            DrawPlane(Vector3.{ 0, 0, 0 }, Vector2.{ 50, 50 }, BEIGE); // Simple world plane
+                // Draw scene: grid of cube trees on a plane to make a "world"
+                DrawPlane(Vector3.{ 0, 0, 0 }, Vector2.{ 50, 50 }, BEIGE); // Simple world plane
 
-            x : float = -count*spacing;
-            while (x <= count*spacing) {
-                defer x += spacing;
+                x : float = -count*spacing;
+                while (x <= count*spacing) {
+                    defer x += spacing;
 
-                z : float = -count*spacing;
-                while (z <= count*spacing) {
-                    defer z += spacing;
+                    z : float = -count*spacing;
+                    while (z <= count*spacing) {
+                        defer z += spacing;
 
-                    DrawCube(Vector3.{ x, 1.5, z }, 1, 1, 1, LIME);
-                    DrawCube(Vector3.{ x, 0.5, z }, 0.25, 1, 0.25, BROWN);
+                        DrawCube(Vector3.{ x, 1.5, z }, 1, 1, 1, LIME);
+                        DrawCube(Vector3.{ x, 0.5, z }, 0.25, 1, 0.25, BROWN);
+                    }
                 }
+
+                // Draw a cube at each player's position
+                DrawCube(cameraPlayer1.position, 1, 1, 1, RED);
+                DrawCube(cameraPlayer2.position, 1, 1, 1, BLUE);
             }
-
-            // Draw a cube at each player's position
-            DrawCube(cameraPlayer1.position, 1, 1, 1, RED);
-            DrawCube(cameraPlayer2.position, 1, 1, 1, BLUE);
-
-            EndMode3D();
 
             DrawRectangle(0, 0, GetScreenWidth()/2, 40, Fade(RAYWHITE, 0.8));
             DrawText("PLAYER2: UP/DOWN to move", 10, 10, 20, DARKBLUE);
-
-            EndTextureMode();
         }
 
         // Draw both views render textures to the screen side by side
         BeginDrawing();
+        defer EndDrawing();
+
         ClearBackground(BLACK);
 
         DrawTextureRec(screenPlayer1.texture, splitScreenRect, Vector2.{ 0, 0 }, WHITE);
         DrawTextureRec(screenPlayer2.texture, splitScreenRect, Vector2.{ screenWidth/2.0, 0 }, WHITE);
 
         DrawRectangle(GetScreenWidth()/2 - 2, 0, 4, GetScreenHeight(), LIGHTGRAY);
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 }

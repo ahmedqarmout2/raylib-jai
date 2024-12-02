@@ -6,19 +6,13 @@ NUM_TEXTURES: s32 : 9;      // Currently we have 8 generation algorithms but som
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - procedural images generation");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     verticalGradient   : Image = GenImageGradientLinear(screenWidth, screenHeight, 0, RED, BLUE);
     horizontalGradient : Image = GenImageGradientLinear(screenWidth, screenHeight, 90, RED, BLUE);
@@ -56,6 +50,7 @@ main :: () {
     currentTexture: s32 = 0;
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -68,6 +63,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -88,8 +84,6 @@ main :: () {
             case 7; DrawText("PERLIN NOISE", 640, 10, 20, RED);
             case 8; DrawText("CELLULAR", 670, 10, 20, RAYWHITE);
         }
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 

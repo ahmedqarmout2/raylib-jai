@@ -9,27 +9,24 @@ delayWriteIndex : u32 = 0;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - stream effects");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     InitAudioDevice();             // Initialize audio device
+    defer CloseAudioDevice();      // Close audio device
 
     music : Music = LoadMusicStream("resources/country.mp3");
+    defer UnloadMusicStream(music);
 
     // Allocate buffer for the delay effect
     delayBufferSize = 48000*2;     // 1 second delay (device sampleRate*channels)
     delayBuffer = cast(*float)alloc(delayBufferSize * size_of(float));
+    defer free(delayBuffer);
 
     PlayMusicStream(music);
 
@@ -40,6 +37,7 @@ main :: () {
     enableEffectDelay : bool = false; // Enable effect delay (1 second)
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -97,13 +95,9 @@ main :: () {
             DrawText("PRESS SPACE TO RESTART MUSIC", 215, 230, 20, LIGHTGRAY);
             DrawText("PRESS P TO PAUSE/RESUME MUSIC", 208, 260, 20, LIGHTGRAY);
             
-            t1 : *u8 = to_c_string(ifx enableEffectLPF then "ON" else "OFF");
-            defer free(t1);
-            DrawText(TextFormat("PRESS F TO TOGGLE LPF EFFECT: %s", t1), 200, 320, 20, GRAY);
-
-            t2 : *u8 = to_c_string(ifx enableEffectDelay then "ON" else "OFF");
-            defer free(t2);
-            DrawText(TextFormat("PRESS D TO TOGGLE DELAY EFFECT: %s", t2), 180, 350, 20, GRAY);
+            // TODO: should we reset temp storage because of get_c_string
+            DrawText(TextFormat("PRESS F TO TOGGLE LPF EFFECT: %s", get_c_string(ifx enableEffectLPF then "ON" else "OFF")), 200, 320, 20, GRAY);
+            DrawText(TextFormat("PRESS D TO TOGGLE DELAY EFFECT: %s", get_c_string(ifx enableEffectDelay then "ON" else "OFF")), 180, 350, 20, GRAY);
         }
         //----------------------------------------------------------------------------------
     }
@@ -114,24 +108,25 @@ main :: () {
 // Module Functions Definition
 //------------------------------------------------------------------------------------
 // Audio effect: lowpass filter
-AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {
-    low: [2]float = .[ 0.0, 0.0 ];
-    
+low: [2]float = .[ 0.0, 0.0 ];
+
+AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {    
     cutoff : float : 70.0 / 44100.0; // 70 Hz lowpass filter
     k      : float : cast(float)(cutoff / (cutoff + 0.1591549431)); // RC filter formula
 
-    _buffer: *float = cast(*float)buffer;
+    bufferData: *float = cast(*float)buffer;
 
     i : u32 = 0;
     while (i < frames*2) {
         defer i += 2;
 
-        l: float = _buffer[i];
-        r: float = _buffer[i + 1];
+        l: float = bufferData[i];
+        r: float = bufferData[i + 1];
+
         low[0] += k * (l - low[0]);
         low[1] += k * (r - low[1]);
-        _buffer[i]     = low[0];
-        _buffer[i + 1] = low[1];
+        bufferData[i]     = low[0];
+        bufferData[i + 1] = low[1];
     }
 }
 

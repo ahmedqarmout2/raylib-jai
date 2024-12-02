@@ -4,25 +4,21 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture from raw data");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
     // Load RAW image data (512x512, 32bit RGBA, no file header)
     fudesumiRaw: Image  = LoadImageRaw("resources/fudesumi.raw", 384, 512, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 0);
     fudesumi: Texture2D = LoadTextureFromImage(fudesumiRaw);  // Upload CPU (RAM) image to GPU (VRAM)
+    defer UnloadTexture(fudesumi);    // Texture unloading
+
     UnloadImage(fudesumiRaw);                                 // Unload CPU (RAM) image data
 
     // Generate a checked texture by code
@@ -54,7 +50,10 @@ main :: () {
     };
 
     checked: Texture2D = LoadTextureFromImage(checkedIm); // TODO: this closes the app and does not work. needs investigation
+    defer UnloadTexture(checked);     // Texture unloading
+
     UnloadImage(checkedIm);        // Unload CPU (RAM) image data (pixels)
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -65,6 +64,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -76,14 +76,6 @@ main :: () {
         DrawText("and RAW IMAGE LOADING", 46, 210, 30, BROWN);
 
         DrawText("(c) Fudesumi sprite by Eiden Marsal", 310, screenHeight - 20, 10, BROWN);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(fudesumi);    // Texture unloading
-    UnloadTexture(checked);     // Texture unloading
-    //--------------------------------------------------------------------------------------
 }

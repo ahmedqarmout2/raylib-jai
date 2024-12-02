@@ -3,21 +3,13 @@
 #import "Math";
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d picking");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -34,6 +26,7 @@ main :: () {
     collision: RayCollision;       // Ray collision hit info
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -48,7 +41,7 @@ main :: () {
 
         if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT)) {
             if (!collision.hit) {
-                ray = GetMouseRay(GetMousePosition(), camera);
+                ray = GetScreenToWorldRay(GetMousePosition(), camera);
 
                 // Check collision between ray and box
                 collision = GetRayCollisionBox(
@@ -63,36 +56,38 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        BeginDrawing();
+        {
+            BeginDrawing();
+            defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        BeginMode3D(camera);
+            {
+                BeginMode3D(camera);
+                defer EndMode3D();
 
-        if (collision.hit) {
-            DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, RED);
-            DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, MAROON);
+                if (collision.hit) {
+                    DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, RED);
+                    DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, MAROON);
 
-            DrawCubeWires(cubePosition, cubeSize.x + 0.2, cubeSize.y + 0.2, cubeSize.z + 0.2, GREEN);
-        } else {
-            DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, GRAY);
-            DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, DARKGRAY);
+                    DrawCubeWires(cubePosition, cubeSize.x + 0.2, cubeSize.y + 0.2, cubeSize.z + 0.2, GREEN);
+                } else {
+                    DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, GRAY);
+                    DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, DARKGRAY);
+                }
+
+                DrawRay(ray, MAROON);
+                DrawGrid(10, 1.0);
+            }
+
+            DrawText("Try clicking on the box with your mouse!", 240, 10, 20, DARKGRAY);
+
+            if (collision.hit) DrawText("BOX SELECTED", (screenWidth - MeasureText("BOX SELECTED", 30)) / 2, cast(s32)(screenHeight * 0.1), 30, GREEN);
+
+            DrawText("Right click mouse to toggle camera controls", 10, 430, 10, GRAY);
+
+            DrawFPS(10, 10);
         }
-
-        DrawRay(ray, MAROON);
-        DrawGrid(10, 1.0);
-
-        EndMode3D();
-
-        DrawText("Try clicking on the box with your mouse!", 240, 10, 20, DARKGRAY);
-
-        if (collision.hit) DrawText("BOX SELECTED", (screenWidth - MeasureText("BOX SELECTED", 30)) / 2, cast(s32)(screenHeight * 0.1), 30, GREEN);
-
-        DrawText("Right click mouse to toggle camera controls", 10, 430, 10, GRAY);
-
-        DrawFPS(10, 10);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 }

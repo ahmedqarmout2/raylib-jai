@@ -5,21 +5,13 @@
 MAX_COLUMNS : s32 : 20;
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera first person");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Define the camera to look into our 3d world (position, target, up vector)
     camera: Camera;
@@ -45,6 +37,7 @@ main :: () {
     DisableCursor();               // Limit cursor to relative movement inside the window
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -128,26 +121,27 @@ main :: () {
 
             ClearBackground(RAYWHITE);
 
-            BeginMode3D(camera);
+            {
+                BeginMode3D(camera);
+                defer EndMode3D();
 
-            DrawPlane(Vector3.{ 0.0, 0.0, 0.0 }, Vector2.{ 32.0, 32.0 }, LIGHTGRAY); // Draw ground
-            DrawCube(Vector3.{ -16.0, 2.5, 0.0 }, 1.0, 5.0, 32.0, BLUE);     // Draw a blue wall
-            DrawCube(Vector3.{ 16.0, 2.5, 0.0 }, 1.0, 5.0, 32.0, LIME);      // Draw a green wall
-            DrawCube(Vector3.{ 0.0, 2.5, 16.0 }, 32.0, 5.0, 1.0, GOLD);      // Draw a yellow wall
+                DrawPlane(Vector3.{ 0.0, 0.0, 0.0 }, Vector2.{ 32.0, 32.0 }, LIGHTGRAY); // Draw ground
+                DrawCube(Vector3.{ -16.0, 2.5, 0.0 }, 1.0, 5.0, 32.0, BLUE);     // Draw a blue wall
+                DrawCube(Vector3.{ 16.0, 2.5, 0.0 }, 1.0, 5.0, 32.0, LIME);      // Draw a green wall
+                DrawCube(Vector3.{ 0.0, 2.5, 16.0 }, 32.0, 5.0, 1.0, GOLD);      // Draw a yellow wall
 
-            // Draw some cubes around
-            for i: 0..MAX_COLUMNS-1 {
-                DrawCube(positions[i], 2.0, heights[i], 2.0, colors[i]);
-                DrawCubeWires(positions[i], 2.0, heights[i], 2.0, MAROON);
+                // Draw some cubes around
+                for i: 0..MAX_COLUMNS-1 {
+                    DrawCube(positions[i], 2.0, heights[i], 2.0, colors[i]);
+                    DrawCubeWires(positions[i], 2.0, heights[i], 2.0, MAROON);
+                }
+
+                // Draw player cube
+                if (cameraMode == .CAMERA_THIRD_PERSON) {
+                    DrawCube(camera.target, 0.5, 0.5, 0.5, PURPLE);
+                    DrawCubeWires(camera.target, 0.5, 0.5, 0.5, DARKPURPLE);
+                }
             }
-
-            // Draw player cube
-            if (cameraMode == .CAMERA_THIRD_PERSON) {
-                DrawCube(camera.target, 0.5, 0.5, 0.5, PURPLE);
-                DrawCubeWires(camera.target, 0.5, 0.5, 0.5, DARKPURPLE);
-            }
-
-            EndMode3D();
 
             // Draw info boxes
             DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5));
@@ -165,16 +159,14 @@ main :: () {
 
             DrawText("Camera status:", 610, 15, 10, BLACK);
 
-            t1 : *u8 = to_c_string(ifx (cameraMode == .CAMERA_FREE) then "FREE" else
+            t1 : *u8 = get_c_string(ifx (cameraMode == .CAMERA_FREE) then "FREE" else
                               ifx (cameraMode == .CAMERA_FIRST_PERSON) then "FIRST_PERSON" else
                               ifx (cameraMode == .CAMERA_THIRD_PERSON) then "THIRD_PERSON" else
                               ifx (cameraMode == .CAMERA_ORBITAL) then "ORBITAL" else "CUSTOM");
-            defer free(t1);
             DrawText(TextFormat("- Mode: %s", t1), 610, 30, 10, BLACK);
 
-            t2 : *u8 = to_c_string(ifx (camera.projection == .CAMERA_PERSPECTIVE) then "PERSPECTIVE" else
+            t2 : *u8 = get_c_string(ifx (camera.projection == .CAMERA_PERSPECTIVE) then "PERSPECTIVE" else
                               ifx (camera.projection == .CAMERA_ORTHOGRAPHIC) then "ORTHOGRAPHIC" else "CUSTOM");
-            defer free(t2);
             DrawText(TextFormat("- Projection: %s", t2), 610, 45, 10, BLACK);
 
             DrawText(TextFormat("- Position: (%06.3f, %06.3f, %06.3f)", camera.position.x, camera.position.y, camera.position.z), 610, 60, 10, BLACK);

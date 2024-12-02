@@ -17,29 +17,26 @@ Bunny :: struct {
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - bunnymark");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     // Load bunny texture
     texBunny: Texture2D = LoadTexture("resources/wabbit_alpha.png");
+    defer UnloadTexture(texBunny);    // Unload bunny texture
 
     bunnies: [..]Bunny;    // Bunnies array
     array_resize(*bunnies, MAX_BUNNIES);
+    defer array_free(bunnies);        // Unload bunnies data array
 
     bunniesCount: s32 = 0;         // Bunnies counter
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -76,6 +73,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -94,15 +92,6 @@ main :: () {
         DrawText(TextFormat("batched draw calls: %i", 1 + bunniesCount/MAX_BATCH_ELEMENTS), 320, 10, 20, MAROON);
 
         DrawFPS(10, 10);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    array_free(bunnies);        // Unload bunnies data array
-
-    UnloadTexture(texBunny);    // Unload bunny texture
-    //--------------------------------------------------------------------------------------
 }

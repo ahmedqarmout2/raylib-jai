@@ -7,24 +7,22 @@ NUM_FRAMES: s32 : 3;       // Number of frames (rectangles) for the button sprit
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - sprite button");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     InitAudioDevice();      // Initialize audio device
+    defer CloseAudioDevice();     // Close audio device
 
     fxButton : Sound     = LoadSound("resources/buttonfx.wav");   // Load button sound
+    defer UnloadSound(fxButton);  // Unload sound
+
     button   : Texture2D = LoadTexture("resources/button.png"); // Load button texture
+    defer UnloadTexture(button);  // Unload button texture
 
     // Define frame rectangle for drawing
     frameHeight: float = cast(float)button.height/NUM_FRAMES;
@@ -39,6 +37,7 @@ main :: () {
     mousePoint: Vector2 = .{ 0.0, 0.0 };
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -65,20 +64,11 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
         DrawTextureRec(button, sourceRec, Vector2.{ btnBounds.x, btnBounds.y }, WHITE); // Draw button frame
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(button);  // Unload button texture
-    UnloadSound(fxButton);  // Unload sound
-
-    CloseAudioDevice();     // Close audio device
-    //--------------------------------------------------------------------------------------
 }

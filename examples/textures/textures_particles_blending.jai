@@ -17,19 +17,13 @@ Particle :: struct {
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - particles blending");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Particles pool, reuse them!
     mouseTail: [MAX_PARTICLES]Particle;
@@ -47,10 +41,13 @@ main :: () {
     gravity: float = 3.0;
 
     smoke: Texture2D = LoadTexture("resources/spark_flame.png");
+    defer UnloadTexture(smoke);
 
     blending: BlendMode = .BLEND_ALPHA;
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
+
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
@@ -88,37 +85,32 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(DARKGRAY);
 
-        BeginBlendMode(blending);
+        {
+            BeginBlendMode(blending);
+            defer EndBlendMode();
 
-        // Draw active particles
-        for i: 0..MAX_PARTICLES-1 {
-            if (mouseTail[i].active)
-                DrawTexturePro(
-                    smoke,
-                    Rectangle.{ 0.0, 0.0, cast(float)smoke.width, cast(float)smoke.height },
-                    Rectangle.{ mouseTail[i].position.x, mouseTail[i].position.y, smoke.width*mouseTail[i].size, smoke.height*mouseTail[i].size },
-                    Vector2.{ cast(float)(smoke.width*mouseTail[i].size/2.0), cast(float)(smoke.height*mouseTail[i].size/2.0) },
-                    mouseTail[i].rotation,
-                    Fade(mouseTail[i].color,
-                    mouseTail[i].alpha));
+            // Draw active particles
+            for i: 0..MAX_PARTICLES-1 {
+                if (mouseTail[i].active)
+                    DrawTexturePro(
+                        smoke,
+                        Rectangle.{ 0.0, 0.0, cast(float)smoke.width, cast(float)smoke.height },
+                        Rectangle.{ mouseTail[i].position.x, mouseTail[i].position.y, smoke.width*mouseTail[i].size, smoke.height*mouseTail[i].size },
+                        Vector2.{ cast(float)(smoke.width*mouseTail[i].size/2.0), cast(float)(smoke.height*mouseTail[i].size/2.0) },
+                        mouseTail[i].rotation,
+                        Fade(mouseTail[i].color,
+                        mouseTail[i].alpha));
+            }
         }
-
-        EndBlendMode();
 
         DrawText("PRESS SPACE to CHANGE BLENDING MODE", 180, 20, 20, BLACK);
 
         if (blending == .BLEND_ALPHA) DrawText("ALPHA BLENDING", 290, screenHeight - 40, 20, BLACK);
         else DrawText("ADDITIVE BLENDING", 280, screenHeight - 40, 20, RAYWHITE);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(smoke);
-    //--------------------------------------------------------------------------------------
 }

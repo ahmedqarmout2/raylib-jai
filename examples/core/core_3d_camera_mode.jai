@@ -3,21 +3,13 @@
 #import "Math";
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera mode");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Define the camera to look into our 3d world
     camera: Camera3D;
@@ -30,6 +22,7 @@ main :: () {
     cubePosition : Vector3 = .{ 0.0, 0.0, 0.0 };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -40,23 +33,23 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
-        BeginMode3D(camera);
+        {
+            BeginMode3D(camera);
+            defer EndMode3D();
 
-        DrawCube(cubePosition, 2.0, 2.0, 2.0, RED);
-        DrawCubeWires(cubePosition, 2.0, 2.0, 2.0, MAROON);
+            DrawCube(cubePosition, 2.0, 2.0, 2.0, RED);
+            DrawCubeWires(cubePosition, 2.0, 2.0, 2.0, MAROON);
 
-        DrawGrid(10, 1.0);
-
-        EndMode3D();
+            DrawGrid(10, 1.0);
+        }
 
         DrawText("Welcome to the third dimension!", 10, 40, 20, DARKGRAY);
 
         DrawFPS(10, 10);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 }

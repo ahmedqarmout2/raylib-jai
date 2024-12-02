@@ -4,24 +4,21 @@
 
 char :: u8;
 
+// Text to be displayed, must be UTF-8 (save this code file as UTF-8)
+// NOTE: It can contain all the required text for the game,
+// this text will be scanned to get all the required codepoints
 text: *char = "いろはにほへと　ちりぬるを\nわかよたれそ　つねならむ\nうゐのおくやま　けふこえて\nあさきゆめみし　ゑひもせす";
 
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [text] example - codepoints loading");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Get codepoints from text
     codepointCount: s32 = 0;
@@ -35,11 +32,12 @@ main :: () {
     // Load font containing all the provided codepoint glyphs
     // A texture font atlas is automatically generated
     font: Font = LoadFontEx("resources/DotGothic16-Regular.ttf", 36, codepointsNoDups, codepointsNoDupsCount);
+    defer UnloadFont(font);     // Unload font
 
     // Set bilinear scale filter for better font scaling
     SetTextureFilter(font.texture, .TEXTURE_FILTER_BILINEAR);
 
-    SetTextLineSpacing(54);         // Set line spacing for multiline text (when line breaks are included '\n')
+    SetTextLineSpacing(20);         // Set line spacing for multiline text (when line breaks are included '\n')
 
     // Free codepoints, atlas has already been generated
     free(codepointsNoDups);
@@ -51,6 +49,7 @@ main :: () {
     ptr: *char = text;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -72,6 +71,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -89,15 +89,8 @@ main :: () {
         }
 
         DrawText("Press SPACE to toggle font atlas view!", 10, GetScreenHeight() - 30, 20, GRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadFont(font);     // Unload font
-    //--------------------------------------------------------------------------------------
 }
 
 // Remove codepoint duplicates if requested

@@ -13,11 +13,6 @@ main :: () {
     InitWindow(windowWidth, windowHeight, "raylib [core] example - window scale letterbox");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-
     SetWindowMinSize(320, 240);
 
     gameScreenWidth  : s32 = 640;
@@ -25,6 +20,8 @@ main :: () {
 
     // Render texture initialization, used to hold the rendering result so we can easily resize it
     target: RenderTexture2D = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
+    defer UnloadRenderTexture(target);        // Unload render texture
+
     SetTextureFilter(target.texture, .TEXTURE_FILTER_BILINEAR);  // Texture scale filter to use
 
     colors: [10]Color;
@@ -57,22 +54,28 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        // Draw everything in the render texture, note this will not be rendered on screen, yet
-        BeginTextureMode(target);
-        ClearBackground(RAYWHITE);  // Clear render texture background color
+        {
+            // Draw everything in the render texture, note this will not be rendered on screen, yet
+            BeginTextureMode(target);
+            defer EndTextureMode();
 
-        i: s32 = 0;
-        while (i < 10) {
-            DrawRectangle(0, (gameScreenHeight/10)*i, gameScreenWidth, gameScreenHeight/10, colors[i]);
-            i += 1;
+            ClearBackground(RAYWHITE);  // Clear render texture background color
+
+            i: s32 = 0;
+            while (i < 10) {
+                DrawRectangle(0, (gameScreenHeight/10)*i, gameScreenWidth, gameScreenHeight/10, colors[i]);
+                i += 1;
+            }
+
+            DrawText("If executed inside a window,\nyou can resize the window,\nand see the screen scaling!", 10, 25, 20, WHITE);
+            DrawText(TextFormat("Default Mouse: [%i , %i]", cast(s32)mouse.x, cast(s32)mouse.y), 350, 25, 20, GREEN);
+            DrawText(TextFormat("Virtual Mouse: [%i , %i]", cast(s32)virtualMouse.x, cast(s32)virtualMouse.y), 350, 55, 20, YELLOW);
         }
 
-        DrawText("If executed inside a window,\nyou can resize the window,\nand see the screen scaling!", 10, 25, 20, WHITE);
-        DrawText(TextFormat("Default Mouse: [%i , %i]", cast(s32)mouse.x, cast(s32)mouse.y), 350, 25, 20, GREEN);
-        DrawText(TextFormat("Virtual Mouse: [%i , %i]", cast(s32)virtualMouse.x, cast(s32)virtualMouse.y), 350, 55, 20, YELLOW);
-        EndTextureMode();
         
         BeginDrawing();
+        defer EndDrawing();
+
         ClearBackground(BLACK);     // Clear screen background
 
         // Draw render texture to screen, properly scaled
@@ -87,12 +90,6 @@ main :: () {
             Vector2.{ 0.0, 0.0 },
             0.0,
             WHITE);
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadRenderTexture(target);        // Unload render texture
-    //--------------------------------------------------------------------------------------
 }

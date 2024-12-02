@@ -15,21 +15,15 @@ CircleWave :: struct {
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);  // NOTE: Try to enable MSAA 4X
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - module playing (streaming)");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     InitAudioDevice();            // Initialize audio device
     defer CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
@@ -39,13 +33,13 @@ main :: () {
     // Creates some circles for visual effect
     circles: [MAX_CIRCLES]CircleWave;
 
-    for < i: MAX_CIRCLES - 1..0 {
+    for #v2 < i: 0..MAX_CIRCLES-1 {
         r: s32 = GetRandomValue(10, 40);
         circles[i].alpha      = 0.0;
         circles[i].radius     = cast(float)r;
         circles[i].position.x = cast(float)GetRandomValue(r, screenWidth  - r);
         circles[i].position.y = cast(float)GetRandomValue(r, screenHeight - r);
-        circles[i].speed      = GetRandomValue(1, 100)/2000.0;
+        circles[i].speed      = cast(float)GetRandomValue(1, 100)/2000.0;
         circles[i].color      = colors[GetRandomValue(0, 13)];
     }
 
@@ -61,6 +55,7 @@ main :: () {
     pause      : bool  = false;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -105,7 +100,7 @@ main :: () {
                 circles[i].radius     = cast(float)r;
                 circles[i].position.x = cast(float)GetRandomValue(r, screenWidth  - r);
                 circles[i].position.y = cast(float)GetRandomValue(r, screenHeight - r);
-                circles[i].speed      = GetRandomValue(1, 100)/2000.0;
+                circles[i].speed      = cast(float)GetRandomValue(1, 100)/2000.0;
                 circles[i].color      = colors[GetRandomValue(0, 13)];
             }
         }
@@ -119,7 +114,7 @@ main :: () {
 
             ClearBackground(RAYWHITE);
 
-            for < i: MAX_CIRCLES - 1..0 {
+            for #v2 < i: 0..MAX_CIRCLES-1 {
                 DrawCircleV(circles[i].position, circles[i].radius, Fade(circles[i].color, circles[i].alpha));
             }
 

@@ -5,6 +5,8 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
@@ -13,17 +15,9 @@ main :: () {
 
     virtualRatio : float : cast(float)screenWidth/cast(float)virtualScreenWidth;
 
-
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - smooth pixel-perfect camera");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     worldSpaceCamera: Camera2D;  // Game world camera
     worldSpaceCamera.zoom = 1.0;
@@ -32,6 +26,7 @@ main :: () {
     screenSpaceCamera.zoom = 1.0;
 
     target: RenderTexture2D = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight); // This is where we'll draw all our objects.
+    defer UnloadRenderTexture(target);    // Unload render texture
 
     rec01 : Rectangle = .{ 70.0, 35.0, 20.0, 20.0 };
     rec02 : Rectangle = .{ 90.0, 55.0, 30.0, 10.0 };
@@ -49,6 +44,7 @@ main :: () {
     cameraY : float = 0.0;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -74,32 +70,39 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        BeginTextureMode(target);
-        ClearBackground(RAYWHITE);
+        {
+            BeginTextureMode(target);
+            defer EndTextureMode();
 
-        BeginMode2D(worldSpaceCamera);
-        DrawRectanglePro(rec01, origin, rotation, BLACK);
-        DrawRectanglePro(rec02, origin, -rotation, RED);
-        DrawRectanglePro(rec03, origin, rotation + 45.0, BLUE);
-        EndMode2D();
-        EndTextureMode();
+            ClearBackground(RAYWHITE);
 
-        BeginDrawing();
-        ClearBackground(RED);
+            {
+                BeginMode2D(worldSpaceCamera);
+                defer EndMode2D();
 
-        BeginMode2D(screenSpaceCamera);
-        DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0, WHITE);
-        EndMode2D();
+                DrawRectanglePro(rec01, origin, rotation, BLACK);
+                DrawRectanglePro(rec02, origin, -rotation, RED);
+                DrawRectanglePro(rec03, origin, rotation + 45.0, BLUE);
+            }
+        }
 
-        DrawText(TextFormat("Screen resolution: %ix%i", screenWidth, screenHeight), 10, 10, 20, DARKBLUE);
-        DrawText(TextFormat("World resolution: %ix%i", virtualScreenWidth, virtualScreenHeight), 10, 40, 20, DARKGREEN);
-        DrawFPS(GetScreenWidth() - 95, 10);
-        EndDrawing();
+        {
+            BeginDrawing();
+            defer EndDrawing();
+
+            ClearBackground(RED);
+
+            {
+                BeginMode2D(screenSpaceCamera);
+                defer EndMode2D();
+
+                DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0, WHITE);
+            }
+
+            DrawText(TextFormat("Screen resolution: %ix%i", screenWidth, screenHeight), 10, 10, 20, DARKBLUE);
+            DrawText(TextFormat("World resolution: %ix%i", virtualScreenWidth, virtualScreenHeight), 10, 40, 20, DARKGREEN);
+            DrawFPS(GetScreenWidth() - 95, 10);
+        }
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadRenderTexture(target);    // Unload render texture
-    //--------------------------------------------------------------------------------------
 }

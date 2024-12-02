@@ -8,27 +8,24 @@ NUM_LINES           : s32 : 5;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - sprite explosion");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     InitAudioDevice();
+    defer CloseAudioDevice();
 
     // Load explosion sound
     fxBoom: Sound = LoadSound("resources/boom.wav");
+    defer UnloadSound(fxBoom);        // Unload sound
 
     // Load explosion texture
     explosion: Texture2D = LoadTexture("resources/explosion.png");
+    defer UnloadTexture(explosion);   // Unload texture
 
     // Init variables for animation
     frameWidth   : float = cast(float)(explosion.width/NUM_FRAMES_PER_LINE);   // Sprite one frame rectangle width
@@ -43,6 +40,7 @@ main :: () {
     framesCounter: s32 = 0;
 
     SetTargetFPS(120);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -86,21 +84,12 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
         // Draw explosion required frame rectangle
         if (active) DrawTextureRec(explosion, frameRec, position, WHITE);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(explosion);   // Unload texture
-    UnloadSound(fxBoom);        // Unload sound
-
-    CloseAudioDevice();
-    //--------------------------------------------------------------------------------------
 }

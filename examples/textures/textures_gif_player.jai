@@ -7,19 +7,13 @@ MIN_FRAME_DELAY: s32 : 1;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - gif playing");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     animFrames: s32 = 0;
 
@@ -27,12 +21,14 @@ main :: () {
     // NOTE: GIF data is always loaded as RGBA (32bit) by default
     // NOTE: Frames are just appended one after another in image.data memory
     imScarfyAnim: Image = LoadImageAnim("resources/scarfy_run.gif", *animFrames);
+    defer UnloadImage(imScarfyAnim);      // Unload image (contains all frames)
 
     // Load texture from image
     // NOTE: We will update this texture when required with next frame data
     // WARNING: It's not recommended to use this technique for sprites animation,
     // use spritesheets instead, like illustrated in textures_sprite_anim example
     texScarfyAnim: Texture2D = LoadTextureFromImage(imScarfyAnim);
+    defer UnloadTexture(texScarfyAnim);   // Unload texture
 
     nextFrameDataOffset: u32 = 0;  // Current byte offset to next frame in image.data
 
@@ -41,6 +37,7 @@ main :: () {
     frameCounter     : s32 = 0;    // General frames counter
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -73,6 +70,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -92,14 +90,6 @@ main :: () {
         DrawTexture(texScarfyAnim, GetScreenWidth()/2 - texScarfyAnim.width/2, 140, WHITE);
 
         DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texScarfyAnim);   // Unload texture
-    UnloadImage(imScarfyAnim);      // Unload image (contains all frames)
-    //--------------------------------------------------------------------------------------
 }

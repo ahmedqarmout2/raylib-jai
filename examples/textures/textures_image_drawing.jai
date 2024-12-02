@@ -5,19 +5,13 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - image drawing");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
@@ -48,9 +42,12 @@ main :: () {
     UnloadFont(font);       // Unload custom font (already drawn used on image)
 
     texture: Texture2D = LoadTextureFromImage(parrots);      // Image converted to texture, uploaded to GPU memory (VRAM)
+    defer UnloadTexture(texture);       // Texture unloading
+
     UnloadImage(parrots);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -61,6 +58,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -69,13 +67,6 @@ main :: () {
 
         DrawText("We are drawing only one texture from various images composed!", 240, 350, 10, DARKGRAY);
         DrawText("Source images have been cropped, scaled, flipped and copied one over the other.", 190, 370, 10, DARKGRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);       // Texture unloading
-    //--------------------------------------------------------------------------------------
 }

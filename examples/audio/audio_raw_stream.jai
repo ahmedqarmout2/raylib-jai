@@ -22,34 +22,32 @@ sineIdx: float = 0.0;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - raw audio streaming");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     InitAudioDevice();              // Initialize audio device
+    defer CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
 
     // Init raw audio stream (sample rate: 44100, sample size: 16bit-short, channels: 1-mono)
     stream : AudioStream = LoadAudioStream(44100, 16, 1);
+    defer UnloadAudioStream(stream);  // Close raw audio stream and delete buffers from RAM
 
     SetAudioStreamCallback(stream, AudioInputCallback);
 
     // Buffer for the single cycle waveform we are synthesizing
     data: *short = cast(*short)alloc(size_of(short)*MAX_SAMPLES);
+    defer free(data);                 // Unload sine wave data
 
     // Frame buffer, describing the waveform when repeated over the course of a frame
     writeBuf: *short = cast(*short)alloc(size_of(short)*MAX_SAMPLES_PER_UPDATE);
+    defer free(writeBuf);             // Unload write buffer
 
     PlayAudioStream(stream);        // Start processing stream buffer (no data loaded currently)
 
@@ -73,6 +71,7 @@ main :: () {
     position : Vector2 = .{ 0.0, 0.0 };
 
     SetTargetFPS(30);              // Set our game to run at 30 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -98,17 +97,13 @@ main :: () {
             if (waveLength < 1) waveLength = 1;
 
             // Write sine wave
-            i: s32 = 0;
-            while (i < waveLength*2) {
-                defer i += 1;
-                data[i] = cast(short)(sin(((2 * RL_PI * cast(float)i/waveLength)))*32000);
+            for 0..waveLength*2-1 {
+                data[it] = cast(short)(sin(((2 * RL_PI * cast(float)it/waveLength)))*32000);
             }
 
             // Make sure the rest of the line is flat
-            j: s32 = waveLength*2;
-            while (j < MAX_SAMPLES) {
-                defer j += 1;
-                data[j] = cast(short)0;
+            for waveLength*2..MAX_SAMPLES-1 {
+                data[it] = cast(short)0;
             }
 
             // Scale read cursor's position to minimize transition artifacts
@@ -150,36 +145,25 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        BeginDrawing();
+        {
+            BeginDrawing();
+            defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawText(TextFormat("sine frequency: %i", cast(s32)frequency), GetScreenWidth() - 220, 10, 20, RED);
-        DrawText("click mouse button to change frequency or pan", 10, 10, 20, DARKGRAY);
+            DrawText(TextFormat("sine frequency: %i", cast(s32)frequency), GetScreenWidth() - 220, 10, 20, RED);
+            DrawText("click mouse button to change frequency or pan", 10, 10, 20, DARKGRAY);
 
-        // Draw the current buffer state proportionate to the screen
-        i: s32 = 0;
-        while (i < screenWidth) {
-            defer i += 1;
+            // Draw the current buffer state proportionate to the screen
+            for 0..screenWidth-1 {
+                position.x = cast(float)it;
+                position.y = 250.0 + 50.0*data[it*MAX_SAMPLES/screenWidth]/32000.0;
 
-            position.x = cast(float)i;
-            position.y = 250.0 + 50.0*data[i*MAX_SAMPLES/screenWidth]/32000.0;
-
-            DrawPixelV(position, RED);
+                DrawPixelV(position, RED);
+            }
         }
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    free(data);                 // Unload sine wave data
-    free(writeBuf);             // Unload write buffer
-
-    UnloadAudioStream(stream);  // Close raw audio stream and delete buffers from RAM
-    CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
-    //--------------------------------------------------------------------------------------
 }
 
 // Audio input processing callback
@@ -187,8 +171,7 @@ AudioInputCallback :: (buffer: *void, frames: u32) #c_call {
     new_context: Context;
     push_context new_context {
         audioFrequency = frequency + (audioFrequency - frequency)*0.95;
-        audioFrequency += 1.0;
-        audioFrequency -= 1.0;
+
         incr : float = audioFrequency/44100.0;
         d: *short = cast(*short)buffer;
 

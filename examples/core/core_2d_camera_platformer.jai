@@ -3,8 +3,8 @@
 #import "Math";
 
 G : s32 : 400;
-PLAYER_JUMP_SPD : float : 350;
-PLAYER_HOR_SPD  : float : 200;
+PLAYER_JUMP_SPD : float : 350.0;
+PLAYER_HOR_SPD  : float : 200.0;
 
 Player :: struct {
     position: Vector2;
@@ -19,21 +19,13 @@ EnvItem :: struct {
 }
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera platformer");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     player: Player;
     player.position = Vector2.{ 400, 280 };
@@ -75,6 +67,7 @@ main :: () {
     ];
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -83,7 +76,7 @@ main :: () {
         
         UpdatePlayer(*player, envItems, deltaTime);
 
-        camera.zoom += (GetMouseWheelMove()*0.05);
+        camera.zoom += (cast(float)GetMouseWheelMove()*0.05);
 
         if camera.zoom > 3.0 camera.zoom = 3.0;
         else if camera.zoom < 0.25 camera.zoom = 0.25;
@@ -101,33 +94,32 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        BeginDrawing();
+        {
+            BeginDrawing();
+            defer EndDrawing();
 
-        ClearBackground(LIGHTGRAY);
+            ClearBackground(LIGHTGRAY);
 
-        BeginMode2D(camera);
+            {
+                BeginMode2D(camera);
+                defer EndMode2D();
 
-        for envItems {
-            DrawRectangleRec(it.rect, it.color);
+                for envItems  DrawRectangleRec(it.rect, it.color);
+
+                playerRect : Rectangle = Rectangle.{ player.position.x - 20, player.position.y - 40, 40, 40 };
+                DrawRectangleRec(playerRect, RED);
+
+                DrawCircleV(player.position, 5.0, GOLD);
+            }
+
+            DrawText("Controls:", 20, 20, 10, BLACK);
+            DrawText("- Right/Left to move", 40, 40, 10, DARKGRAY);
+            DrawText("- Space to jump", 40, 60, 10, DARKGRAY);
+            DrawText("- Mouse Wheel to Zoom in-out, R to reset zoom", 40, 80, 10, DARKGRAY);
+            DrawText("- C to change camera mode", 40, 100, 10, DARKGRAY);
+            DrawText("Current camera mode:", 20, 120, 10, BLACK);
+            DrawText(get_c_string(cameraDescriptions[cameraOption]), 40, 140, 10, DARKGRAY);
         }
-
-        playerRect : Rectangle = Rectangle.{ player.position.x - 20, player.position.y - 40, 40, 40 };
-        DrawRectangleRec(playerRect, RED);
-
-        EndMode2D();
-
-        DrawText("Controls:", 20, 20, 10, BLACK);
-        DrawText("- Right/Left to move", 40, 40, 10, DARKGRAY);
-        DrawText("- Space to jump", 40, 60, 10, DARKGRAY);
-        DrawText("- Mouse Wheel to Zoom in-out, R to reset zoom", 40, 80, 10, DARKGRAY);
-        DrawText("- C to change camera mode", 40, 100, 10, DARKGRAY);
-        DrawText("Current camera mode:", 20, 120, 10, BLACK);
-
-        desc : *u8 = to_c_string(cameraDescriptions[cameraOption]);
-        defer free(desc);
-        DrawText(desc, 40, 140, 10, DARKGRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 }
@@ -140,17 +132,18 @@ UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float) {
         player.canJump = false;
     }
 
-    hitObstacle: s32 = 0;
-    for * envItems {
+    hitObstacle: bool = false;
+    for envItems {
         p : *Vector2 = *player.position;
         if (it.blocking &&
             it.rect.x <= p.x &&
             it.rect.x + it.rect.width >= p.x &&
             it.rect.y >= p.y &&
             it.rect.y <= p.y + player.speed*delta) {
-            hitObstacle = 1;
+            hitObstacle = true;
             player.speed = 0.0;
             p.y = it.rect.y;
+            break;
         }
     }
 
@@ -174,7 +167,7 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
     maxX: float = -1000;
     maxY: float = -1000;
 
-    for * envItems {
+    for envItems {
         minX = min(it.rect.x, minX);
         maxX = max(it.rect.x + it.rect.width, maxX);
         minY = min(it.rect.y, minY);
@@ -205,11 +198,11 @@ UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems:
     }
 }
 
-UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
-    evenOutSpeed  : float = 700;
-    eveningOut    : bool = false;
-    evenOutTarget : float;
+evenOutSpeed  : float = 700;
+eveningOut    : s32 = 0;
+evenOutTarget : float;
 
+UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
     camera.offset   = Vector2.{ width/2.0, height/2.0 };
     camera.target.x = player.position.x;
 
@@ -219,27 +212,27 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
 
             if (camera.target.y > evenOutTarget) {
                 camera.target.y = evenOutTarget;
-                eveningOut = false;
+                eveningOut = 0;
             }
         } else {
             camera.target.y -= evenOutSpeed*delta;
 
             if (camera.target.y < evenOutTarget) {
                 camera.target.y = evenOutTarget;
-                eveningOut = false;
+                eveningOut = 0;
             }
         }
     } else {
         if (player.canJump && (player.speed == 0) && (player.position.y != camera.target.y)) {
-            eveningOut = true;
+            eveningOut = 1;
             evenOutTarget = player.position.y;
         }
     }
 }
 
-UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
-    bbox : Vector2 = .{ 0.2, 0.2 };
+bbox : Vector2 = .{ 0.2, 0.2 };
 
+UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
     bboxWorldMin: Vector2 = GetScreenToWorld2D(Vector2.{ (1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height }, << camera);
     bboxWorldMax: Vector2 = GetScreenToWorld2D(Vector2.{ (1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height }, << camera);
     camera.offset = Vector2.{ (1 - bbox.x)*0.5 * width, (1 - bbox.y)*0.5*height };

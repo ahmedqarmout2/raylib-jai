@@ -20,23 +20,19 @@ curveSelectedPoint: *Vector2;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     SetConfigFlags(.FLAG_VSYNC_HINT | .FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [textures] examples - textured curve");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     // Load the road texture
     texRoad = LoadTexture("resources/road.png");
+    defer UnloadTexture(texRoad);
+
     SetTextureFilter(texRoad, .TEXTURE_FILTER_BILINEAR);
 
     // Setup the curve
@@ -47,6 +43,7 @@ main :: () {
     curveEndPositionTangent = Vector2.{ 600, 100 };
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -83,6 +80,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -112,16 +110,8 @@ main :: () {
         DrawText("Drag points to move curve, press SPACE to show/hide base curve", 10, 10, 10, DARKGRAY);
         DrawText(TextFormat("Curve width: %2.0f (Use + and - to adjust)", curveWidth), 10, 30, 10, DARKGRAY);
         DrawText(TextFormat("Curve segments: %d (Use LEFT and RIGHT to adjust)", curveSegments), 10, 50, 10, DARKGRAY);
-            
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texRoad);
-
-    //--------------------------------------------------------------------------------------
 }
 
 // Draw textured curve using Spline Cubic Bezier

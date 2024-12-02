@@ -5,21 +5,13 @@
 MAX_BUILDINGS : s32 : 100;
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     player : Rectangle = .{400, 280, 40, 40};
     buildings: [MAX_BUILDINGS]Rectangle;
@@ -45,6 +37,7 @@ main :: () {
     camera.zoom = 1.0;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -65,19 +58,17 @@ main :: () {
         else if (camera.rotation < -40) camera.rotation = -40;
 
         // Camera zoom controls
-        camera.zoom += cast(s32)(GetMouseWheelMove() * 0.05);
+        camera.zoom += cast(float)(GetMouseWheelMove() * 0.05);
 
         if (camera.zoom > 3.0) camera.zoom = 3.0;
         else if (camera.zoom < 0.1) camera.zoom = 0.1;
 
         // Camera reset (zoom and rotation)
-        if (IsKeyPressed(.KEY_R))
-        {
+        if (IsKeyPressed(.KEY_R)) {
             camera.zoom = 1.0;
             camera.rotation = 0.0;
         }
         //----------------------------------------------------------------------------------
-
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -87,18 +78,19 @@ main :: () {
 
             ClearBackground(RAYWHITE);
 
-            BeginMode2D(camera);
+            {
+                BeginMode2D(camera);
+                defer EndMode2D();
 
-            DrawRectangle(-6000, 320, 13000, 8000, DARKGRAY);
+                DrawRectangle(-6000, 320, 13000, 8000, DARKGRAY);
 
-            for i: 0..MAX_BUILDINGS-1 DrawRectangleRec(buildings[i], buildColors[i]);
+                for i: 0..MAX_BUILDINGS-1 DrawRectangleRec(buildings[i], buildColors[i]);
 
-            DrawRectangleRec(player, RED);
+                DrawRectangleRec(player, RED);
 
-            DrawLine(cast(s32)camera.target.x, -screenHeight * 10, cast(s32)camera.target.x, screenHeight * 10, GREEN);
-            DrawLine(-screenWidth * 10, cast(s32)camera.target.y, screenWidth * 10, cast(s32)camera.target.y, GREEN);
-
-            EndMode2D();
+                DrawLine(cast(s32)camera.target.x, -screenHeight * 10, cast(s32)camera.target.x, screenHeight * 10, GREEN);
+                DrawLine(-screenWidth * 10, cast(s32)camera.target.y, screenWidth * 10, cast(s32)camera.target.y, GREEN);
+            }
 
             DrawText("SCREEN AREA", 640, 10, 20, RED);
 

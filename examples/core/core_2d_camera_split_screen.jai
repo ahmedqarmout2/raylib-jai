@@ -7,19 +7,13 @@ PLAYER_SIZE : s32 : 40;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera split screen");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     player1 : Rectangle = .{ 200, 200, cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE };
     player2 : Rectangle = .{ 250, 200, cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE };
@@ -46,6 +40,7 @@ main :: () {
     splitScreenRect : Rectangle = .{ 0.0, 0.0, cast(float)screenCamera1.texture.width, cast(float)-screenCamera1.texture.height };
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -66,77 +61,87 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        BeginTextureMode(screenCamera1);
-        ClearBackground(RAYWHITE);
+        {
+            BeginTextureMode(screenCamera1);
+            defer EndTextureMode();
 
-        BeginMode2D(camera1);
+            ClearBackground(RAYWHITE);
 
-        s1: s32 : screenWidth/PLAYER_SIZE;
-        s2: s32 : screenHeight/PLAYER_SIZE;
+            {
+                BeginMode2D(camera1);
+                defer EndMode2D();
 
-        // Draw full scene with first camera
-        for i: 0..s1 {
-            DrawLineV(Vector2.{ cast(float)(PLAYER_SIZE*i), 0 }, Vector2.{ cast(float)(PLAYER_SIZE*i), cast(float)screenHeight }, LIGHTGRAY);
-        }
+                s1: s32 : screenWidth/PLAYER_SIZE;
+                s2: s32 : screenHeight/PLAYER_SIZE;
 
-        for i: 0..s2 {
-            DrawLineV(Vector2.{ 0, cast(float)(PLAYER_SIZE*i) }, Vector2.{ cast(float)screenWidth, cast(float)(PLAYER_SIZE*i) }, LIGHTGRAY);
-        }
+                // Draw full scene with first camera
+                for i: 0..s1 {
+                    DrawLineV(Vector2.{ cast(float)(PLAYER_SIZE*i), 0 }, Vector2.{ cast(float)(PLAYER_SIZE*i), cast(float)screenHeight }, LIGHTGRAY);
+                }
 
-        for i: 0..s1-1 {
-            for j: 0..s2-1 {
-                DrawText(TextFormat("[%i,%i]", i, j), 10 + PLAYER_SIZE*i, 15 + PLAYER_SIZE*j, 10, LIGHTGRAY);
+                for i: 0..s2 {
+                    DrawLineV(Vector2.{ 0, cast(float)(PLAYER_SIZE*i) }, Vector2.{ cast(float)screenWidth, cast(float)(PLAYER_SIZE*i) }, LIGHTGRAY);
+                }
+
+                for i: 0..s1-1 {
+                    for j: 0..s2-1 {
+                        DrawText(TextFormat("[%i,%i]", i, j), 10 + PLAYER_SIZE*i, 15 + PLAYER_SIZE*j, 10, LIGHTGRAY);
+                    }
+                }
+
+                DrawRectangleRec(player1, RED);
+                DrawRectangleRec(player2, BLUE);
             }
+
+            DrawRectangle(0, 0, GetScreenWidth()/2, 30, Fade(RAYWHITE, 0.6));
+            DrawText("PLAYER1: W/S/A/D to move", 10, 10, 10, MAROON);
         }
 
-        DrawRectangleRec(player1, RED);
-        DrawRectangleRec(player2, BLUE);
-        EndMode2D();
+        {
+            BeginTextureMode(screenCamera2);
+            defer EndTextureMode();
+
+            ClearBackground(RAYWHITE);
+
+            {
+                BeginMode2D(camera2);
+                defer EndMode2D();
+
+                // Draw full scene with second camera
+                for i: 0..screenWidth/PLAYER_SIZE {
+                    DrawLineV(Vector2.{ cast(float)(PLAYER_SIZE*i), 0 }, Vector2.{ cast(float)(PLAYER_SIZE*i), cast(float)screenHeight }, LIGHTGRAY);
+                }
+
+                for i: 0..screenHeight/PLAYER_SIZE {
+                    DrawLineV(Vector2.{ 0, cast(float)(PLAYER_SIZE*i) }, Vector2.{ cast(float)screenWidth, cast(float)(PLAYER_SIZE*i) }, LIGHTGRAY);
+                }
+
+                for i: 0..screenWidth/PLAYER_SIZE-1 {
+                    for j: 0..screenHeight/PLAYER_SIZE-1 {
+                        DrawText(TextFormat("[%i,%i]", i, j), 10 + PLAYER_SIZE*i, 15 + PLAYER_SIZE*j, 10, LIGHTGRAY);
+                    }
+                }
+
+                DrawRectangleRec(player1, RED);
+                DrawRectangleRec(player2, BLUE);
+            }
+
+            DrawRectangle(0, 0, GetScreenWidth()/2, 30, Fade(RAYWHITE, 0.6));
+            DrawText("PLAYER2: UP/DOWN/LEFT/RIGHT to move", 10, 10, 10, DARKBLUE);
+        }
+
+        {
+            // Draw both views render textures to the screen side by side
+            BeginDrawing();
+            defer EndDrawing();
+
+            ClearBackground(BLACK);
+
+            DrawTextureRec(screenCamera1.texture, splitScreenRect, Vector2.{ 0, 0 }, WHITE);
+            DrawTextureRec(screenCamera2.texture, splitScreenRect, Vector2.{ screenWidth/2.0, 0 }, WHITE);
         
-        DrawRectangle(0, 0, GetScreenWidth()/2, 30, Fade(RAYWHITE, 0.6));
-        DrawText("PLAYER1: W/S/A/D to move", 10, 10, 10, MAROON);
-            
-        EndTextureMode();
-
-        BeginTextureMode(screenCamera2);
-        ClearBackground(RAYWHITE);
-
-        BeginMode2D(camera2);
-
-        // Draw full scene with second camera
-        for i: 0..screenWidth/PLAYER_SIZE {
-            DrawLineV(Vector2.{ cast(float)(PLAYER_SIZE*i), 0 }, Vector2.{ cast(float)(PLAYER_SIZE*i), cast(float)screenHeight }, LIGHTGRAY);
+            DrawRectangle(GetScreenWidth()/2 - 2, 0, 4, GetScreenHeight(), LIGHTGRAY);
         }
-
-        for i: 0..screenHeight/PLAYER_SIZE {
-            DrawLineV(Vector2.{ 0, cast(float)(PLAYER_SIZE*i) }, Vector2.{ cast(float)screenWidth, cast(float)(PLAYER_SIZE*i) }, LIGHTGRAY);
-        }
-
-        for i: 0..screenWidth/PLAYER_SIZE-1 {
-            for j: 0..screenHeight/PLAYER_SIZE-1 {
-                DrawText(TextFormat("[%i,%i]", i, j), 10 + PLAYER_SIZE*i, 15 + PLAYER_SIZE*j, 10, LIGHTGRAY);
-            }
-        }
-
-        DrawRectangleRec(player1, RED);
-        DrawRectangleRec(player2, BLUE);
-
-        EndMode2D();
-
-        DrawRectangle(0, 0, GetScreenWidth()/2, 30, Fade(RAYWHITE, 0.6));
-        DrawText("PLAYER2: UP/DOWN/LEFT/RIGHT to move", 10, 10, 10, DARKBLUE);
-
-        EndTextureMode();
-
-        // Draw both views render textures to the screen side by side
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        DrawTextureRec(screenCamera1.texture, splitScreenRect, Vector2.{ 0, 0 }, WHITE);
-        DrawTextureRec(screenCamera2.texture, splitScreenRect, Vector2.{ screenWidth/2.0, 0 }, WHITE);
-    
-        DrawRectangle(GetScreenWidth()/2 - 2, 0, 4, GetScreenHeight(), LIGHTGRAY);
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 }

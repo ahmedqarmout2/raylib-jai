@@ -3,8 +3,6 @@
 #import "Math";
 
 main :: () {
-    set_working_directory(#filepath);
-
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
@@ -29,11 +27,6 @@ main :: () {
     //SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
     InitWindow(screenWidth, screenHeight, "raylib [core] example - window flags");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
 
     ballPosition : Vector2 = .{ GetScreenWidth() / 2.0, GetScreenHeight() / 2.0 };
     ballSpeed    : Vector2 = .{ 5.0, 4.0 };
@@ -117,6 +110,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         if (IsWindowState(.FLAG_WINDOW_TRANSPARENT)) ClearBackground(BLANK);
         else ClearBackground(RAYWHITE);
@@ -160,8 +154,6 @@ main :: () {
         else DrawText("FLAG_WINDOW_TRANSPARENT: off", 10, 340, 10, MAROON);
         if (IsWindowState(.FLAG_MSAA_4X_HINT)) DrawText("FLAG_MSAA_4X_HINT: on", 10, 360, 10, LIME);
         else DrawText("FLAG_MSAA_4X_HINT: off", 10, 360, 10, MAROON);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 }

@@ -5,22 +5,17 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - N-patch drawing");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     nPatchTexture: Texture2D = LoadTexture("resources/ninepatch_button.png");
+    defer UnloadTexture(nPatchTexture);  // Texture unloading
 
     mousePosition: Vector2;
     origin: Vector2 = .{ 0.0, 0.0 };
@@ -42,6 +37,7 @@ main :: () {
     v3PatchInfo: NPatchInfo = .{ Rectangle.{ 0.0, 192.0, 64.0, 64.0 }, 6, 6, 6, 6, .NPATCH_THREE_PATCH_VERTICAL };
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -70,6 +66,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -85,13 +82,6 @@ main :: () {
         DrawText("TEXTURE", 15, 360, 10, DARKGRAY);
 
         DrawText("Move the mouse to stretch or shrink the n-patches", 10, 20, 20, DARKGRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(nPatchTexture);  // Texture unloading
-    //--------------------------------------------------------------------------------------
 }

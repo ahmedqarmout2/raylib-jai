@@ -30,27 +30,26 @@ processText: [9]*u8: .[
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - image processing");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
     imOrigin: Image = LoadImage("resources/parrots.png");       // Loaded in CPU memory (RAM)
+    defer UnloadImage(imOrigin);        // Unload image-origin from RAM
+
     ImageFormat(*imOrigin, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8); // Format image to RGBA 32bit (required for texture update) <-- ISSUE
+
     texture: Texture2D = LoadTextureFromImage(imOrigin);        // Image converted to texture, GPU memory (VRAM)
+    defer UnloadTexture(texture);       // Unload texture from VRAM
 
     imCopy: Image = ImageCopy(imOrigin);
+    defer UnloadImage(imCopy);          // Unload image-copy from RAM
 
     currentProcess : s32  = 0;
     textureReload  : bool = false;
@@ -73,6 +72,7 @@ main :: () {
         if i == 8 return .FLIP_HORIZONTAL;
         return .NONE;
     }
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -132,6 +132,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -146,15 +147,6 @@ main :: () {
 
         DrawTexture(texture, screenWidth - texture.width - 60, screenHeight/2 - texture.height/2, WHITE);
         DrawRectangleLines(screenWidth - texture.width - 60, screenHeight/2 - texture.height/2, texture.width, texture.height, BLACK);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);       // Unload texture from VRAM
-    UnloadImage(imOrigin);        // Unload image-origin from RAM
-    UnloadImage(imCopy);          // Unload image-copy from RAM
-    //--------------------------------------------------------------------------------------
 }

@@ -4,26 +4,22 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - blend modes");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     bgImage: Image = LoadImage("resources/cyberpunk_street_background.png");     // Loaded in CPU memory (RAM)
     bgTexture: Texture2D = LoadTextureFromImage(bgImage);                        // Image converted to texture, GPU memory (VRAM)
+    defer UnloadTexture(bgTexture); // Unload background texture
 
     fgImage: Image = LoadImage("resources/cyberpunk_street_foreground.png");     // Loaded in CPU memory (RAM)
     fgTexture: Texture2D = LoadTextureFromImage(fgImage);                        // Image converted to texture, GPU memory (VRAM)
+    defer UnloadTexture(fgTexture); // Unload foreground texture
 
     // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
     UnloadImage(bgImage);
@@ -31,6 +27,7 @@ main :: () {
 
     blendCountMax: s32 : 4;
     blendMode: BlendMode = .BLEND_ALPHA;
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -48,15 +45,19 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
         DrawTexture(bgTexture, screenWidth/2 - bgTexture.width/2, screenHeight/2 - bgTexture.height/2, WHITE);
 
-        // Apply the blend mode and then draw the foreground texture
-        BeginBlendMode(blendMode);
-        DrawTexture(fgTexture, screenWidth/2 - fgTexture.width/2, screenHeight/2 - fgTexture.height/2, WHITE);
-        EndBlendMode();
+        {
+            // Apply the blend mode and then draw the foreground texture
+            BeginBlendMode(blendMode);
+            defer EndBlendMode();
+
+            DrawTexture(fgTexture, screenWidth/2 - fgTexture.width/2, screenHeight/2 - fgTexture.height/2, WHITE);
+        }
 
         // Draw the texts
         DrawText("Press SPACE to change blend modes.", 310, 350, 10, GRAY);
@@ -69,14 +70,6 @@ main :: () {
         }
 
         DrawText("(c) Cyberpunk Street Environment by Luis Zuno (@ansimuz)", screenWidth - 330, screenHeight - 20, 10, GRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(fgTexture); // Unload foreground texture
-    UnloadTexture(bgTexture); // Unload background texture
-    //--------------------------------------------------------------------------------------
 }

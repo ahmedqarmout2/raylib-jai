@@ -5,31 +5,31 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - background scrolling");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // NOTE: Be careful, background width must be equal or bigger than screen width
     // if not, texture should be draw more than two times for scrolling effect
     background: Texture2D = LoadTexture("resources/cyberpunk_street_background.png");
+    defer UnloadTexture(background);  // Unload background texture
+
     midground : Texture2D = LoadTexture("resources/cyberpunk_street_midground.png");
+    defer UnloadTexture(midground);   // Unload midground texture
+
     foreground: Texture2D = LoadTexture("resources/cyberpunk_street_foreground.png");
+    defer UnloadTexture(foreground);  // Unload foreground texture
 
     scrollingBack: float = 0.0;
     scrollingMid : float = 0.0;
     scrollingFore: float = 0.0;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -70,11 +70,4 @@ main :: () {
         }
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(background);  // Unload background texture
-    UnloadTexture(midground);   // Unload midground texture
-    UnloadTexture(foreground);  // Unload foreground texture
-    //--------------------------------------------------------------------------------------
 }

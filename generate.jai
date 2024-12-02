@@ -55,6 +55,7 @@ GENERAL_HEADER ::  #string DONE
 DONE
 
 RAYLIB_HEADER ::  #string DONE
+#import "Basic";
 #import "Math";
 DONE
 
@@ -73,6 +74,24 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     winmm   :: #library,system,link_always "winmm";
 
     raylib_native :: #library,no_dll "lib/raylib";
+}
+
+// Additional functionality
+get_c_string :: (text: string) -> *u8 #expand {
+    c_str: *u8;
+    #if is_constant(text) {
+        c_str = text.data;
+    } else {
+        c_str = _to_temp_c_string(text);
+    }
+    return c_str;
+}
+
+_to_temp_c_string :: (s: string) -> *u8 {
+    result : *u8 = talloc(s.count + 1);
+    memcpy(result, s.data, s.count);
+    result[s.count] = 0;
+    return result;
 }
 DONE
 
@@ -252,6 +271,8 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "ImageFormat", "(image: *Image, newFormat: PixelFormat)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "LoadImageRaw", "(fileName: *u8, width: s32, height: s32, format: PixelFormat, headerSize: s32) -> Image");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadButtonPressed", "() -> GamepadButton");
 }
 
 populate_improved_struct_elements_table :: () {

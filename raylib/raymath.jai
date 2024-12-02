@@ -12,7 +12,7 @@ RAD2DEG :: (180.0/PI);
 /*
 ***********************************************************************************************
 *
-*   raymath v1.5 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
+*   raymath v2.0 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
 *
 *   CONVENTIONS:
 *     - Matrix structure is defined as row-major (memory layout) but parameters naming AND all
@@ -24,7 +24,7 @@ RAD2DEG :: (180.0/PI);
 *     - Functions are always self-contained, no function use another raymath function inside,
 *       required code is directly re-implemented inside
 *     - Functions input parameters are always received by value (2 unavoidable exceptions)
-*     - Functions use always a "result" variable for return
+*     - Functions use always a "result" variable for return (except C++ operators)
 *     - Functions are always defined inline
 *     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
 *     - No compound literals used to make sure libray is compatible with C++
@@ -39,10 +39,12 @@ RAD2DEG :: (180.0/PI);
 *           Define static inline functions code, so #include header suffices for use.
 *           This may use up lots of memory.
 *
+*       #define RAYMATH_DISABLE_CPP_OPERATORS
+*           Disables C++ operator overloads for raymath types.
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2015-2023 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2015-2024 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -65,6 +67,7 @@ RAD2DEG :: (180.0/PI);
 
 
 // Function specifiers definition
+
 
 //----------------------------------------------------------------------------------
 // Defines and Macros
@@ -226,6 +229,16 @@ Vector2Reflect :: (v: Vector2, normal: Vector2) -> Vector2 #foreign raylib_nativ
 
 
 
+// Get min value for each pair of components
+Vector2Min :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
+
+
+
+// Get max value for each pair of components
+Vector2Max :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
+
+
+
 // Rotate vector by angle
 Vector2Rotate :: (v: Vector2, angle: float) -> Vector2 #foreign raylib_native;
 
@@ -256,8 +269,21 @@ Vector2ClampValue :: (v: Vector2, min: float, max: float) -> Vector2 #foreign ra
 
 
 
+
 // Check whether two given vectors are almost equal
 Vector2Equals :: (p: Vector2, q: Vector2) -> s32 #foreign raylib_native;
+
+
+
+// Compute the direction of a refracted ray
+// v: normalized direction of the incoming ray
+// n: normalized normal vector of the interface of two optical media
+// r: ratio of the refractive index of the medium from where the ray comes
+//    to the refractive index of the medium on the other side of the surface
+Vector2Refract :: (v: Vector2, n: Vector2, r: float) -> Vector2 #foreign raylib_native;
+
+
+
 
 
 
@@ -410,8 +436,23 @@ Vector3RotateByAxisAngle :: (v: Vector3, axis: Vector3, angle: float) -> Vector3
 
 
 
+// Move Vector towards target
+Vector3MoveTowards :: (v: Vector3, target: Vector3, maxDistance: float) -> Vector3 #foreign raylib_native;
+
+
+
+
+
+
 // Calculate linear interpolation between two vectors
 Vector3Lerp :: (v1: Vector3, v2: Vector3, amount: float) -> Vector3 #foreign raylib_native;
+
+
+
+// Calculate cubic hermite interpolation between two vectors and their tangents
+// as described in the GLTF 2.0 specification: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
+Vector3CubicHermite :: (v1: Vector3, tangent1: Vector3, v2: Vector3, tangent2: Vector3, amount: float) -> Vector3 #foreign raylib_native;
+
 
 
 
@@ -484,6 +525,7 @@ Vector3ClampValue :: (v: Vector3, min: float, max: float) -> Vector3 #foreign ra
 
 
 
+
 // Check whether two given vectors are almost equal
 Vector3Equals :: (p: Vector3, q: Vector3) -> s32 #foreign raylib_native;
 
@@ -497,6 +539,83 @@ Vector3Equals :: (p: Vector3, q: Vector3) -> s32 #foreign raylib_native;
 Vector3Refract :: (v: Vector3, n: Vector3, r: float) -> Vector3 #foreign raylib_native;
 
 
+
+
+
+
+//----------------------------------------------------------------------------------
+// Module Functions Definition - Vector4 math
+//----------------------------------------------------------------------------------
+
+Vector4Zero :: () -> Vector4 #foreign raylib_native;
+
+Vector4One :: () -> Vector4 #foreign raylib_native;
+
+Vector4Add :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
+
+Vector4AddValue :: (v: Vector4, add: float) -> Vector4 #foreign raylib_native;
+
+Vector4Subtract :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
+
+Vector4SubtractValue :: (v: Vector4, add: float) -> Vector4 #foreign raylib_native;
+
+Vector4Length :: (v: Vector4) -> float #foreign raylib_native;
+
+Vector4LengthSqr :: (v: Vector4) -> float #foreign raylib_native;
+
+Vector4DotProduct :: (v1: Vector4, v2: Vector4) -> float #foreign raylib_native;
+
+// Calculate distance between two vectors
+Vector4Distance :: (v1: Vector4, v2: Vector4) -> float #foreign raylib_native;
+
+// Calculate square distance between two vectors
+Vector4DistanceSqr :: (v1: Vector4, v2: Vector4) -> float #foreign raylib_native;
+
+
+Vector4Scale :: (v: Vector4, scale: float) -> Vector4 #foreign raylib_native;
+
+// Multiply vector by vector
+Vector4Multiply :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
+
+// Negate vector
+Vector4Negate :: (v: Vector4) -> Vector4 #foreign raylib_native;
+
+// Divide vector by vector
+Vector4Divide :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
+
+// Normalize provided vector
+Vector4Normalize :: (v: Vector4) -> Vector4 #foreign raylib_native;
+
+
+
+// Get min value for each pair of components
+Vector4Min :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
+
+
+
+// Get max value for each pair of components
+Vector4Max :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
+
+
+
+// Calculate linear interpolation between two vectors
+Vector4Lerp :: (v1: Vector4, v2: Vector4, amount: float) -> Vector4 #foreign raylib_native;
+
+
+
+// Move Vector towards target
+Vector4MoveTowards :: (v: Vector4, target: Vector4, maxDistance: float) -> Vector4 #foreign raylib_native;
+
+
+
+
+
+
+// Invert the given vector
+Vector4Invert :: (v: Vector4) -> Vector4 #foreign raylib_native;
+
+// Check whether two given vectors are almost equal
+Vector4Equals :: (p: Vector4, q: Vector4) -> s32 #foreign raylib_native;
 
 
 
@@ -613,7 +732,7 @@ MatrixScale :: (x: float, y: float, z: float) -> Matrix4 #foreign raylib_native;
 
 
 // Get perspective projection matrix
-MatrixFrustum :: (left: float64, right: float64, bottom: float64, top: float64, near: float64, far: float64) -> Matrix4 #foreign raylib_native;
+MatrixFrustum :: (left: float64, right: float64, bottom: float64, top: float64, nearPlane: float64, farPlane: float64) -> Matrix4 #foreign raylib_native;
 
 
 
@@ -737,6 +856,14 @@ QuaternionSlerp :: (q1: Quaternion, q2: Quaternion, amount: float) -> Quaternion
 
 
 
+// Calculate quaternion cubic spline interpolation using Cubic Hermite Spline algorithm
+// as described in the GLTF 2.0 specification: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
+QuaternionCubicHermiteSpline :: (q1: Quaternion, outTangent1: Quaternion, q2: Quaternion, inTangent2: Quaternion, t: float) -> Quaternion #foreign raylib_native;
+
+
+
+
+
 // Calculate quaternion based on the rotation from one vector to another
 QuaternionFromVector3ToVector3 :: (from: Vector3, to: Vector3) -> Quaternion #foreign raylib_native;
 
@@ -815,6 +942,23 @@ QuaternionTransform :: (q: Quaternion, mat: Matrix4) -> Quaternion #foreign rayl
 // Check whether two given quaternions are almost equal
 QuaternionEquals :: (p: Quaternion, q: Quaternion) -> s32 #foreign raylib_native;
 
+
+
+// Decompose a transformation matrix into its rotational, translational and scaling components
+MatrixDecompose :: (mat: Matrix4, translation: *Vector3, rotation: *Quaternion, scale: *Vector3) #foreign raylib_native;
+    // Extract translation.
+
+    // Extract upper-left for determinant computation
+
+    // Extract scale
+
+
+
+
+    // Remove scale from the matrix if it is not close to zero
+
+        // Extract rotation
+        // Set to identity if close to zero
 
 
 

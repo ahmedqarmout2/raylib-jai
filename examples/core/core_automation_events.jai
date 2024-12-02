@@ -23,19 +23,13 @@ EnvElement :: struct {
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - automation events");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Define player
     player: Player;
@@ -70,6 +64,7 @@ main :: () {
     currentPlayFrame: u32 = 0;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -83,7 +78,7 @@ main :: () {
 
             // Supports loading .rgs style files (text or binary) and .png style palette images
             if (IsFileExtension(droppedFiles.paths[0], ".txt;.rae")) {
-                UnloadAutomationEventList(*aelist);
+                UnloadAutomationEventList(aelist);
                 aelist = LoadAutomationEventList(droppedFiles.paths[0]);
 
                 eventRecording = false;
@@ -137,11 +132,6 @@ main :: () {
         }
         else player.canJump = true;
 
-        camera.zoom += (cast(float)GetMouseWheelMove()*0.05);
-
-        if (camera.zoom > 3.0) camera.zoom = 3.0;
-        else if (camera.zoom < 0.25) camera.zoom = 0.25;
-
         if (IsKeyPressed(.KEY_R)) {
             // Reset game state
             player.position = Vector2.{ 400, 280 };
@@ -155,6 +145,30 @@ main :: () {
         }
         //----------------------------------------------------------------------------------
 
+        // Events playing
+        // NOTE: Logic must be before Camera update because it depends on mouse-wheel value, 
+        // that can be set by the played event... but some other inputs could be affected
+        //----------------------------------------------------------------------------------
+        if (eventPlaying) {
+            // NOTE: Multiple events could be executed in a single frame
+            while (playFrameCounter == aelist.events[currentPlayFrame].frame) {
+                PlayAutomationEvent(aelist.events[currentPlayFrame]);
+                currentPlayFrame += 1;
+
+                if (currentPlayFrame == aelist.count) {
+                    eventPlaying = false;
+                    currentPlayFrame = 0;
+                    playFrameCounter = 0;
+
+                    TraceLog(.LOG_INFO, "FINISH PLAYING!");
+                    break;
+                }
+            }
+
+            playFrameCounter += 1;
+        }
+        //----------------------------------------------------------------------------------
+
         // Update camera
         //----------------------------------------------------------------------------------
         camera.target = player.position;
@@ -163,6 +177,11 @@ main :: () {
         minY: float = 1000;
         maxX: float = -1000;
         maxY: float = -1000;
+
+        // WARNING: On event replay, mouse-wheel internal value is set
+        camera.zoom += (cast(float)GetMouseWheelMove()*0.05);
+        if (camera.zoom > 3.0) camera.zoom = 3.0;
+        else if (camera.zoom < 0.25) camera.zoom = 0.25;
 
         for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
             element: EnvElement = envElements[i];
@@ -249,18 +268,19 @@ main :: () {
 
             ClearBackground(LIGHTGRAY);
 
-            BeginMode2D(camera);
+            {
+                BeginMode2D(camera);
+                defer EndMode2D();
 
-            // Draw environment elements
-            for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
-                DrawRectangleRec(envElements[i].rect, envElements[i].color);
+                // Draw environment elements
+                for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
+                    DrawRectangleRec(envElements[i].rect, envElements[i].color);
+                }
+
+                // Draw player rectangle
+                DrawRectangleRec(Rectangle.{ player.position.x - 20, player.position.y - 40, 40, 40 }, RED);
             }
 
-            // Draw player rectangle
-            DrawRectangleRec(Rectangle.{ player.position.x - 20, player.position.y - 40, 40, 40 }, RED);
-
-            EndMode2D();
-            
             // Draw game controls
             DrawRectangle(10, 10, 290, 145, Fade(SKYBLUE, 0.5));
             DrawRectangleLines(10, 10, 290, 145, Fade(BLUE, 0.8));

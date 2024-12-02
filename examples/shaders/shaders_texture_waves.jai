@@ -1,28 +1,29 @@
 #import "raylib";
 #import "Basic";
 
+#if OS == .WINDOWS || OS == .MACOS
+    GLSL_VERSION :: 330;
+else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+    GLSL_VERSION :: 100;
+
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - texture waves");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     // Load texture texture to apply shaders
     texture: Texture2D = LoadTexture("resources/space.png");
+    defer UnloadTexture(texture);       // Unload texture
 
     // Load shader and setup location points and values
-    shader: Shader = LoadShader(null, "resources/wave.fs");
+    shader: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/wave.fs", GLSL_VERSION));
+    defer UnloadShader(shader);         // Unload shader
 
     secondsLoc : s32 = GetShaderLocation(shader, "seconds");
     freqXLoc   : s32 = GetShaderLocation(shader, "freqX");
@@ -52,6 +53,7 @@ main :: () {
     seconds: float = 0.0;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -63,25 +65,16 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
+        defer EndDrawing();
 
-            ClearBackground(RAYWHITE);
+        ClearBackground(RAYWHITE);
 
-            BeginShaderMode(shader);
+        BeginShaderMode(shader);
+        defer EndShaderMode();
 
-            DrawTexture(texture, 0, 0, WHITE);
-            DrawTexture(texture, texture.width, 0, WHITE);
-
-            EndShaderMode();
-        }
+        DrawTexture(texture, 0, 0, WHITE);
+        DrawTexture(texture, texture.width, 0, WHITE);
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadShader(shader);         // Unload shader
-    UnloadTexture(texture);       // Unload texture
-    //--------------------------------------------------------------------------------------
 }

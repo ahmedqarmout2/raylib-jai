@@ -8,22 +8,17 @@ MIN_FRAME_SPEED: s32 : 1;
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [texture] example - sprite anim");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     scarfy: Texture2D = LoadTexture("resources/scarfy.png");        // Texture loading
+    defer UnloadTexture(scarfy);       // Texture unloading
 
     position: Vector2   = .{ 350.0, 280.0 };
     frameRec: Rectangle = .{ 0.0, 0.0, cast(float)scarfy.width/6, cast(float)scarfy.height };
@@ -33,6 +28,7 @@ main :: () {
     framesSpeed   : s32 = 8;       // Number of spritesheet frames shown by second
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -59,6 +55,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -78,13 +75,6 @@ main :: () {
         DrawTextureRec(scarfy, frameRec, position, WHITE);  // Draw part of the texture
 
         DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(scarfy);       // Texture unloading
-    //--------------------------------------------------------------------------------------
 }

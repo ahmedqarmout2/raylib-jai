@@ -7,21 +7,13 @@ MAX_FILEPATH_SIZE     : s32 : 2048;
 char :: u8;
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - drop files");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     filePathCounter: s32 = 0;
     filePaths: [MAX_FILEPATH_RECORDED]*char; // We will register a maximum of filepaths
@@ -32,6 +24,7 @@ main :: () {
     }
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -57,6 +50,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -76,8 +70,6 @@ main :: () {
 
             DrawText("Drop new files...", 100, 110 + 40*filePathCounter, 20, DARKGRAY);
         }
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 

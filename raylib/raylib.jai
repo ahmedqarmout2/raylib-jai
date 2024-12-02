@@ -4,28 +4,29 @@
 // jai generate.jai && ./generate.exe
 //
 
+#import "Basic";
 #import "Math";
 
 /*
 ***********************************************************************************************
 *
-*   raylib v5.0 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
+*   raylib v5.5 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
 *
 *   FEATURES:
 *       - NO external dependencies, all required libraries included with raylib
 *       - Multiplatform: Windows, Linux, FreeBSD, OpenBSD, NetBSD, DragonFly,
 *                        MacOS, Haiku, Android, Raspberry Pi, DRM native, HTML5.
 *       - Written in plain C code (C99) in PascalCase/camelCase notation
-*       - Hardware accelerated with OpenGL (1.1, 2.1, 3.3, 4.3 or ES2 - choose at compile)
+*       - Hardware accelerated with OpenGL (1.1, 2.1, 3.3, 4.3, ES2, ES3 - choose at compile)
 *       - Unique OpenGL abstraction layer (usable as standalone module): [rlgl]
-*       - Multiple Fonts formats supported (TTF, XNA fonts, AngelCode fonts)
+*       - Multiple Fonts formats supported (TTF, OTF, FNT, BDF, Sprite fonts)
 *       - Outstanding texture formats support, including compressed formats (DXT, ETC, ASTC)
 *       - Full 3d support for 3d Shapes, Models, Billboards, Heightmaps and more!
 *       - Flexible Materials system, supporting classic maps and PBR maps
-*       - Animated 3D models supported (skeletal bones animation) (IQM)
+*       - Animated 3D models supported (skeletal bones animation) (IQM, M3D, GLTF)
 *       - Shaders support, including Model shaders and Postprocessing shaders
 *       - Powerful math module for Vector, Matrix and Quaternion operations: [raymath]
-*       - Audio loading and playing with streaming support (WAV, OGG, MP3, FLAC, XM, MOD)
+*       - Audio loading and playing with streaming support (WAV, OGG, MP3, FLAC, QOA, XM, MOD)
 *       - VR stereo rendering with configurable HMD device parameters
 *       - Bindings to multiple programming languages available!
 *
@@ -36,29 +37,35 @@
 *       - One default RenderBatch is loaded on rlglInit()->rlLoadRenderBatch() [rlgl] (OpenGL 3.3 or ES2)
 *
 *   DEPENDENCIES (included):
-*       [rcore] rglfw (Camilla Löwy - github.com/glfw/glfw) for window/context management and input (PLATFORM_DESKTOP)
-*       [rlgl] glad (David Herberth - github.com/Dav1dde/glad) for OpenGL 3.3 extensions loading (PLATFORM_DESKTOP)
+*       [rcore][GLFW] rglfw (Camilla Löwy - github.com/glfw/glfw) for window/context management and input
+*       [rcore][RGFW] rgfw (ColleagueRiley - github.com/ColleagueRiley/RGFW) for window/context management and input
+*       [rlgl] glad/glad_gles2 (David Herberth - github.com/Dav1dde/glad) for OpenGL 3.3 extensions loading
 *       [raudio] miniaudio (David Reid - github.com/mackron/miniaudio) for audio device/context management
 *
 *   OPTIONAL DEPENDENCIES (included):
 *       [rcore] msf_gif (Miles Fogle) for GIF recording
 *       [rcore] sinfl (Micha Mettke) for DEFLATE decompression algorithm
 *       [rcore] sdefl (Micha Mettke) for DEFLATE compression algorithm
+*       [rcore] rprand (Ramon Snatamaria) for pseudo-random numbers generation
+*       [rtextures] qoi (Dominic Szablewski - https://phoboslab.org) for QOI image manage
 *       [rtextures] stb_image (Sean Barret) for images loading (BMP, TGA, PNG, JPEG, HDR...)
 *       [rtextures] stb_image_write (Sean Barret) for image writing (BMP, TGA, PNG, JPG)
-*       [rtextures] stb_image_resize (Sean Barret) for image resizing algorithms
+*       [rtextures] stb_image_resize2 (Sean Barret) for image resizing algorithms
+*       [rtextures] stb_perlin (Sean Barret) for Perlin Noise image generation
 *       [rtext] stb_truetype (Sean Barret) for ttf fonts loading
 *       [rtext] stb_rect_pack (Sean Barret) for rectangles packing
 *       [rmodels] par_shapes (Philip Rideout) for parametric 3d shapes generation
 *       [rmodels] tinyobj_loader_c (Syoyo Fujita) for models loading (OBJ, MTL)
 *       [rmodels] cgltf (Johannes Kuhlmann) for models loading (glTF)
-*       [rmodels] Model3D (bzt) for models loading (M3D, https://bztsrc.gitlab.io/model3d)
+*       [rmodels] m3d (bzt) for models loading (M3D, https://bztsrc.gitlab.io/model3d)
+*       [rmodels] vox_loader (Johann Nadalutti) for models loading (VOX)
 *       [raudio] dr_wav (David Reid) for WAV audio file loading
 *       [raudio] dr_flac (David Reid) for FLAC audio file loading
 *       [raudio] dr_mp3 (David Reid) for MP3 audio file loading
 *       [raudio] stb_vorbis (Sean Barret) for OGG audio loading
 *       [raudio] jar_xm (Joshua Reisenauer) for XM audio module loading
 *       [raudio] jar_mod (Joshua Reisenauer) for MOD audio module loading
+*       [raudio] qoa (Dominic Szablewski - https://phoboslab.org) for QOA audio manage
 *
 *
 *   LICENSE: zlib/libpng
@@ -66,7 +73,7 @@
 *   raylib is licensed under an unmodified zlib/libpng license, which is an OSI-certified,
 *   BSD-like license that allows static linking with closed source software:
 *
-*   Copyright (c) 2013-2023 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2013-2024 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -89,12 +96,13 @@
 
 
 RAYLIB_VERSION_MAJOR :: 5;
-RAYLIB_VERSION_MINOR :: 0;
+RAYLIB_VERSION_MINOR :: 5;
 RAYLIB_VERSION_PATCH :: 0;
-RAYLIB_VERSION ::  "5.0";
+RAYLIB_VERSION ::  "5.5";
 
-// Function specifiers in case library is build/used as a shared library (Windows)
+// Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
+// NOTE: visibility("default") attribute makes symbols "visible" when compiled with -fvisibility=hidden
 
 
 //----------------------------------------------------------------------------------
@@ -282,8 +290,10 @@ Mesh :: struct {
     // Animation vertex data
     animVertices: *float;     // Animated vertex positions (after bones transformations)
     animNormals: *float;      // Animated normals (after bones transformations)
-    boneIds: *u8;  // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
-    boneWeights: *float;      // Vertex bone weight, up to 4 bones influence by vertex (skinning)
+    boneIds: *u8;  // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning) (shader-location = 6)
+    boneWeights: *float;      // Vertex bone weight, up to 4 bones influence by vertex (skinning) (shader-location = 7)
+    boneMatrices: *Matrix4;    // Bones animated transformation matrices
+    boneCount: s32;           // Number of bones
 
     // OpenGL identifiers
     vaoId: u32;      // OpenGL Vertex Array Object id
@@ -351,7 +361,7 @@ ModelAnimation :: struct {
 // Ray, ray for raycasting
 Ray :: struct {
     position: Vector3;        // Ray position (origin)
-    direction: Vector3;       // Ray direction
+    direction: Vector3;       // Ray direction (normalized)
 }
 
 // RayCollision, ray hit information
@@ -414,7 +424,6 @@ VrDeviceInfo :: struct {
     vResolution: s32;                 // Vertical resolution in pixels
     hScreenSize: float;               // Horizontal size in meters
     vScreenSize: float;               // Vertical size in meters
-    vScreenCenter: float;             // Screen center in meters
     eyeToScreenDistance: float;       // Distance between eye and display in meters
     lensSeparationDistance: float;    // Lens separation distance in meters
     interpupillaryDistance: float;    // IPD (distance between pupils) in meters
@@ -608,7 +617,7 @@ KeyboardKey :: enum s32 {
     KEY_KP_EQUAL        :: 336;      // Key: Keypad =
     // Android key buttons
     KEY_BACK            :: 4;        // Key: Android back button
-    KEY_MENU            :: 82;       // Key: Android menu button
+    KEY_MENU            :: 5;        // Key: Android menu button
     KEY_VOLUME_UP       :: 24;       // Key: Android volume up button
     KEY_VOLUME_DOWN     :: 25;        // Key: Android volume down button
 }
@@ -652,12 +661,12 @@ GamepadButton :: enum s32 {
     GAMEPAD_BUTTON_LEFT_FACE_DOWN;      // Gamepad left DPAD down button
     GAMEPAD_BUTTON_LEFT_FACE_LEFT;      // Gamepad left DPAD left button
     GAMEPAD_BUTTON_RIGHT_FACE_UP;       // Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
-    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;    // Gamepad right button right (i.e. PS3: Square, Xbox: X)
+    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;    // Gamepad right button right (i.e. PS3: Circle, Xbox: B)
     GAMEPAD_BUTTON_RIGHT_FACE_DOWN;     // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
-    GAMEPAD_BUTTON_RIGHT_FACE_LEFT;     // Gamepad right button left (i.e. PS3: Circle, Xbox: B)
+    GAMEPAD_BUTTON_RIGHT_FACE_LEFT;     // Gamepad right button left (i.e. PS3: Square, Xbox: X)
     GAMEPAD_BUTTON_LEFT_TRIGGER_1;      // Gamepad top/back trigger left (first), it could be a trailing button
     GAMEPAD_BUTTON_LEFT_TRIGGER_2;      // Gamepad top/back trigger left (second), it could be a trailing button
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_1;     // Gamepad top/back trigger right (one), it could be a trailing button
+    GAMEPAD_BUTTON_RIGHT_TRIGGER_1;     // Gamepad top/back trigger right (first), it could be a trailing button
     GAMEPAD_BUTTON_RIGHT_TRIGGER_2;     // Gamepad top/back trigger right (second), it could be a trailing button
     GAMEPAD_BUTTON_MIDDLE_LEFT;         // Gamepad center buttons, left one (i.e. PS3: Select)
     GAMEPAD_BUTTON_MIDDLE;              // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
@@ -721,7 +730,10 @@ ShaderLocationIndex :: enum s32 {
     SHADER_LOC_MAP_CUBEMAP;         // Shader location: samplerCube texture: cubemap
     SHADER_LOC_MAP_IRRADIANCE;      // Shader location: samplerCube texture: irradiance
     SHADER_LOC_MAP_PREFILTER;       // Shader location: samplerCube texture: prefilter
-    SHADER_LOC_MAP_BRDF;             // Shader location: sampler2d texture: brdf
+    SHADER_LOC_MAP_BRDF;            // Shader location: sampler2d texture: brdf
+    SHADER_LOC_VERTEX_BONEIDS;      // Shader location: vertex attribute: boneIds
+    SHADER_LOC_VERTEX_BONEWEIGHTS;  // Shader location: vertex attribute: boneWeights
+    SHADER_LOC_BONE_MATRICES;        // Shader location: array of matrices uniform: boneMatrices
 }
 
 SHADER_LOC_MAP_DIFFUSE  :: ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO;
@@ -804,7 +816,6 @@ CubemapLayout :: enum s32 {
     CUBEMAP_LAYOUT_LINE_HORIZONTAL;         // Layout is defined by a horizontal line with faces
     CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR;     // Layout is defined by a 3x4 cross with cubemap faces
     CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE;     // Layout is defined by a 4x3 cross with cubemap faces
-    CUBEMAP_LAYOUT_PANORAMA;                 // Layout is defined by a panorama image (equirrectangular map)
 }
 
 // Font type, defines generation method
@@ -844,11 +855,11 @@ Gesture :: enum s32 {
 
 // Camera system modes
 CameraMode :: enum s32 {
-    CAMERA_CUSTOM :: 0;              // Custom camera
-    CAMERA_FREE;                    // Free camera
-    CAMERA_ORBITAL;                 // Orbital camera
-    CAMERA_FIRST_PERSON;            // First person camera
-    CAMERA_THIRD_PERSON;             // Third person camera
+    CAMERA_CUSTOM :: 0;              // Camera custom, controlled by user (UpdateCamera() does nothing)
+    CAMERA_FREE;                    // Camera free mode
+    CAMERA_ORBITAL;                 // Camera orbital, around target, zoom supported
+    CAMERA_FIRST_PERSON;            // Camera first person
+    CAMERA_THIRD_PERSON;             // Camera third person
 }
 
 // Camera projection
@@ -865,7 +876,7 @@ NPatchLayout :: enum s32 {
 }
 
 // Callbacks to hook some internal functions
-// WARNING: These callbacks are intended for advance users
+// WARNING: These callbacks are intended for advanced users
 
 //------------------------------------------------------------------------------------
 // Global Variables Definition
@@ -924,6 +935,7 @@ GetWindowScaleDPI :: () -> Vector2 #foreign raylib_native;
 GetMonitorName :: (monitor: s32) -> *u8 #foreign raylib_native;
 SetClipboardText :: (text: *u8) #foreign raylib_native;
 GetClipboardText :: () -> *u8 #foreign raylib_native;
+GetClipboardImage :: () -> Image #foreign raylib_native;
 EnableEventWaiting :: () #foreign raylib_native;
 DisableEventWaiting :: () #foreign raylib_native;
 
@@ -962,7 +974,7 @@ UnloadVrStereoConfig :: (config: VrStereoConfig) #foreign raylib_native;
 // NOTE: Shader functionality is not available on OpenGL 1.1
 LoadShader :: (vsFileName: *u8, fsFileName: *u8) -> Shader #foreign raylib_native;
 LoadShaderFromMemory :: (vsCode: *u8, fsCode: *u8) -> Shader #foreign raylib_native;
-IsShaderReady :: (shader: Shader) -> bool #foreign raylib_native;
+IsShaderValid :: (shader: Shader) -> bool #foreign raylib_native;
 GetShaderLocation :: (shader: Shader, uniformName: *u8) -> s32 #foreign raylib_native;
 GetShaderLocationAttrib :: (shader: Shader, attribName: *u8) -> s32 #foreign raylib_native;
 SetShaderValue :: (shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType) #foreign raylib_native;
@@ -972,13 +984,15 @@ SetShaderValueTexture :: (shader: Shader, locIndex: s32, texture: Texture2D) #fo
 UnloadShader :: (shader: Shader) #foreign raylib_native;
 
 // Screen-space-related functions
-GetMouseRay :: (mousePosition: Vector2, camera: Camera) -> Ray #foreign raylib_native;
-GetCameraMatrix :: (camera: Camera) -> Matrix4 #foreign raylib_native;
-GetCameraMatrix2D :: (camera: Camera2D) -> Matrix4 #foreign raylib_native;
+GetMouseRay :: GetScreenToWorldRay;    // Compatibility hack for previous raylib versions
+GetScreenToWorldRay :: (position: Vector2, camera: Camera) -> Ray #foreign raylib_native;
+GetScreenToWorldRayEx :: (position: Vector2, camera: Camera, width: s32, height: s32) -> Ray #foreign raylib_native;
 GetWorldToScreen :: (position: Vector3, camera: Camera) -> Vector2 #foreign raylib_native;
-GetScreenToWorld2D :: (position: Vector2, camera: Camera2D) -> Vector2 #foreign raylib_native;
 GetWorldToScreenEx :: (position: Vector3, camera: Camera, width: s32, height: s32) -> Vector2 #foreign raylib_native;
 GetWorldToScreen2D :: (position: Vector2, camera: Camera2D) -> Vector2 #foreign raylib_native;
+GetScreenToWorld2D :: (position: Vector2, camera: Camera2D) -> Vector2 #foreign raylib_native;
+GetCameraMatrix :: (camera: Camera) -> Matrix4 #foreign raylib_native;
+GetCameraMatrix2D :: (camera: Camera2D) -> Matrix4 #foreign raylib_native;
 
 // Timing-related functions
 SetTargetFPS :: (fps: s32) #foreign raylib_native;
@@ -987,7 +1001,7 @@ GetTime :: () -> float64 #foreign raylib_native;
 GetFPS :: () -> s32 #foreign raylib_native;
 
 // Custom frame control functions
-// NOTE: Those functions are intended for advance users that want full control over the frame processing
+// NOTE: Those functions are intended for advanced users that want full control over the frame processing
 // By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
 // To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
 SwapScreenBuffer :: () #foreign raylib_native;
@@ -1014,7 +1028,7 @@ MemRealloc :: (ptr: *void, size: u32) -> *void #foreign raylib_native;
 MemFree :: (ptr: *void) #foreign raylib_native;
 
 // Set custom callbacks
-// WARNING: Callbacks setup is intended for advance users
+// WARNING: Callbacks setup is intended for advanced users
 SetTraceLogCallback :: (callback: TraceLogCallback) #foreign raylib_native;
 SetLoadFileDataCallback :: (callback: LoadFileDataCallback) #foreign raylib_native;
 SetSaveFileDataCallback :: (callback: SaveFileDataCallback) #foreign raylib_native;
@@ -1043,8 +1057,10 @@ GetDirectoryPath :: (filePath: *u8) -> *u8 #foreign raylib_native;
 GetPrevDirectoryPath :: (dirPath: *u8) -> *u8 #foreign raylib_native;
 GetWorkingDirectory :: () -> *u8 #foreign raylib_native;
 GetApplicationDirectory :: () -> *u8 #foreign raylib_native;
+MakeDirectory :: (dirPath: *u8) -> s32 #foreign raylib_native;
 ChangeDirectory :: (dir: *u8) -> bool #foreign raylib_native;
 IsPathFile :: (path: *u8) -> bool #foreign raylib_native;
+IsFileNameValid :: (fileName: *u8) -> bool #foreign raylib_native;
 LoadDirectoryFiles :: (dirPath: *u8) -> FilePathList #foreign raylib_native;
 LoadDirectoryFilesEx :: (basePath: *u8, filter: *u8, scanSubdirs: bool) -> FilePathList #foreign raylib_native;
 UnloadDirectoryFiles :: (files: FilePathList) #foreign raylib_native;
@@ -1058,10 +1074,14 @@ CompressData :: (data: *u8, dataSize: s32, compDataSize: *s32) -> *u8 #foreign r
 DecompressData :: (compData: *u8, compDataSize: s32, dataSize: *s32) -> *u8 #foreign raylib_native;
 EncodeDataBase64 :: (data: *u8, dataSize: s32, outputSize: *s32) -> *u8 #foreign raylib_native;
 DecodeDataBase64 :: (data: *u8, outputSize: *s32) -> *u8 #foreign raylib_native;
+ComputeCRC32 :: (data: *u8, dataSize: s32) -> u32 #foreign raylib_native;
+ComputeMD5 :: (data: *u8, dataSize: s32) -> *u32 #foreign raylib_native;
+ComputeSHA1 :: (data: *u8, dataSize: s32) -> *u32 #foreign raylib_native;
+
 
 // Automation events functionality
 LoadAutomationEventList :: (fileName: *u8) -> AutomationEventList #foreign raylib_native;
-UnloadAutomationEventList :: (list: *AutomationEventList) #foreign raylib_native;
+UnloadAutomationEventList :: (list: AutomationEventList) #foreign raylib_native;
 ExportAutomationEventList :: (list: AutomationEventList, fileName: *u8) -> bool #foreign raylib_native;
 SetAutomationEventList :: (list: *AutomationEventList) #foreign raylib_native;
 SetAutomationEventBaseFrame :: (frame: s32) #foreign raylib_native;
@@ -1090,10 +1110,11 @@ IsGamepadButtonPressed :: (gamepad: s32, button: GamepadButton) -> bool #foreign
 IsGamepadButtonDown :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
 IsGamepadButtonReleased :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
 IsGamepadButtonUp :: (gamepad: s32, button: GamepadButton) -> bool #foreign raylib_native;
-GetGamepadButtonPressed :: () -> s32 #foreign raylib_native;
+GetGamepadButtonPressed :: () -> GamepadButton #foreign raylib_native;
 GetGamepadAxisCount :: (gamepad: s32) -> s32 #foreign raylib_native;
 GetGamepadAxisMovement :: (gamepad: s32, axis: GamepadAxis) -> float #foreign raylib_native;
 SetGamepadMappings :: (mappings: *u8) -> s32 #foreign raylib_native;
+SetGamepadVibration :: (gamepad: s32, leftMotor: float, rightMotor: float, duration: float) #foreign raylib_native;
 
 // Input-related functions: mouse
 IsMouseButtonPressed :: (button: MouseButton) -> bool #foreign raylib_native;
@@ -1143,6 +1164,8 @@ UpdateCameraPro :: (camera: *Camera, movement: Vector3, rotation: Vector3, zoom:
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
 SetShapesTexture :: (texture: Texture2D, source: Rectangle) #foreign raylib_native;
+GetShapesTexture :: () -> Texture2D #foreign raylib_native;
+GetShapesTextureRectangle :: () -> Rectangle #foreign raylib_native;
 
 // Basic shapes drawing functions
 DrawPixel :: (posX: s32, posY: s32, color: Color) #foreign raylib_native;
@@ -1155,7 +1178,7 @@ DrawLineBezier :: (startPos: Vector2, endPos: Vector2, thick: float, color: Colo
 DrawCircle :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
 DrawCircleSector :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
 DrawCircleSectorLines :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
-DrawCircleGradient :: (centerX: s32, centerY: s32, radius: float, color1: Color, color2: Color) #foreign raylib_native;
+DrawCircleGradient :: (centerX: s32, centerY: s32, radius: float, inner: Color, outer: Color) #foreign raylib_native;
 DrawCircleV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
 DrawCircleLines :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
 DrawCircleLinesV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
@@ -1167,13 +1190,14 @@ DrawRectangle :: (posX: s32, posY: s32, width: s32, height: s32, color: Color) #
 DrawRectangleV :: (position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
 DrawRectangleRec :: (rec: Rectangle, color: Color) #foreign raylib_native;
 DrawRectanglePro :: (rec: Rectangle, origin: Vector2, rotation: float, color: Color) #foreign raylib_native;
-DrawRectangleGradientV :: (posX: s32, posY: s32, width: s32, height: s32, color1: Color, color2: Color) #foreign raylib_native;
-DrawRectangleGradientH :: (posX: s32, posY: s32, width: s32, height: s32, color1: Color, color2: Color) #foreign raylib_native;
-DrawRectangleGradientEx :: (rec: Rectangle, col1: Color, col2: Color, col3: Color, col4: Color) #foreign raylib_native;
+DrawRectangleGradientV :: (posX: s32, posY: s32, width: s32, height: s32, top: Color, bottom: Color) #foreign raylib_native;
+DrawRectangleGradientH :: (posX: s32, posY: s32, width: s32, height: s32, left: Color, right: Color) #foreign raylib_native;
+DrawRectangleGradientEx :: (rec: Rectangle, topLeft: Color, bottomLeft: Color, topRight: Color, bottomRight: Color) #foreign raylib_native;
 DrawRectangleLines :: (posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
 DrawRectangleLinesEx :: (rec: Rectangle, lineThick: float, color: Color) #foreign raylib_native;
 DrawRectangleRounded :: (rec: Rectangle, roundness: float, segments: s32, color: Color) #foreign raylib_native;
-DrawRectangleRoundedLines :: (rec: Rectangle, roundness: float, segments: s32, lineThick: float, color: Color) #foreign raylib_native;
+DrawRectangleRoundedLines :: (rec: Rectangle, roundness: float, segments: s32, color: Color) #foreign raylib_native;
+DrawRectangleRoundedLinesEx :: (rec: Rectangle, roundness: float, segments: s32, lineThick: float, color: Color) #foreign raylib_native;
 DrawTriangle :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
 DrawTriangleLines :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
 DrawTriangleFan :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
@@ -1205,12 +1229,13 @@ GetSplinePointBezierCubic :: (p1: Vector2, c2: Vector2, c3: Vector2, p4: Vector2
 CheckCollisionRecs :: (rec1: Rectangle, rec2: Rectangle) -> bool #foreign raylib_native;
 CheckCollisionCircles :: (center1: Vector2, radius1: float, center2: Vector2, radius2: float) -> bool #foreign raylib_native;
 CheckCollisionCircleRec :: (center: Vector2, radius: float, rec: Rectangle) -> bool #foreign raylib_native;
+CheckCollisionCircleLine :: (center: Vector2, radius: float, p1: Vector2, p2: Vector2) -> bool #foreign raylib_native;
 CheckCollisionPointRec :: (point: Vector2, rec: Rectangle) -> bool #foreign raylib_native;
 CheckCollisionPointCircle :: (point: Vector2, center: Vector2, radius: float) -> bool #foreign raylib_native;
 CheckCollisionPointTriangle :: (point: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> bool #foreign raylib_native;
+CheckCollisionPointLine :: (point: Vector2, p1: Vector2, p2: Vector2, threshold: s32) -> bool #foreign raylib_native;
 CheckCollisionPointPoly :: (point: Vector2, points: *Vector2, pointCount: s32) -> bool #foreign raylib_native;
 CheckCollisionLines :: (startPos1: Vector2, endPos1: Vector2, startPos2: Vector2, endPos2: Vector2, collisionPoint: *Vector2) -> bool #foreign raylib_native;
-CheckCollisionPointLine :: (point: Vector2, p1: Vector2, p2: Vector2, threshold: s32) -> bool #foreign raylib_native;
 GetCollisionRec :: (rec1: Rectangle, rec2: Rectangle) -> Rectangle #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
@@ -1221,12 +1246,12 @@ GetCollisionRec :: (rec1: Rectangle, rec2: Rectangle) -> Rectangle #foreign rayl
 // NOTE: These functions do not require GPU access
 LoadImage :: (fileName: *u8) -> Image #foreign raylib_native;
 LoadImageRaw :: (fileName: *u8, width: s32, height: s32, format: PixelFormat, headerSize: s32) -> Image #foreign raylib_native;
-LoadImageSvg :: (fileNameOrString: *u8, width: s32, height: s32) -> Image #foreign raylib_native;
 LoadImageAnim :: (fileName: *u8, frames: *s32) -> Image #foreign raylib_native;
+LoadImageAnimFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32, frames: *s32) -> Image #foreign raylib_native;
 LoadImageFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32) -> Image #foreign raylib_native;
 LoadImageFromTexture :: (texture: Texture2D) -> Image #foreign raylib_native;
 LoadImageFromScreen :: () -> Image #foreign raylib_native;
-IsImageReady :: (image: Image) -> bool #foreign raylib_native;
+IsImageValid :: (image: Image) -> bool #foreign raylib_native;
 UnloadImage :: (image: Image) #foreign raylib_native;
 ExportImage :: (image: Image, fileName: *u8) -> bool #foreign raylib_native;
 ExportImageToMemory :: (image: Image, fileType: *u8, fileSize: *s32) -> *u8 #foreign raylib_native;
@@ -1246,6 +1271,7 @@ GenImageText :: (width: s32, height: s32, text: *u8) -> Image #foreign raylib_na
 // Image manipulation functions
 ImageCopy :: (image: Image) -> Image #foreign raylib_native;
 ImageFromImage :: (image: Image, rec: Rectangle) -> Image #foreign raylib_native;
+ImageFromChannel :: (image: Image, selectedChannel: s32) -> Image #foreign raylib_native;
 ImageText :: (text: *u8, fontSize: s32, color: Color) -> Image #foreign raylib_native;
 ImageTextEx :: (font: Font, text: *u8, fontSize: float, spacing: float, tint: Color) -> Image #foreign raylib_native;
 ImageFormat :: (image: *Image, newFormat: PixelFormat) #foreign raylib_native;
@@ -1256,6 +1282,7 @@ ImageAlphaClear :: (image: *Image, color: Color, threshold: float) #foreign rayl
 ImageAlphaMask :: (image: *Image, alphaMask: Image) #foreign raylib_native;
 ImageAlphaPremultiply :: (image: *Image) #foreign raylib_native;
 ImageBlurGaussian :: (image: *Image, blurSize: s32) #foreign raylib_native;
+ImageKernelConvolution :: (image: *Image, kernel: *float, kernelSize: s32) #foreign raylib_native;
 ImageResize :: (image: *Image, newWidth: s32, newHeight: s32) #foreign raylib_native;
 ImageResizeNN :: (image: *Image, newWidth: s32, newHeight: s32) #foreign raylib_native;
 ImageResizeCanvas :: (image: *Image, newWidth: s32, newHeight: s32, offsetX: s32, offsetY: s32, fill: Color) #foreign raylib_native;
@@ -1286,6 +1313,7 @@ ImageDrawPixel :: (dst: *Image, posX: s32, posY: s32, color: Color) #foreign ray
 ImageDrawPixelV :: (dst: *Image, position: Vector2, color: Color) #foreign raylib_native;
 ImageDrawLine :: (dst: *Image, startPosX: s32, startPosY: s32, endPosX: s32, endPosY: s32, color: Color) #foreign raylib_native;
 ImageDrawLineV :: (dst: *Image, start: Vector2, end: Vector2, color: Color) #foreign raylib_native;
+ImageDrawLineEx :: (dst: *Image, start: Vector2, end: Vector2, thick: s32, color: Color) #foreign raylib_native;
 ImageDrawCircle :: (dst: *Image, centerX: s32, centerY: s32, radius: s32, color: Color) #foreign raylib_native;
 ImageDrawCircleV :: (dst: *Image, center: Vector2, radius: s32, color: Color) #foreign raylib_native;
 ImageDrawCircleLines :: (dst: *Image, centerX: s32, centerY: s32, radius: s32, color: Color) #foreign raylib_native;
@@ -1294,6 +1322,11 @@ ImageDrawRectangle :: (dst: *Image, posX: s32, posY: s32, width: s32, height: s3
 ImageDrawRectangleV :: (dst: *Image, position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
 ImageDrawRectangleRec :: (dst: *Image, rec: Rectangle, color: Color) #foreign raylib_native;
 ImageDrawRectangleLines :: (dst: *Image, rec: Rectangle, thick: s32, color: Color) #foreign raylib_native;
+ImageDrawTriangle :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+ImageDrawTriangleEx :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, c1: Color, c2: Color, c3: Color) #foreign raylib_native;
+ImageDrawTriangleLines :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+ImageDrawTriangleFan :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+ImageDrawTriangleStrip :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
 ImageDraw :: (dst: *Image, src: Image, srcRec: Rectangle, dstRec: Rectangle, tint: Color) #foreign raylib_native;
 ImageDrawText :: (dst: *Image, text: *u8, posX: s32, posY: s32, fontSize: s32, color: Color) #foreign raylib_native;
 ImageDrawTextEx :: (dst: *Image, font: Font, text: *u8, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
@@ -1304,9 +1337,9 @@ LoadTexture :: (fileName: *u8) -> Texture2D #foreign raylib_native;
 LoadTextureFromImage :: (image: Image) -> Texture2D #foreign raylib_native;
 LoadTextureCubemap :: (image: Image, layout: s32) -> TextureCubemap #foreign raylib_native;
 LoadRenderTexture :: (width: s32, height: s32) -> RenderTexture2D #foreign raylib_native;
-IsTextureReady :: (texture: Texture2D) -> bool #foreign raylib_native;
+IsTextureValid :: (texture: Texture2D) -> bool #foreign raylib_native;
 UnloadTexture :: (texture: Texture2D) #foreign raylib_native;
-IsRenderTextureReady :: (target: RenderTexture2D) -> bool #foreign raylib_native;
+IsRenderTextureValid :: (target: RenderTexture2D) -> bool #foreign raylib_native;
 UnloadRenderTexture :: (target: RenderTexture2D) #foreign raylib_native;
 UpdateTexture :: (texture: Texture2D, pixels: *void) #foreign raylib_native;
 UpdateTextureRec :: (texture: Texture2D, rec: Rectangle, pixels: *void) #foreign raylib_native;
@@ -1325,6 +1358,7 @@ DrawTexturePro :: (texture: Texture2D, source: Rectangle, dest: Rectangle, origi
 DrawTextureNPatch :: (texture: Texture2D, nPatchInfo: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 
 // Color/pixel related functions
+ColorIsEqual :: (col1: Color, col2: Color) -> bool #foreign raylib_native;
 Fade :: (color: Color, alpha: float) -> Color #foreign raylib_native;
 ColorToInt :: (color: Color) -> s32 #foreign raylib_native;
 ColorNormalize :: (color: Color) -> Vector4 #foreign raylib_native;
@@ -1336,6 +1370,7 @@ ColorBrightness :: (color: Color, factor: float) -> Color #foreign raylib_native
 ColorContrast :: (color: Color, contrast: float) -> Color #foreign raylib_native;
 ColorAlpha :: (color: Color, alpha: float) -> Color #foreign raylib_native;
 ColorAlphaBlend :: (dst: Color, src: Color, tint: Color) -> Color #foreign raylib_native;
+ColorLerp :: (color1: Color, color2: Color, factor: float) -> Color #foreign raylib_native;
 GetColor :: (hexValue: u32) -> Color #foreign raylib_native;
 GetPixelColor :: (srcPtr: *void, format: s32) -> Color #foreign raylib_native;
 SetPixelColor :: (dstPtr: *void, color: Color, format: s32) #foreign raylib_native;
@@ -1351,7 +1386,7 @@ LoadFont :: (fileName: *u8) -> Font #foreign raylib_native;
 LoadFontEx :: (fileName: *u8, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
 LoadFontFromImage :: (image: Image, key: Color, firstChar: s32) -> Font #foreign raylib_native;
 LoadFontFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
-IsFontReady :: (font: Font) -> bool #foreign raylib_native;
+IsFontValid :: (font: Font) -> bool #foreign raylib_native;
 LoadFontData :: (fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: s32) -> *GlyphInfo #foreign raylib_native;
 GenImageFontAtlas :: (glyphs: *GlyphInfo, glyphRecs: **Rectangle, glyphCount: s32, fontSize: s32, padding: s32, packMethod: s32) -> Image #foreign raylib_native;
 UnloadFontData :: (glyphs: *GlyphInfo, glyphCount: s32) #foreign raylib_native;
@@ -1401,7 +1436,11 @@ TextFindIndex :: (text: *u8, find: *u8) -> s32 #foreign raylib_native;
 TextToUpper :: (text: *u8) -> *u8 #foreign raylib_native;
 TextToLower :: (text: *u8) -> *u8 #foreign raylib_native;
 TextToPascal :: (text: *u8) -> *u8 #foreign raylib_native;
+TextToSnake :: (text: *u8) -> *u8 #foreign raylib_native;
+TextToCamel :: (text: *u8) -> *u8 #foreign raylib_native;
+
 TextToInteger :: (text: *u8) -> s32 #foreign raylib_native;
+TextToFloat :: (text: *u8) -> float #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)
@@ -1437,7 +1476,7 @@ DrawGrid :: (slices: s32, spacing: float) #foreign raylib_native;
 // Model management functions
 LoadModel :: (fileName: *u8) -> Model #foreign raylib_native;
 LoadModelFromMesh :: (mesh: Mesh) -> Model #foreign raylib_native;
-IsModelReady :: (model: Model) -> bool #foreign raylib_native;
+IsModelValid :: (model: Model) -> bool #foreign raylib_native;
 UnloadModel :: (model: Model) #foreign raylib_native;
 GetModelBoundingBox :: (model: Model) -> BoundingBox #foreign raylib_native;
 
@@ -1446,8 +1485,10 @@ DrawModel :: (model: Model, position: Vector3, scale: float, tint: Color) #forei
 DrawModelEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) #foreign raylib_native;
 DrawModelWires :: (model: Model, position: Vector3, scale: float, tint: Color) #foreign raylib_native;
 DrawModelWiresEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) #foreign raylib_native;
+DrawModelPoints :: (model: Model, position: Vector3, scale: float, tint: Color) #foreign raylib_native;
+DrawModelPointsEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) #foreign raylib_native;
 DrawBoundingBox :: (box: BoundingBox, color: Color) #foreign raylib_native;
-DrawBillboard :: (camera: Camera, texture: Texture2D, position: Vector3, size: float, tint: Color) #foreign raylib_native;
+DrawBillboard :: (camera: Camera, texture: Texture2D, position: Vector3, scale: float, tint: Color) #foreign raylib_native;
 DrawBillboardRec :: (camera: Camera, texture: Texture2D, source: Rectangle, position: Vector3, size: Vector2, tint: Color) #foreign raylib_native;
 DrawBillboardPro :: (camera: Camera, texture: Texture2D, source: Rectangle, position: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 
@@ -1457,9 +1498,10 @@ UpdateMeshBuffer :: (mesh: Mesh, index: s32, data: *void, dataSize: s32, offset:
 UnloadMesh :: (mesh: Mesh) #foreign raylib_native;
 DrawMesh :: (mesh: Mesh, material: Material, transform: Matrix4) #foreign raylib_native;
 DrawMeshInstanced :: (mesh: Mesh, material: Material, transforms: *Matrix4, instances: s32) #foreign raylib_native;
-ExportMesh :: (mesh: Mesh, fileName: *u8) -> bool #foreign raylib_native;
 GetMeshBoundingBox :: (mesh: Mesh) -> BoundingBox #foreign raylib_native;
 GenMeshTangents :: (mesh: *Mesh) #foreign raylib_native;
+ExportMesh :: (mesh: Mesh, fileName: *u8) -> bool #foreign raylib_native;
+ExportMeshAsCode :: (mesh: Mesh, fileName: *u8) -> bool #foreign raylib_native;
 
 // Mesh generation functions
 GenMeshPoly :: (sides: s32, radius: float) -> Mesh #foreign raylib_native;
@@ -1477,7 +1519,7 @@ GenMeshCubicmap :: (cubicmap: Image, cubeSize: Vector3) -> Mesh #foreign raylib_
 // Material loading/unloading functions
 LoadMaterials :: (fileName: *u8, materialCount: *s32) -> *Material #foreign raylib_native;
 LoadMaterialDefault :: () -> Material #foreign raylib_native;
-IsMaterialReady :: (material: Material) -> bool #foreign raylib_native;
+IsMaterialValid :: (material: Material) -> bool #foreign raylib_native;
 UnloadMaterial :: (material: Material) #foreign raylib_native;
 SetMaterialTexture :: (material: *Material, mapType: s32, texture: Texture2D) #foreign raylib_native;
 SetModelMeshMaterial :: (model: *Model, meshId: s32, materialId: s32) #foreign raylib_native;
@@ -1485,6 +1527,7 @@ SetModelMeshMaterial :: (model: *Model, meshId: s32, materialId: s32) #foreign r
 // Model animations loading/unloading functions
 LoadModelAnimations :: (fileName: *u8, animCount: *s32) -> *ModelAnimation #foreign raylib_native;
 UpdateModelAnimation :: (model: Model, anim: ModelAnimation, frame: s32) #foreign raylib_native;
+UpdateModelAnimationBones :: (model: Model, anim: ModelAnimation, frame: s32) #foreign raylib_native;
 UnloadModelAnimation :: (anim: ModelAnimation) #foreign raylib_native;
 UnloadModelAnimations :: (animations: *ModelAnimation, animCount: s32) #foreign raylib_native;
 IsModelAnimationValid :: (model: Model, anim: ModelAnimation) -> bool #foreign raylib_native;
@@ -1513,11 +1556,11 @@ GetMasterVolume :: () -> float #foreign raylib_native;
 // Wave/Sound loading/unloading functions
 LoadWave :: (fileName: *u8) -> Wave #foreign raylib_native;
 LoadWaveFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32) -> Wave #foreign raylib_native;
-IsWaveReady :: (wave: Wave) -> bool #foreign raylib_native;
+IsWaveValid :: (wave: Wave) -> bool #foreign raylib_native;
 LoadSound :: (fileName: *u8) -> Sound #foreign raylib_native;
 LoadSoundFromWave :: (wave: Wave) -> Sound #foreign raylib_native;
 LoadSoundAlias :: (source: Sound) -> Sound #foreign raylib_native;
-IsSoundReady :: (sound: Sound) -> bool #foreign raylib_native;
+IsSoundValid :: (sound: Sound) -> bool #foreign raylib_native;
 UpdateSound :: (sound: Sound, data: *void, sampleCount: s32) #foreign raylib_native;
 UnloadWave :: (wave: Wave) #foreign raylib_native;
 UnloadSound :: (sound: Sound) #foreign raylib_native;
@@ -1535,7 +1578,7 @@ SetSoundVolume :: (sound: Sound, volume: float) #foreign raylib_native;
 SetSoundPitch :: (sound: Sound, pitch: float) #foreign raylib_native;
 SetSoundPan :: (sound: Sound, pan: float) #foreign raylib_native;
 WaveCopy :: (wave: Wave) -> Wave #foreign raylib_native;
-WaveCrop :: (wave: *Wave, initSample: s32, finalSample: s32) #foreign raylib_native;
+WaveCrop :: (wave: *Wave, initFrame: s32, finalFrame: s32) #foreign raylib_native;
 WaveFormat :: (wave: *Wave, sampleRate: s32, sampleSize: s32, channels: s32) #foreign raylib_native;
 LoadWaveSamples :: (wave: Wave) -> *float #foreign raylib_native;
 UnloadWaveSamples :: (samples: *float) #foreign raylib_native;
@@ -1543,7 +1586,7 @@ UnloadWaveSamples :: (samples: *float) #foreign raylib_native;
 // Music management functions
 LoadMusicStream :: (fileName: *u8) -> Music #foreign raylib_native;
 LoadMusicStreamFromMemory :: (fileType: *u8, data: *u8, dataSize: s32) -> Music #foreign raylib_native;
-IsMusicReady :: (music: Music) -> bool #foreign raylib_native;
+IsMusicValid :: (music: Music) -> bool #foreign raylib_native;
 UnloadMusicStream :: (music: Music) #foreign raylib_native;
 PlayMusicStream :: (music: Music) #foreign raylib_native;
 IsMusicStreamPlaying :: (music: Music) -> bool #foreign raylib_native;
@@ -1560,7 +1603,7 @@ GetMusicTimePlayed :: (music: Music) -> float #foreign raylib_native;
 
 // AudioStream management functions
 LoadAudioStream :: (sampleRate: u32, sampleSize: u32, channels: u32) -> AudioStream #foreign raylib_native;
-IsAudioStreamReady :: (stream: AudioStream) -> bool #foreign raylib_native;
+IsAudioStreamValid :: (stream: AudioStream) -> bool #foreign raylib_native;
 UnloadAudioStream :: (stream: AudioStream) #foreign raylib_native;
 UpdateAudioStream :: (stream: AudioStream, data: *void, frameCount: s32) #foreign raylib_native;
 IsAudioStreamProcessed :: (stream: AudioStream) -> bool #foreign raylib_native;
@@ -1596,5 +1639,23 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     winmm   :: #library,system,link_always "winmm";
 
     raylib_native :: #library,no_dll "lib/raylib";
+}
+
+// Additional functionality
+get_c_string :: (text: string) -> *u8 #expand {
+    c_str: *u8;
+    #if is_constant(text) {
+        c_str = text.data;
+    } else {
+        c_str = _to_temp_c_string(text);
+    }
+    return c_str;
+}
+
+_to_temp_c_string :: (s: string) -> *u8 {
+    result : *u8 = talloc(s.count + 1);
+    memcpy(result, s.data, s.count);
+    result[s.count] = 0;
+    return result;
 }
 

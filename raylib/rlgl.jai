@@ -8,7 +8,7 @@
 /*
 ***********************************************************************************************
 *
-*   rlgl v4.5 - A multi-OpenGL abstraction layer with an immediate-mode style API
+*   rlgl v5.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
 *
 *   DESCRIPTION:
 *       An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0)
@@ -16,17 +16,17 @@
 *
 *   ADDITIONAL NOTES:
 *       When choosing an OpenGL backend different than OpenGL 1.1, some internal buffer are
-*       initialized on rlglInit() to accumulate vertex data.
+*       initialized on rlglInit() to accumulate vertex data
 *
 *       When an internal state change is required all the stored vertex data is renderer in batch,
-*       additionally, rlDrawRenderBatchActive() could be called to force flushing of the batch.
+*       additionally, rlDrawRenderBatchActive() could be called to force flushing of the batch
 *
 *       Some resources are also loaded for convenience, here the complete list:
 *          - Default batch (RLGL.defaultBatch): RenderBatch system to accumulate vertex data
 *          - Default texture (RLGL.defaultTextureId): 1x1 white pixel R8G8B8A8
 *          - Default shader (RLGL.State.defaultShaderId, RLGL.State.defaultShaderLocs)
 *
-*       Internal buffer (and resources) must be manually unloaded calling rlglClose().
+*       Internal buffer (and resources) must be manually unloaded calling rlglClose()
 *
 *   CONFIGURATION:
 *       #define GRAPHICS_API_OPENGL_11
@@ -40,9 +40,9 @@
 *           required by any other module, use rlGetVersion() to check it
 *
 *       #define RLGL_IMPLEMENTATION
-*           Generates the implementation of the library into the included file.
+*           Generates the implementation of the library into the included file
 *           If not defined, the library is in header only mode and can be included in other headers
-*           or source files without problems. But only ONE file should hold the implementation.
+*           or source files without problems. But only ONE file should hold the implementation
 *
 *       #define RLGL_RENDER_TEXTURES_HINT
 *           Enable framebuffer objects (fbo) support (enabled by default)
@@ -70,18 +70,21 @@
 *       When loading a shader, the following vertex attributes and uniform
 *       location names are tried to be set automatically:
 *
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION     "vertexPosition"    // Bound by default to shader location: 0
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD     "vertexTexCoord"    // Bound by default to shader location: 1
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL       "vertexNormal"      // Bound by default to shader location: 2
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR        "vertexColor"       // Bound by default to shader location: 3
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT      "vertexTangent"     // Bound by default to shader location: 4
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: 5
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION     "vertexPosition"    // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD     "vertexTexCoord"    // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL       "vertexNormal"      // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR        "vertexColor"       // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT      "vertexTangent"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEIDS      "vertexBoneIds"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS  "vertexBoneWeights" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MVP         "mvp"               // model-view-projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW        "matView"           // view matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_PROJECTION  "matProjection"     // projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MODEL       "matModel"          // model matrix
-*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL      "matNormal"         // normal matrix (transpose(inverse(matModelView))
+*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL      "matNormal"         // normal matrix (transpose(inverse(matModelView)))
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR       "colDiffuse"        // color diffuse (base tint color, multiplied by texture color)
+*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONE_MATRICES  "boneMatrices"   // bone matrices
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0  "texture0"          // texture0 (texture slot active 0)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1  "texture1"          // texture1 (texture slot active 1)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
@@ -93,7 +96,7 @@
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2014-2023 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014-2024 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -114,10 +117,11 @@
 */
 
 
-RLGL_VERSION ::  "4.5";
+RLGL_VERSION ::  "5.0";
 
-// Function specifiers in case library is build/used as a shared library (Windows)
+// Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
+// NOTE: visibility(default) attribute makes symbols "visible" when compiled with -fvisibility=hidden
 
 // Function specifiers definition
 
@@ -233,6 +237,11 @@ RL_BLEND_DST_ALPHA ::                      0x80CA;     // GL_BLEND_DST_ALPHA
 RL_BLEND_SRC_ALPHA ::                      0x80CB;     // GL_BLEND_SRC_ALPHA
 RL_BLEND_COLOR ::                          0x8005;     // GL_BLEND_COLOR
 
+RL_READ_FRAMEBUFFER ::                     0x8CA8;     // GL_READ_FRAMEBUFFER
+RL_DRAW_FRAMEBUFFER ::                     0x8CA9;     // GL_DRAW_FRAMEBUFFER
+
+// Default shader vertex attribute locations
+RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT ::         4;
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -245,9 +254,10 @@ rlVertexBuffer :: struct {
 
     vertices: *float;             // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
     texcoords: *float;            // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
+    normals: *float;              // Vertex normal (XYZ - 3 components per vertex) (shader-location = 2)
     colors: *u8;       // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
     vaoId: u32;          // OpenGL Vertex Array Object id
-    vboId: [4]u32;       // OpenGL Vertex Buffer Objects id (4 types of vertex data)
+    vboId: [5]u32;       // OpenGL Vertex Buffer Objects id (5 types of vertex data)
 }
 
 // Draw call type
@@ -396,6 +406,10 @@ rlShaderUniformDataType :: enum s32 {
     RL_SHADER_UNIFORM_IVEC2;            // Shader uniform type: ivec2 (2 int)
     RL_SHADER_UNIFORM_IVEC3;            // Shader uniform type: ivec3 (3 int)
     RL_SHADER_UNIFORM_IVEC4;            // Shader uniform type: ivec4 (4 int)
+    RL_SHADER_UNIFORM_UINT;             // Shader uniform type: unsigned int
+    RL_SHADER_UNIFORM_UIVEC2;           // Shader uniform type: uivec2 (2 unsigned int)
+    RL_SHADER_UNIFORM_UIVEC3;           // Shader uniform type: uivec3 (3 unsigned int)
+    RL_SHADER_UNIFORM_UIVEC4;           // Shader uniform type: uivec4 (4 unsigned int)
     RL_SHADER_UNIFORM_SAMPLER2D;         // Shader uniform type: sampler2d
 }
 
@@ -456,6 +470,9 @@ rlMultMatrixf :: (matf: *float) #foreign raylib_native;
 rlFrustum :: (left: float64, right: float64, bottom: float64, top: float64, znear: float64, zfar: float64) #foreign raylib_native;
 rlOrtho :: (left: float64, right: float64, bottom: float64, top: float64, znear: float64, zfar: float64) #foreign raylib_native;
 rlViewport :: (x: s32, y: s32, width: s32, height: s32) #foreign raylib_native;
+rlSetClipPlanes :: (nearPlane: float64, farPlane: float64) #foreign raylib_native;
+rlGetCullDistanceNear :: () -> float64 #foreign raylib_native;
+rlGetCullDistanceFar :: () -> float64 #foreign raylib_native;
 
 //------------------------------------------------------------------------------------
 // Functions Declaration - Vertex level operations
@@ -503,8 +520,10 @@ rlDisableShader :: () #foreign raylib_native;
 // Framebuffer state
 rlEnableFramebuffer :: (id: u32) #foreign raylib_native;
 rlDisableFramebuffer :: () #foreign raylib_native;
+rlGetActiveFramebuffer :: () -> u32 #foreign raylib_native;
 rlActiveDrawBuffers :: (count: s32) #foreign raylib_native;
 rlBlitFramebuffer :: (srcX: s32, srcY: s32, srcWidth: s32, srcHeight: s32, dstX: s32, dstY: s32, dstWidth: s32, dstHeight: s32, bufferMask: s32) #foreign raylib_native;
+rlBindFramebuffer :: (target: u32, framebuffer: u32) #foreign raylib_native;
 
 // General render state
 rlEnableColorBlend :: () #foreign raylib_native;
@@ -515,6 +534,7 @@ rlEnableDepthMask :: () #foreign raylib_native;
 rlDisableDepthMask :: () #foreign raylib_native;
 rlEnableBackfaceCulling :: () #foreign raylib_native;
 rlDisableBackfaceCulling :: () #foreign raylib_native;
+rlColorMask :: (r: bool, g: bool, b: bool, a: bool) #foreign raylib_native;
 rlSetCullFace :: (mode: s32) #foreign raylib_native;
 rlEnableScissorTest :: () #foreign raylib_native;
 rlDisableScissorTest :: () #foreign raylib_native;
@@ -576,7 +596,7 @@ rlUpdateVertexBuffer :: (bufferId: u32, data: *void, dataSize: s32, offset: s32)
 rlUpdateVertexBufferElements :: (id: u32, data: *void, dataSize: s32, offset: s32) #foreign raylib_native;
 rlUnloadVertexArray :: (vaoId: u32) #foreign raylib_native;
 rlUnloadVertexBuffer :: (vboId: u32) #foreign raylib_native;
-rlSetVertexAttribute :: (index: u32, compSize: s32, type: s32, normalized: bool, stride: s32, pointer: *void) #foreign raylib_native;
+rlSetVertexAttribute :: (index: u32, compSize: s32, type: s32, normalized: bool, stride: s32, offset: s32) #foreign raylib_native;
 rlSetVertexAttributeDivisor :: (index: u32, divisor: s32) #foreign raylib_native;
 rlSetVertexAttributeDefault :: (locIndex: s32, value: *void, attribType: s32, count: s32) #foreign raylib_native;
 rlDrawVertexArray :: (offset: s32, count: s32) #foreign raylib_native;
@@ -587,7 +607,7 @@ rlDrawVertexArrayElementsInstanced :: (offset: s32, count: s32, buffer: *void, i
 // Textures management
 rlLoadTexture :: (data: *void, width: s32, height: s32, format: s32, mipmapCount: s32) -> u32 #foreign raylib_native;
 rlLoadTextureDepth :: (width: s32, height: s32, useRenderBuffer: bool) -> u32 #foreign raylib_native;
-rlLoadTextureCubemap :: (data: *void, size: s32, format: s32) -> u32 #foreign raylib_native;
+rlLoadTextureCubemap :: (data: *void, size: s32, format: s32, mipmapCount: s32) -> u32 #foreign raylib_native;
 rlUpdateTexture :: (id: u32, offsetX: s32, offsetY: s32, width: s32, height: s32, format: s32, data: *void) #foreign raylib_native;
 rlGetGlTextureFormats :: (format: s32, glInternalFormat: *u32, glFormat: *u32, glType: *u32) #foreign raylib_native;
 rlGetPixelFormatName :: (format: u32) -> *u8 #foreign raylib_native;
@@ -597,7 +617,7 @@ rlReadTexturePixels :: (id: u32, width: s32, height: s32, format: s32) -> *void 
 rlReadScreenPixels :: (width: s32, height: s32) -> *u8 #foreign raylib_native;
 
 // Framebuffer management (fbo)
-rlLoadFramebuffer :: (width: s32, height: s32) -> u32 #foreign raylib_native;
+rlLoadFramebuffer :: () -> u32 #foreign raylib_native;
 rlFramebufferAttach :: (fboId: u32, texId: u32, attachType: s32, texType: s32, mipLevel: s32) #foreign raylib_native;
 rlFramebufferComplete :: (id: u32) -> bool #foreign raylib_native;
 rlUnloadFramebuffer :: (id: u32) #foreign raylib_native;
@@ -611,6 +631,7 @@ rlGetLocationUniform :: (shaderId: u32, uniformName: *u8) -> s32 #foreign raylib
 rlGetLocationAttrib :: (shaderId: u32, attribName: *u8) -> s32 #foreign raylib_native;
 rlSetUniform :: (locIndex: s32, value: *void, uniformType: s32, count: s32) #foreign raylib_native;
 rlSetUniformMatrix :: (locIndex: s32, mat: Matrix4) #foreign raylib_native;
+rlSetUniformMatrices :: (locIndex: s32, mat: *Matrix4, count: s32) #foreign raylib_native;
 rlSetUniformSampler :: (locIndex: s32, textureId: u32) #foreign raylib_native;
 rlSetShader :: (id: u32, locs: *s32) #foreign raylib_native;
 

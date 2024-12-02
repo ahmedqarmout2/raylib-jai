@@ -5,29 +5,26 @@
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [texture] example - image text drawing");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     parrots: Image = LoadImage("resources/parrots.png"); // Load image in CPU memory (RAM)
 
     // TTF Font loading with custom generation parameters
     font: Font = LoadFontEx("resources/KAISG.ttf", 64, null, 0);
+    defer UnloadFont(font);           // Unload custom font
 
     // Draw over image using custom font
     ImageDrawTextEx(*parrots, font, "[Parrots font drawing]", Vector2.{ 20.0, 20.0 }, cast(float)font.baseSize, 0.0, RED);
 
     texture: Texture2D = LoadTextureFromImage(parrots);  // Image converted to texture, uploaded to GPU memory (VRAM)
+    defer UnloadTexture(texture);     // Texture unloading
+
     UnloadImage(parrots);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
 
     position: Vector2 = .{ cast(float)(screenWidth/2 - texture.width/2), cast(float)(screenHeight/2 - texture.height/2 - 20) };
@@ -35,6 +32,7 @@ main :: () {
     showFont: bool = false;
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -46,6 +44,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -58,15 +57,6 @@ main :: () {
         } else DrawTexture(font.texture, screenWidth/2 - font.texture.width/2, 50, BLACK);
 
         DrawText("PRESS SPACE to SHOW FONT ATLAS USED", 290, 420, 10, DARKGRAY);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);     // Texture unloading
-
-    UnloadFont(font);           // Unload custom font
-    //--------------------------------------------------------------------------------------
 }

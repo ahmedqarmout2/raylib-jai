@@ -2,21 +2,13 @@
 #import "Basic";
 
 main :: () {
-    set_working_directory(#filepath);
-
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - window should close");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     SetExitKey(.KEY_NULL);       // Disable KEY_ESCAPE to close window, X-button still works
     
@@ -24,8 +16,9 @@ main :: () {
     exitWindow          : bool  = false;    // Flag to set window to exit
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
-    while (!exitWindow) { // Detect window close button or ESC key
+    while (!exitWindow) {
         // Update
         //----------------------------------------------------------------------------------
         if (WindowShouldClose() || IsKeyPressed(.KEY_ESCAPE)) exitWindowRequested = true;

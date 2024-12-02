@@ -9,23 +9,19 @@ COLOR_SIZE  : s32 : 16;        // Size of the color select buttons
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     SetConfigFlags(.FLAG_WINDOW_RESIZABLE); // Make the window resizable
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - Draw part of a texture tiled");
     defer CloseWindow(); // Close window and OpenGL context
 
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
-
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     texPattern: Texture = LoadTexture("resources/patterns.png");
+    defer UnloadTexture(texPattern);  // Unload texture
+
     SetTextureFilter(texPattern, .TEXTURE_FILTER_TRILINEAR); // Makes the texture smoother when upscaled
 
     // Coordinates for all patterns inside the texture
@@ -68,6 +64,7 @@ main :: () {
     rotation      : float = 0.0;
 
     SetTargetFPS(60);
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -112,6 +109,8 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
+
         ClearBackground(RAYWHITE);
 
         // Draw the tiled area
@@ -156,14 +155,8 @@ main :: () {
 
         // Draw FPS
         DrawText(TextFormat("%i FPS", GetFPS()), 2 + MARGIN_SIZE, 2 + MARGIN_SIZE, 20, BLACK);
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texPattern);  // Unload texture
-    //--------------------------------------------------------------------------------------
 }
 
 // Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.

@@ -7,19 +7,13 @@ MAX_POINTS: s32 : 11;      // 10 points and back to the start
 main :: () {
     set_working_directory(#filepath);
 
+    // Initialization
+    //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - textured polygon");
     defer CloseWindow(); // Close window and OpenGL context
-
-    icon: Image = LoadImage("../raylib_16x16.png");
-    ImageFormat(*icon, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    SetWindowIcon(icon);
-    defer UnloadImage(icon);
-    //--------------------------------------------------------------------------------------
 
     // Define texture coordinates to map our texture to poly
     texcoords: [MAX_POINTS]Vector2 = .[
@@ -51,10 +45,12 @@ main :: () {
 
     // Load texture to be mapped to poly
     texture: Texture = LoadTexture("resources/cat.png");
+    defer UnloadTexture(texture); // Unload texture
 
     angle: float = 0.0;             // Rotation angle (in degrees)
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) { // Detect window close button or ESC key
         // Update
@@ -66,6 +62,7 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        defer EndDrawing();
 
         ClearBackground(RAYWHITE);
 
@@ -78,15 +75,8 @@ main :: () {
             texcoords,
             MAX_POINTS,
             WHITE);
-
-        EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texture); // Unload texture
-    //--------------------------------------------------------------------------------------
 }
 
 // Draw textured polygon, defined by vertex and texture coordinates
