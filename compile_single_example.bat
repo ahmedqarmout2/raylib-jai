@@ -3,7 +3,7 @@ setlocal
 
 pushd examples
 
-pushd core
+pushd text
 for %%i in (*.jai) do jai -import_dir ../.. -x64 %%i || exit /b
 popd
 

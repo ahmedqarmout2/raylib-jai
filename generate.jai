@@ -273,6 +273,8 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "LoadImageRaw", "(fileName: *u8, width: s32, height: s32, format: PixelFormat, headerSize: s32) -> Image");
 
     Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadButtonPressed", "() -> GamepadButton");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "GetCharPressed", "() -> u8");
 }
 
 populate_improved_struct_elements_table :: () {
