@@ -75,24 +75,6 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 
     raylib_native :: #library,no_dll "lib/raylib";
 }
-
-// Additional functionality
-get_c_string :: (text: string) -> *u8 #expand {
-    c_str: *u8;
-    #if is_constant(text) {
-        c_str = text.data;
-    } else {
-        c_str = _to_temp_c_string(text);
-    }
-    return c_str;
-}
-
-_to_temp_c_string :: (s: string) -> *u8 {
-    result : *u8 = talloc(s.count + 1);
-    memcpy(result, s.data, s.count);
-    result[s.count] = 0;
-    return result;
-}
 DONE
 
 RAYMATH_HEADER ::  #string DONE
@@ -275,6 +257,10 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadButtonPressed", "() -> GamepadButton");
 
     Hash_Table.table_add(*g_improved_function_definitions, "GetCharPressed", "() -> u8");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "LoadFontData", "(fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType) -> *GlyphInfo");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "SetMouseCursor", "(cursor: MouseCursor)");
 }
 
 populate_improved_struct_elements_table :: () {

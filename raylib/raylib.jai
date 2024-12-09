@@ -1130,7 +1130,7 @@ SetMouseOffset :: (offsetX: s32, offsetY: s32) #foreign raylib_native;
 SetMouseScale :: (scaleX: float, scaleY: float) #foreign raylib_native;
 GetMouseWheelMove :: () -> float #foreign raylib_native;
 GetMouseWheelMoveV :: () -> Vector2 #foreign raylib_native;
-SetMouseCursor :: (cursor: s32) #foreign raylib_native;
+SetMouseCursor :: (cursor: MouseCursor) #foreign raylib_native;
 
 // Input-related functions: touch
 GetTouchX :: () -> s32 #foreign raylib_native;
@@ -1387,7 +1387,7 @@ LoadFontEx :: (fileName: *u8, fontSize: s32, codepoints: *s32, codepointCount: s
 LoadFontFromImage :: (image: Image, key: Color, firstChar: s32) -> Font #foreign raylib_native;
 LoadFontFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
 IsFontValid :: (font: Font) -> bool #foreign raylib_native;
-LoadFontData :: (fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: s32) -> *GlyphInfo #foreign raylib_native;
+LoadFontData :: (fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType) -> *GlyphInfo #foreign raylib_native;
 GenImageFontAtlas :: (glyphs: *GlyphInfo, glyphRecs: **Rectangle, glyphCount: s32, fontSize: s32, padding: s32, packMethod: s32) -> Image #foreign raylib_native;
 UnloadFontData :: (glyphs: *GlyphInfo, glyphCount: s32) #foreign raylib_native;
 UnloadFont :: (font: Font) #foreign raylib_native;
@@ -1639,23 +1639,5 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     winmm   :: #library,system,link_always "winmm";
 
     raylib_native :: #library,no_dll "lib/raylib";
-}
-
-// Additional functionality
-get_c_string :: (text: string) -> *u8 #expand {
-    c_str: *u8;
-    #if is_constant(text) {
-        c_str = text.data;
-    } else {
-        c_str = _to_temp_c_string(text);
-    }
-    return c_str;
-}
-
-_to_temp_c_string :: (s: string) -> *u8 {
-    result : *u8 = talloc(s.count + 1);
-    memcpy(result, s.data, s.count);
-    result[s.count] = 0;
-    return result;
 }
 

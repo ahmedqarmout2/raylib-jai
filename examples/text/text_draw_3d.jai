@@ -55,9 +55,7 @@ main :: () {
     // Set the text (using markdown!)
     text: [64]u8;
     s := "Hello ~~World~~ in 3D!";
-    for s {
-        text[it_index] = it;
-    }
+    for s text[it_index] = it;
 
     tbox: Vector3;
     layers: s32 = 1;
