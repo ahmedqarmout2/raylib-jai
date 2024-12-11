@@ -16,6 +16,19 @@ _to_temp_c_string :: (s: string) -> *u8 {
     return result;
 }
 
-copy_string_to_u8_array :: (dst: *u8, src: string) {
+copy_string_to_array :: (dst: *u8, src: string) {
     for src dst[it_index] = it;
+}
+
+copy_string_to_array :: (dst: *[..]u8, src: string) {
+    for src array_add(dst, it);
+}
+
+strlen :: (s: *u8) -> s64 {
+    count: s64 = 0;
+    while <<s {
+        count += 1;
+        s += 1;
+    }
+    return count;
 }

@@ -21,16 +21,13 @@ main :: () {
     defer CloseWindow(); // Close window and OpenGL context
 
     msg1: [50]char;
-    s := "THIS IS A custom SPRITE FONT...";
-    for s msg1[it_index] = it;
+    copy_string_to_array(msg1.data, "THIS IS A custom SPRITE FONT...");
 
     msg2: [50]char;
-    s = "...and this is ANOTHER CUSTOM font...";
-    for s msg2[it_index] = it;
+    copy_string_to_array(msg2.data, "...and this is ANOTHER CUSTOM font...");
 
     msg3: [50]char;
-    s = "...and a THIRD one! GREAT! :D";
-    for s msg3[it_index] = it;
+    copy_string_to_array(msg3.data, "...and a THIRD one! GREAT! :D");
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
     font1: Font = LoadFont("resources/custom_mecha.png");          // Font loading

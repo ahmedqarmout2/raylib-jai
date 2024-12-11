@@ -18,10 +18,7 @@ main :: () {
     defer CloseWindow(); // Close window and OpenGL context
 
     text: [..]char;
-    s := "Text cannot escape\tthis container\t...word wrap also works when active so here's a long text for testing.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nec ullamcorper sit amet risus nullam eget felis eget.";
-
-    array_resize(*text, s.count);
-    for s text[it_index] = it;
+    copy_string_to_array(*text, "Text cannot escape\tthis container\t...word wrap also works when active so here's a long text for testing.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nec ullamcorper sit amet risus nullam eget felis eget.");
 
     resizing: bool = false;
     wordWrap: bool = true;

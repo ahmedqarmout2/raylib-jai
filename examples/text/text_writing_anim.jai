@@ -16,7 +16,7 @@ main :: () {
     defer CloseWindow(); // Close window and OpenGL context
 
     message: [128]char;
-    copy_string_to_u8_array(message.data, "This sample illustrates a text writing\nanimation effect! Check it out! ;)");
+    copy_string_to_array(message.data, "This sample illustrates a text writing\nanimation effect! Check it out! ;)");
 
     framesCounter: s32 = 0;
 

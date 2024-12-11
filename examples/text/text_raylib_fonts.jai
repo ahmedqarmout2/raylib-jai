@@ -39,12 +39,9 @@ main :: () {
         "PIXANTIQUA FONT designed by Gerhard Grossmann",
         "ALPHA_BETA FONT designed by Brian Kent (AEnigma)",
         "JUPITER_CRASH FONT designed by Brian Kent (AEnigma)" ];
-    
+
     for i: 0..s.count-1 {
-        array_resize(*messages[i], s[i].count);
-        for j: 0..s[i].count-1 {
-            messages[i][j] = s[i][j];
-        }
+        copy_string_to_array(*messages[i], s[i]);
     }
 
     defer {
