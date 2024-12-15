@@ -1067,7 +1067,7 @@ UnloadDirectoryFiles :: (files: FilePathList) #foreign raylib_native;
 IsFileDropped :: () -> bool #foreign raylib_native;
 LoadDroppedFiles :: () -> FilePathList #foreign raylib_native;
 UnloadDroppedFiles :: (files: FilePathList) #foreign raylib_native;
-GetFileModTime :: (fileName: *u8) -> s32 #foreign raylib_native;
+GetFileModTime :: (fileName: *u8) -> s64 #foreign raylib_native;
 
 // Compression/Encoding functionality
 CompressData :: (data: *u8, dataSize: s32, compDataSize: *s32) -> *u8 #foreign raylib_native;

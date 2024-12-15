@@ -19,7 +19,7 @@ TYPE_MAP :: string.[
     "unsigned int",   "u32",
     "unsigned char",  "u8",
     "char",           "u8",
-    "long",           "s32",
+    "long",           "s64",
     "double",         "float64",
     "int",            "s32",
     "Matrix",         "Matrix4"
@@ -46,7 +46,7 @@ NUMBERS         :: "0123456789";
 RLGL_END        :: "#endif // RLGL_H";
 RCAMERA_END     :: "#endif // RCAMERA_H";
 
-GENERAL_HEADER ::  #string DONE
+GENERAL_HEADER :: #string DONE
 //
 // This file was auto-generated using the following command:
 //
@@ -54,12 +54,12 @@ GENERAL_HEADER ::  #string DONE
 //
 DONE
 
-RAYLIB_HEADER ::  #string DONE
+RAYLIB_HEADER :: #string DONE
 #import "Basic";
 #import "Math";
 DONE
 
-RAYLIB_FOOTER ::  #string DONE
+RAYLIB_FOOTER :: #string DONE
 TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
 LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
 SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
@@ -77,7 +77,7 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 }
 DONE
 
-RAYMATH_HEADER ::  #string DONE
+RAYMATH_HEADER :: #string DONE
 RL_PI   :: 3.14159265358979323846;
 EPSILON :: 0.000001;
 DEG2RAD :: (PI/180.0);
@@ -261,6 +261,9 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "LoadFontData", "(fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType) -> *GlyphInfo");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetMouseCursor", "(cursor: MouseCursor)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "rlLoadTexture", "(data: *void, width: s32, height: s32, format: PixelFormat, mipmapCount: s32) -> u32");
+    Hash_Table.table_add(*g_improved_function_definitions, "rlFramebufferAttach", "(fboId: u32, texId: u32, attachType: rlFramebufferAttachType, texType: rlFramebufferAttachTextureType, mipLevel: s32)");
 }
 
 populate_improved_struct_elements_table :: () {

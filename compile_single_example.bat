@@ -3,7 +3,7 @@ setlocal
 
 pushd examples
 
-pushd text
+pushd shaders
 for %%i in (*.jai) do jai -import_dir ../.. -x64 %%i || exit /b
 popd
 

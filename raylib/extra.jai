@@ -28,7 +28,7 @@ strlen :: (s: *u8) -> s64 {
     count: s64 = 0;
     while <<s {
         count += 1;
-        s += 1;
+        s     += 1;
     }
     return count;
 }
