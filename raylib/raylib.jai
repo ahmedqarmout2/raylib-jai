@@ -1521,7 +1521,7 @@ LoadMaterials :: (fileName: *u8, materialCount: *s32) -> *Material #foreign rayl
 LoadMaterialDefault :: () -> Material #foreign raylib_native;
 IsMaterialValid :: (material: Material) -> bool #foreign raylib_native;
 UnloadMaterial :: (material: Material) #foreign raylib_native;
-SetMaterialTexture :: (material: *Material, mapType: s32, texture: Texture2D) #foreign raylib_native;
+SetMaterialTexture :: (material: *Material, mapType: MaterialMapIndex, texture: Texture2D) #foreign raylib_native;
 SetModelMeshMaterial :: (model: *Model, meshId: s32, materialId: s32) #foreign raylib_native;
 
 // Model animations loading/unloading functions

@@ -11,6 +11,10 @@ pushd core
 for %%i in (*.jai) do jai -import_dir ../.. -x64 %%i || exit /b
 popd
 
+pushd models
+for %%i in (*.jai) do jai -import_dir ../.. -x64 %%i || exit /b
+popd
+
 pushd shaders
 for %%i in (*.jai) do jai -import_dir ../.. -x64 %%i || exit /b
 popd

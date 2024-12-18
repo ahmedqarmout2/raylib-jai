@@ -265,6 +265,8 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "rlLoadTexture", "(data: *void, width: s32, height: s32, format: PixelFormat, mipmapCount: s32) -> u32");
     Hash_Table.table_add(*g_improved_function_definitions, "rlFramebufferAttach", "(fboId: u32, texId: u32, attachType: rlFramebufferAttachType, texType: rlFramebufferAttachTextureType, mipLevel: s32)");
     Hash_Table.table_add(*g_improved_function_definitions, "rlSetUniform", "(locIndex: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "SetMaterialTexture", "(material: *Material, mapType: MaterialMapIndex, texture: Texture2D)");
 }
 
 populate_improved_struct_elements_table :: () {
