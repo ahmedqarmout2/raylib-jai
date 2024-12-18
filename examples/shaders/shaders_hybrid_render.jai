@@ -26,10 +26,12 @@ main :: () {
 
     // This Shader calculates pixel depth and color using raymarch
     shdrRaymarch: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/hybrid_raymarch.fs", GLSL_VERSION));
+    defer UnloadShader(shdrRaymarch);
 
     // This Shader is a standard rasterization fragment shader with the addition of depth writing
     // You are required to write depth for all shaders if one shader does it
     shdrRaster: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/hybrid_raster.fs", GLSL_VERSION));
+    defer UnloadShader(shdrRaster);
 
     // Declare Struct used to store camera locs.
     marchLocs: RayLocs;
@@ -45,6 +47,7 @@ main :: () {
 
     // Use Customized function to create writable depth texture buffer
     target: RenderTexture2D = LoadRenderTextureDepthTex(screenWidth, screenHeight);
+    defer UnloadRenderTextureDepthTex(target);
 
     // Define the camera to look into our 3d world
     camera: Camera = .{

@@ -629,7 +629,7 @@ rlLoadShaderProgram :: (vShaderId: u32, fShaderId: u32) -> u32 #foreign raylib_n
 rlUnloadShaderProgram :: (id: u32) #foreign raylib_native;
 rlGetLocationUniform :: (shaderId: u32, uniformName: *u8) -> s32 #foreign raylib_native;
 rlGetLocationAttrib :: (shaderId: u32, attribName: *u8) -> s32 #foreign raylib_native;
-rlSetUniform :: (locIndex: s32, value: *void, uniformType: s32, count: s32) #foreign raylib_native;
+rlSetUniform :: (locIndex: s32, value: *void, uniformType: ShaderUniformDataType, count: s32) #foreign raylib_native;
 rlSetUniformMatrix :: (locIndex: s32, mat: Matrix4) #foreign raylib_native;
 rlSetUniformMatrices :: (locIndex: s32, mat: *Matrix4, count: s32) #foreign raylib_native;
 rlSetUniformSampler :: (locIndex: s32, textureId: u32) #foreign raylib_native;
