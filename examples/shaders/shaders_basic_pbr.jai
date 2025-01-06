@@ -142,6 +142,8 @@ main :: () {
         UnloadMaterial(floor.materials[0]);
         floor.materials[0].maps = null;
         UnloadModel(floor);
+
+        UnloadShader(shader);       // Unload Shader
     };
     
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second

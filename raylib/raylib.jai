@@ -1335,7 +1335,7 @@ ImageDrawTextEx :: (dst: *Image, font: Font, text: *u8, position: Vector2, fontS
 // NOTE: These functions require GPU access
 LoadTexture :: (fileName: *u8) -> Texture2D #foreign raylib_native;
 LoadTextureFromImage :: (image: Image) -> Texture2D #foreign raylib_native;
-LoadTextureCubemap :: (image: Image, layout: s32) -> TextureCubemap #foreign raylib_native;
+LoadTextureCubemap :: (image: Image, layout: CubemapLayout) -> TextureCubemap #foreign raylib_native;
 LoadRenderTexture :: (width: s32, height: s32) -> RenderTexture2D #foreign raylib_native;
 IsTextureValid :: (texture: Texture2D) -> bool #foreign raylib_native;
 UnloadTexture :: (texture: Texture2D) #foreign raylib_native;

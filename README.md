@@ -49,3 +49,6 @@ Run the example `.exe` files from the `examples/` directory.
 A `python` script [generator.py](generator.py) reads `raylib.h` and generates [raylib.jai](raylib.jai).
 
 
+models/models_mesh_generation.jai takes a while to close
+models/models_point_rendering.jai crahes when unloading model
+shaders/shaders_basic_pbr.jai takes a while to close
