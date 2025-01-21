@@ -46,9 +46,12 @@ Run the example `.exe` files from the `examples/` directory.
 ## Regenerating the bindings
 
 > jai .\generate.jai
+
 > .\generate.exe
 
 ## TODO
 Fix models/models_mesh_generation.jai which takes a while to close
+
 Fix models/models_point_rendering.jai which crahes when unloading model
+
 Fix shaders/shaders_basic_pbr.jai which takes a while to close
