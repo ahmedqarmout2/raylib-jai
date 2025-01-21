@@ -168,7 +168,7 @@ main :: () {
 
 // Audio input processing callback
 AudioInputCallback :: (buffer: *void, frames: u32) #c_call {
-    new_context: Context;
+    new_context: #Context;
     push_context new_context {
         audioFrequency = frequency + (audioFrequency - frequency)*0.95;
 

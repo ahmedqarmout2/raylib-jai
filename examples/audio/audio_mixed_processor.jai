@@ -73,7 +73,7 @@ main :: () {
 }
 
 ProcessAudio :: (buffer: *void, frames: u32) #c_call {
-    new_context: Context;
+    new_context: #Context;
     push_context new_context {
         samples: *float = cast(*float)buffer;   // Samples internally stored as <float>s
         average: float = 0.0;                   // Temporary average volume

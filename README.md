@@ -1,8 +1,8 @@
 # raylib-jai bindings
 
-[Raylib](https://www.raylib.com/) is a minimal gamedev library for C and this repository has a script for automatically generating Jai bindings from `raylib.h`, `raymath.h` and `rlgl.h`.
+[Raylib](https://www.raylib.com/) is a minimal gamedev library for C and this repository has a script for automatically generating Jai bindings from `raylib.h`, `raymath.h`, `rcamera.h` and `rlgl.h`.
 
-> Tested with Jai version: beta 0.1.096
+> Tested with Jai version: beta 0.2.008
 
 > Raylib version: 5.5
  
@@ -42,13 +42,13 @@ Run the example `.exe` files from the `examples/` directory.
 ## Differences from C raylib
 
 * Some functions which take enum arguments (like `SetConfigFlags` for example) have their argument types changed from C's `int` (or Jai's `s32`) to the actual enum type. Consequently, you can call them like `SetConfigFlags(.FLAG_FULLSCREEN_MODE);`
-* An additional set of macros lets you change any of the Begin/End function call pairs (like `BeginMode3D(camera)` and `EndMode3D()`) into an equivalent `PushMode3D(camera)` which will insert an automatic `defer EndXXX()` call into the scope for you.
 
 ## Regenerating the bindings
 
-A `python` script [generator.py](generator.py) reads `raylib.h` and generates [raylib.jai](raylib.jai).
+> jai .\generate.jai
+> .\generate.exe
 
-
-models/models_mesh_generation.jai takes a while to close
-models/models_point_rendering.jai crahes when unloading model
-shaders/shaders_basic_pbr.jai takes a while to close
+## TODO
+Fix models/models_mesh_generation.jai which takes a while to close
+Fix models/models_point_rendering.jai which crahes when unloading model
+Fix shaders/shaders_basic_pbr.jai which takes a while to close
