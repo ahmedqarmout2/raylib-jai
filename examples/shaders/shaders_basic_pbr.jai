@@ -17,8 +17,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    SetConfigFlags(.FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
-
+    SetConfigFlags(.FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - basic pbr");
     defer CloseWindow(); // Close window and OpenGL context
 
@@ -72,6 +71,15 @@ main :: () {
     // There could be more complex models consisting of multiple meshes and
     // multiple materials defined for those meshes... but always 1 mesh = 1 material
     car: Model = LoadModel("resources/models/old_car_new.glb");
+    defer {
+        // Unbind (disconnect) shader from car.material[0] 
+        // to avoid UnloadMaterial() trying to unload it automatically
+        s: Shader;
+        car.materials[0].shader = s;
+        UnloadMaterial(car.materials[0]);
+        car.materials[0].maps = null;
+        UnloadModel(car);
+    };
 
     // Assign already setup PBR shader to model.materials[0], used by models.meshes[0]
     car.materials[0].shader = shader;
@@ -92,6 +100,16 @@ main :: () {
     // Load floor model mesh and assign material parameters
     // NOTE: A basic plane shape can be generated instead of being loaded from a model file
     floor: Model = LoadModel("resources/models/plane.glb");
+    defer {
+        // Unbind (disconnect) shader from car.material[0] 
+        // to avoid UnloadMaterial() trying to unload it automatically
+        s: Shader;
+        floor.materials[0].shader = s;
+        UnloadMaterial(floor.materials[0]);
+        floor.materials[0].maps = null;
+        UnloadModel(floor);
+    };
+
     //Mesh floorMesh = GenMeshPlane(10, 10, 10, 10);
     //GenMeshTangents(&floorMesh);      // TODO: Review tangents generation
     //Model floor = LoadModelFromMesh(floorMesh);
@@ -129,23 +147,6 @@ main :: () {
     SetShaderValue(shader, GetShaderLocation(shader, "useTexMRA")     , *usage, .SHADER_UNIFORM_INT);
     SetShaderValue(shader, GetShaderLocation(shader, "useTexEmissive"), *usage, .SHADER_UNIFORM_INT);
 
-    defer {
-        // Unbind (disconnect) shader from car.material[0] 
-        // to avoid UnloadMaterial() trying to unload it automatically
-        s: Shader = ---;
-        car.materials[0].shader = s;
-        UnloadMaterial(car.materials[0]);
-        car.materials[0].maps = null;
-        UnloadModel(car);
-
-        floor.materials[0].shader = s;
-        UnloadMaterial(floor.materials[0]);
-        floor.materials[0].maps = null;
-        UnloadModel(floor);
-
-        UnloadShader(shader);       // Unload Shader
-    };
-    
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 

@@ -128,8 +128,8 @@ GenMeshPoints :: (numPoints: s32) -> Mesh
     mesh: Mesh = .{ 
         triangleCount = 1,
         vertexCount = numPoints,
-        vertices = cast(*float)alloc(numPoints*3*size_of(float)),
-        colors = cast(*u8)alloc(numPoints*4*size_of(u8)),
+        vertices = cast(*float)MemAlloc(cast(u32)(numPoints*3*size_of(float))),
+        colors = cast(*u8)MemAlloc(cast(u32)(numPoints*4*size_of(u8))),
     };
 
     // https://en.wikipedia.org/wiki/Spherical_coordinate_system

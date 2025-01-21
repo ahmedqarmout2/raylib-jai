@@ -129,9 +129,9 @@ GenMeshCustom :: () -> Mesh {
     mesh: Mesh;
     mesh.triangleCount = 1;
     mesh.vertexCount = mesh.triangleCount*3;
-    mesh.vertices = cast(*float)alloc(mesh.vertexCount*3*size_of(float));    // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.texcoords = cast(*float)alloc(mesh.vertexCount*2*size_of(float));   // 3 vertices, 2 coordinates each (x, y)
-    mesh.normals = cast(*float)alloc(mesh.vertexCount*3*size_of(float));     // 3 vertices, 3 coordinates each (x, y, z)
+    mesh.vertices = cast(*float)MemAlloc(cast(u32)(mesh.vertexCount*3*size_of(float)));    // 3 vertices, 3 coordinates each (x, y, z)
+    mesh.texcoords = cast(*float)MemAlloc(cast(u32)(mesh.vertexCount*2*size_of(float)));   // 3 vertices, 2 coordinates each (x, y)
+    mesh.normals = cast(*float)MemAlloc(cast(u32)(mesh.vertexCount*3*size_of(float)));     // 3 vertices, 3 coordinates each (x, y, z)
 
     // Vertex at (0, 0, 0)
     mesh.vertices[0] = 0;
