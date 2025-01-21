@@ -84,8 +84,7 @@ DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
 
-OUTPUT_RAYMATH_FUNCTION_CODE :: false;
-OUTPUT_UNRECOGNIZED_CODE     :: false;
+OUTPUT_UNRECOGNIZED_CODE :: false;
 
 main :: () {
     populate_improved_function_definitions_table();
@@ -708,78 +707,19 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
 
     function_definition := convert_function_definition(line);
 
-    if (OUTPUT_RAYMATH_FUNCTION_CODE) {
-        print_to_builder(output_builder, "% {\n", function_definition);
-    } else {
-        print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
-    }
+    print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
 
-    // Skip the next line as it will be just {
-    if (!increment_line_counter()) {
-        print("EOF while looking for the end of a function.\n");
-        return;
-    }
-
-    open_brackets := 1;
     while (true) {
         if (!increment_line_counter()) {
             print("EOF while looking for the end of a function.\n");
             return;
         }
 
-        if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
-            continue;
-        }
-
         line := String.trim(file_lines[g_line_counter]);
 
-        for REMOVED_CASTS {
-            line = String.replace(line, it, "");
-        }
-
-        // Convert v1->x *= ilength to v1.x *= ilength;
-        line = String.replace(line, "->", ".");
-
-        if (String.starts_with(line, SWITCH_PREFIX)) {
-            line = String.replace(line, SWITCH_PREFIX, "if");
-            line = String.replace(line, "(", "");
-            line = String.replace(line, ")", " ==");
-        }
-
-        // Convert case 0: to case 0; that appear in switch cases
-        if (String.starts_with(line, CASE_PREFIX)) {
-            line = String.replace(line, ":", ";");
-        }
-
-        // Remove breaks that appear in switch cases
-        line = String.replace(line, "break;", "");
-
-        remove_f_from_floats(line);
-
-        line_parts := String.split(line, " ");
-        if ((line_parts.count > 1 && line_parts[1] == "=") || (line_parts.count > 2 && line_parts[2] == "=")) {
-            line = convert_assignment(line, line_parts[1] != "=");
-        }
-
-        if (String.contains(line, "}") && !String.contains(line, "{")) {
-            open_brackets -= 1;
-        }
-
-        if (OUTPUT_RAYMATH_FUNCTION_CODE) {
-            print_to_builder(output_builder, "%\n", generate_indentation(line, open_brackets));
-        }
-
-        if (String.contains(line, "{") && !String.contains(line, "}")) {
-            open_brackets += 1;
-        }
-
+        // Skip to the end of function
         if (String.starts_with(line, "}")) {
-            if (open_brackets <= 0) {
-                if (open_brackets < 0) {
-                    print("Unexpected end of function\n");
-                }
-                return;
-            }
+            return;
         }
     }
 }
