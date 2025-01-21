@@ -98,7 +98,7 @@ main :: () {
 
             // Write sine wave
             for 0..waveLength*2-1 {
-                data[it] = cast(short)(sin(((2 * RL_PI * cast(float)it/waveLength)))*32000);
+                data[it] = cast(short)(sin(((2 * PI * cast(float)it/waveLength)))*32000);
             }
 
             // Make sure the rest of the line is flat
@@ -179,7 +179,7 @@ AudioInputCallback :: (buffer: *void, frames: u32) #c_call {
         while (i < frames) {
             defer i += 1;
 
-            d[i] = cast(short)(32000.0*sin(2*RL_PI*sineIdx));
+            d[i] = cast(short)(32000.0*sin(2*PI*sineIdx));
             sineIdx += incr;
             if (sineIdx > 1.0) sineIdx -= 1.0;
         }

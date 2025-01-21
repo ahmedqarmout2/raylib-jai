@@ -78,7 +78,6 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 DONE
 
 RAYMATH_HEADER :: #string DONE
-RL_PI   :: 3.14159265358979323846;
 EPSILON :: 0.000001;
 DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
