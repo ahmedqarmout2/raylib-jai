@@ -17,21 +17,36 @@ There are more than shown here ported in the [examples/](examples) folder.
 
 
 ## Minimal example
+Copy raylib directory into your libs directory. For example:
+```
+my_game/
+
+.... libs/
+
+.... .... raylib
+
+.... main.jai
+```
 
 ```
-#load "path/to/raylib.jai";
+// main.jai
+#import "raylib";
 
 main :: () {
     InitWindow(800, 450, "raylib example");
     defer CloseWindow();
+
     while !WindowShouldClose() {
         BeginDrawing();
         defer EndDrawing();
+
         ClearBackground(RAYWHITE);
         DrawText("raylib + jai", 190, 200, 20, LIGHTGRAY);
     }
 }
 ```
+
+> Compile using: jai -import_dir .\libs .\main.jai
 
 
 ## Building the examples

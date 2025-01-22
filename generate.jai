@@ -109,7 +109,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
     g_lines_count  = 0;
 
     print("------------------------------------\n");
-    print("Generating bindings for: %\n", input_filename);
+    print("Generating bindings for: % ...\n", input_filename);
 
     input_file := String.join("include/", input_filename, ".h");
 
@@ -201,6 +201,8 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
         remainder_file := String.join("raylib/", input_filename, "_unrecognized.h");
         File.write_entire_file(remainder_file, *unrecognized_builder);
     }
+
+    print("Generated bindings for: %\n", input_filename);
     print("------------------------------------\n");
 }
 
