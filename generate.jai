@@ -25,26 +25,28 @@ TYPE_MAP :: string.[
     "Matrix",         "Matrix4"
 ];
 
-JAI_STRUCTS   :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
-REMOVED_CASTS :: string.["(float)"];
+JAI_STRUCTS        :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
+REMOVED_CASTS      :: string.["(float)"];
+KNOWN_FUNC_RETURNS :: string.["void", "Color"];
 
-DOUBLE_POINTER  :: "**";
-SINGLE_POINTER  :: "*";
-STRUCT_PREFIX   :: "typedef struct";
-RLAPI_PREFIX    :: "RLAPI";
-RMAPI_PREFIX    :: "RMAPI";
-CONST_PREFIX    :: "const";
-ENUM_PREFIX     :: "typedef enum";
-DEFINE_PREFIX   :: "#define";
-RAYLIB_COLOR    :: "CLITERAL(Color)";
-TYPEDEF_PREFIX  :: "typedef";
-IF_BEGIN_PREFIX :: "#if ";
-IF_END_PREFIX   :: "#endif";
-SWITCH_PREFIX   :: "switch";
-CASE_PREFIX     :: "case";
-NUMBERS         :: "0123456789";
-RLGL_END        :: "#endif // RLGL_H";
-RCAMERA_END     :: "#endif // RCAMERA_H";
+DOUBLE_POINTER   :: "**";
+SINGLE_POINTER   :: "*";
+STRUCT_PREFIX    :: "typedef struct";
+RLAPI_PREFIX     :: "RLAPI";
+RMAPI_PREFIX     :: "RMAPI";
+RAYGUIAPI_PREFIX :: "RAYGUIAPI";
+CONST_PREFIX     :: "const";
+ENUM_PREFIX      :: "typedef enum";
+DEFINE_PREFIX    :: "#define";
+RAYLIB_COLOR     :: "CLITERAL(Color)";
+TYPEDEF_PREFIX   :: "typedef";
+IF_BEGIN_PREFIX  :: "#if ";
+IF_END_PREFIX    :: "#endif";
+SWITCH_PREFIX    :: "switch";
+CASE_PREFIX      :: "case";
+NUMBERS          :: "0123456789";
+RLGL_END         :: "#endif // RLGL_H";
+RCAMERA_END      :: "#endif // RCAMERA_H";
 
 GENERAL_HEADER :: #string DONE
 //
@@ -83,8 +85,6 @@ DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
 
-OUTPUT_UNRECOGNIZED_CODE :: false;
-
 main :: () {
     populate_improved_function_definitions_table();
     defer Hash_Table.deinit(*g_improved_function_definitions);
@@ -95,16 +95,17 @@ main :: () {
     populate_improved_definitions();
     defer Hash_Table.deinit(*g_improved_definitions);
 
-    generate_bindings("raylib", RAYLIB_HEADER, RAYLIB_FOOTER);
-    generate_bindings("raymath", RAYMATH_HEADER, "");
-    generate_bindings("rlgl", "", "");
-    generate_bindings("rcamera", "", "");
+    generate_bindings("raylib" , RAYLIB_HEADER , RAYLIB_FOOTER, false);
+    generate_bindings("raymath", RAYMATH_HEADER, ""           , false);
+    generate_bindings("rlgl"   , ""            , ""           , false);
+    generate_bindings("rcamera", ""            , ""           , false);
+    generate_bindings("raygui" , ""            , ""           , false);
 }
 
 g_line_counter : int;
 g_lines_count  : int;
 
-generate_bindings :: (input_filename: string, file_header: string, file_footer: string) {
+generate_bindings :: (input_filename: string, file_header: string, file_footer: string, output_unrecognized_code: bool) {
     g_line_counter = -1;
     g_lines_count  = 0;
 
@@ -181,8 +182,18 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
             continue;
         }
 
+        if (String.starts_with(line, RAYGUIAPI_PREFIX)) {
+            handle_rayguiapi(file_lines, *output_builder, *unrecognized_builder);
+            continue;
+        }
+
         if (String.starts_with(line, RLGL_END) || String.starts_with(line, RCAMERA_END)) {
             break;
+        }
+
+        if (is_function(file_lines)) {
+            // handle_full_function(file_lines);
+            continue;
         }
 
         // Unrecognized lines
@@ -197,7 +208,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
     output_file := String.join("raylib/", input_filename, ".jai");
     File.write_entire_file(output_file, *output_builder);
 
-    if (OUTPUT_UNRECOGNIZED_CODE) {
+    if (output_unrecognized_code) {
         remainder_file := String.join("raylib/", input_filename, "_unrecognized.h");
         File.write_entire_file(remainder_file, *unrecognized_builder);
     }
@@ -471,6 +482,33 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecog
 }
 
 handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    // Handle one line enum
+    {
+        line := String.trim(file_lines[g_line_counter]);
+        if (String.contains(line, "}") && String.contains(line, ";")) {
+            line = String.replace(line, ENUM_PREFIX, "");
+
+            success1, enum_string, comment := String.split_from_left(line, ";");
+            if (!success1) {
+                print("--Unexpected enum definition--\n");
+                print("%\n", line);
+                return;
+            }
+
+            success2, enum_values, enum_name := String.split_from_left(enum_string, "}");
+            if (!success2) {
+                print("--Unexpected enum definition--\n");
+                print("%\n", enum_string);
+                return;
+            }
+
+            enum_values = String.replace(enum_values, ",", ";");
+
+            print_to_builder(output_builder, "% :: enum %; } %\n", enum_name, enum_values, comment);
+            return;
+        }
+    }
+
     enum_name := "";
 
     // Look ahead for enum name
@@ -725,6 +763,25 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
     }
 }
 
+handle_rayguiapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    // Remove RAYGUIAPI_PREFIX prefix
+    line = String.slice(line, RAYGUIAPI_PREFIX.count + 1, line.count - RAYGUIAPI_PREFIX.count);
+
+    success, definition, comment := String.split_from_left(line, ";");
+    if (!success) {
+        print("--Unexpected function definition--\n");
+        print("% %\n", RAYGUIAPI_PREFIX, definition);
+        print("--Expected: RAYGUIAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
+        return;
+    }
+
+    function_definition := convert_function_definition(definition);
+
+    print_to_builder(output_builder, "% #foreign raygui_native;%\n", function_definition, comment);
+}
+
 remove_f_from_floats :: (line: string) {
     found_number := false;
     found_dot    := false;
@@ -744,6 +801,55 @@ remove_f_from_floats :: (line: string) {
         found_number = false;
         found_dot    = false;
     }
+}
+
+is_function :: (file_lines: []string) -> bool {
+    line := file_lines[g_line_counter];
+    line = String.replace(line, "static", "");
+    line = String.trim(line);
+
+    for KNOWN_FUNC_RETURNS {
+        if (String.starts_with(line, it)) {
+            left_bracket_idx  := String.find_index_from_right(line, "(");
+            right_bracket_idx := String.find_index_from_right(line, ")");
+            if (left_bracket_idx > 0 && right_bracket_idx > left_bracket_idx) {
+                func_bracket_idx := String.find_index_from_right(line, "{");
+                if (func_bracket_idx > right_bracket_idx) {
+                    return true;
+                }
+
+                next_line := file_lines[g_line_counter+1];
+                if (String.starts_with(next_line, "{")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    return false;
+}
+
+// THIS IS NOT COMPLETE YET, but I dont have a good reason to complete it. IT IS A PAIN
+handle_full_function :: (file_lines: []string) {
+    line := file_lines[g_line_counter];
+    line = String.replace(line, "static", "");
+    line = String.trim(line);
+
+    right_bracket_idx := String.find_index_from_right(line, ")");
+
+    c_function_definition   := String.slice(line, 0, right_bracket_idx + 1);
+    jai_function_definition := convert_function_definition(c_function_definition);
+
+    success, old_definition, first_line_remainder := String.split_from_left(line, ")");
+    if (!success) {
+        print("Unexpected function definition\n");
+        print("%\n", line);
+        return;
+    }
+
+    line = String.join(jai_function_definition, first_line_remainder);
+
+    // print("FOUND A FUNCTION: %\n", line);
 }
 
 convert_function_definition :: (line: string) -> string {
@@ -943,12 +1049,4 @@ convert_assignment :: (line: string, with_type: bool) -> string {
     }
 
     return String.join(new_line, " = ", remainder);
-}
-
-generate_indentation :: (line: string, factor: int) -> string {
-    indentation := "";
-    for i: 0..factor*4-1 {
-        indentation = String.join(indentation, " ");
-    }
-    return String.join(indentation, line);
 }
