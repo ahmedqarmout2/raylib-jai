@@ -8,11 +8,11 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    SetConfigFlags(.FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [shapes] example - cubic-bezier lines");
 
     startPoint: Vector2 = .{ 30, 30 };
-    endPoint: Vector2 = .{ casst(float)screenWidth - 30, casst(float)screenHeight - 30 };
+    endPoint: Vector2 = .{ cast(float)screenWidth - 30, cast(float)screenHeight - 30 };
     moveStartPoint: bool = false;
     moveEndPoint: bool = false;
 
@@ -38,7 +38,7 @@ main :: () {
         if (moveEndPoint)
         {
             endPoint = mouse;
-            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) moveEndPoint = false;
+            if (IsMouseButtonReleased(.MOUSE_BUTTON_LEFT)) moveEndPoint = false;
         }
         //----------------------------------------------------------------------------------
 
