@@ -76,6 +76,7 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     winmm   :: #library,system,link_always "winmm";
 
     raylib_native :: #library,no_dll "lib/raylib";
+    raygui_native :: #library,no_dll "lib/raygui";
 }
 DONE
 
@@ -503,8 +504,9 @@ handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecogni
             }
 
             enum_values = String.replace(enum_values, ",", ";");
+            enum_values = String.replace(enum_values, "=", "::");
 
-            print_to_builder(output_builder, "% :: enum %; } %\n", enum_name, enum_values, comment);
+            print_to_builder(output_builder, "% :: enum s32 %; } %\n", enum_name, enum_values, comment);
             return;
         }
     }
@@ -602,10 +604,10 @@ convert_enum_element :: (line: string) -> string {
         split_name_on_index      = equals_index;
         split_remainder_on_index = ifx (comma_index > 0) then comma_index + 1 else first_space_after_value_index;
         end_value_on_index       = ifx (comma_index > 0) then comma_index - 1 else first_space_after_value_index;
-    } else if (comma_index > 0 && comma_index < first_space_index) {
+    } else if (comma_index > 0) {
         split_name_on_index      = comma_index;
         split_remainder_on_index = comma_index + 1;
-        } else {
+    } else {
         split_name_on_index      = first_space_index;
         split_remainder_on_index = first_space_index;
     }

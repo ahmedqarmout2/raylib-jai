@@ -406,15 +406,15 @@ int padding;
 // Gui control state
 GuiState :: enum s32 {
     STATE_NORMAL :: 0;
-    STATE_FOCUSED,;
-    STATE_PRESSED,;
+    STATE_FOCUSED;
+    STATE_PRESSED;
     STATE_DISABLED;
 }
 
 // Gui control text alignment
 GuiTextAlignment :: enum s32 {
     TEXT_ALIGN_LEFT :: 0;
-    TEXT_ALIGN_CENTER,;
+    TEXT_ALIGN_CENTER;
     TEXT_ALIGN_RIGHT;
 }
 
@@ -422,7 +422,7 @@ GuiTextAlignment :: enum s32 {
 // NOTE: Text vertical position inside the text bounds
 GuiTextAlignmentVertical :: enum s32 {
     TEXT_ALIGN_TOP :: 0;
-    TEXT_ALIGN_MIDDLE,;
+    TEXT_ALIGN_MIDDLE;
     TEXT_ALIGN_BOTTOM;
 }
 
@@ -430,7 +430,7 @@ GuiTextAlignmentVertical :: enum s32 {
 // NOTE: Useful for multiline text
 GuiTextWrapMode :: enum s32 {
     TEXT_WRAP_NONE :: 0;
-    TEXT_WRAP_CHAR,;
+    TEXT_WRAP_CHAR;
     TEXT_WRAP_WORD;
 }
 
@@ -441,19 +441,19 @@ GuiControl :: enum s32 {
 
     // Basic controls
     LABEL;          // Used also for: LABELBUTTON
-    BUTTON,;
+    BUTTON;
     TOGGLE;         // Used also for: TOGGLEGROUP
     SLIDER;         // Used also for: SLIDERBAR, TOGGLESLIDER
-    PROGRESSBAR,;
-    CHECKBOX,;
-    COMBOBOX,;
-    DROPDOWNBOX,;
+    PROGRESSBAR;
+    CHECKBOX;
+    COMBOBOX;
+    DROPDOWNBOX;
     TEXTBOX;        // Used also for: TEXTBOXMULTI
-    VALUEBOX,;
+    VALUEBOX;
     SPINNER;        // Uses: BUTTON, VALUEBOX
-    LISTVIEW,;
-    COLORPICKER,;
-    SCROLLBAR,;
+    LISTVIEW;
+    COLORPICKER;
+    SCROLLBAR;
     STATUSBAR;
 }
 
@@ -703,7 +703,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 // Gui control property style color element
- GuiPropertyElement :: enum  { BORDER = 0; BASE; TEXT; OTHER ; } 
+ GuiPropertyElement :: enum s32  { BORDER :: 0; BASE; TEXT; OTHER ; } 
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
