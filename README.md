@@ -68,3 +68,7 @@ Run the example `.exe` files from the `examples/` directory.
 > jai .\generate.jai
 
 > .\generate.exe
+
+## TODO
+
+* Add support for Linux and MacOS

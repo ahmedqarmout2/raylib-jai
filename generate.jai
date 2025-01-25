@@ -113,7 +113,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
     print("------------------------------------\n");
     print("Generating bindings for: % ...\n", input_filename);
 
-    input_file := String.join("include/", input_filename, ".h");
+    input_file := String.join("c_headers/", input_filename, ".h");
 
     file, success := File.file_open(input_file);
     if !success {
