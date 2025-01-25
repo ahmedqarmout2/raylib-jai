@@ -553,7 +553,7 @@ rlIsStereoRenderEnabled :: () -> bool #foreign raylib_native;
 rlClearColor :: (r: u8, g: u8, b: u8, a: u8) #foreign raylib_native;
 rlClearScreenBuffers :: () #foreign raylib_native;
 rlCheckErrors :: () #foreign raylib_native;
-rlSetBlendMode :: (mode: s32) #foreign raylib_native;
+rlSetBlendMode :: (mode: BlendMode) #foreign raylib_native;
 rlSetBlendFactors :: (glSrcFactor: s32, glDstFactor: s32, glEquation: s32) #foreign raylib_native;
 rlSetBlendFactorsSeparate :: (glSrcRGB: s32, glDstRGB: s32, glSrcAlpha: s32, glDstAlpha: s32, glEqRGB: s32, glEqAlpha: s32) #foreign raylib_native;
 

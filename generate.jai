@@ -282,6 +282,8 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "SetMaterialTexture", "(material: *Material, mapType: MaterialMapIndex, texture: Texture2D)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "LoadTextureCubemap", "(image: Image, layout: CubemapLayout) -> TextureCubemap");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "rlSetBlendMode", "(mode: BlendMode)");
 }
 
 populate_improved_struct_elements_table :: () {
