@@ -78,6 +78,13 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     raylib_native :: #library,no_dll "lib/raylib";
     raygui_native :: #library,no_dll "lib/raygui";
 }
+
+#if OS == .LINUX {
+    libm :: #library,system,link_always "libm";
+
+    raylib_native :: #library,no_dll "lib/linux/raylib";
+    raygui_native :: #library,no_dll "lib/linux/raygui";
+}
 DONE
 
 RAYMATH_HEADER :: #string DONE
