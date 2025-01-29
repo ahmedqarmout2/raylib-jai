@@ -63,7 +63,7 @@ Run `compile_examples.bat` with `jai` on your PATH.
 Run the example `.exe` files from the `examples/` directory.
 
 
-## Differences from C raylib
+## Features
 
 * Windows and linux support
 
