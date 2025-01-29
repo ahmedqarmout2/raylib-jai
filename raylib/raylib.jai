@@ -1638,8 +1638,8 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     shell32 :: #library,system,link_always "shell32";
     winmm   :: #library,system,link_always "winmm";
 
-    raylib_native :: #library,no_dll "lib/raylib";
-    raygui_native :: #library,no_dll "lib/raygui";
+    raylib_native :: #library,no_dll "lib/windows/raylib";
+    raygui_native :: #library,no_dll "lib/windows/raygui";
 }
 
 #if OS == .LINUX {

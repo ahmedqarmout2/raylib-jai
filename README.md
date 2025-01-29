@@ -5,13 +5,20 @@
 > Tested with Jai version: beta 0.2.008
 
 > Raylib version: 5.5
+
+> Raygui version: 4.5-dev
  
 There are also examples--direct Jai ports of the [raylib examples](https://www.raylib.com/examples.html).
 
-<a href="examples/core_3d_camera_first_person.jai"><img src="doc/screenshots/core_3d_camera_first_person.png" style="max-width: 398px;"></a>
-<a href="examples/shaders_custom_uniform.jai"><img src="doc/screenshots/shaders_custom_uniform.png" style="max-width: 398px;"></a>
-<a href="examples/shaders_texture_waves.jai"><img src="doc/screenshots/shaders_texture_waves.png" style="max-width: 398px;"></a>
-<a href="examples/textures_bunnymark.jai"><img src="doc/screenshots/textures_bunnymark.png" style="max-width: 398px;"></a>
+<a href="examples/core/core_3d_camera_first_person.jai"><img src="doc/screenshots/core_3d_camera_first_person.png" style="max-width: 400px;"></a>
+<a href="examples/models/models_heightmap.jai"><img src="doc/screenshots/models_heightmap.png" style="max-width: 400px;"></a>
+<a href="examples/shaders/shaders_custom_uniform.jai"><img src="doc/screenshots/shaders_custom_uniform.png" style="max-width: 400px;"></a>
+<a href="examples/shaders/shaders_texture_waves.jai"><img src="doc/screenshots/shaders_texture_waves.png" style="max-width: 400px;"></a>
+<a href="examples/shapes/shapes_collision_area.jai"><img src="doc/screenshots/shapes_collision_area.png" style="max-width: 400px;"></a>
+<a href="examples/shapes/shapes_colors_palette.jai"><img src="doc/screenshots/shapes_colors_palette.png" style="max-width: 400px;"></a>
+<a href="examples/shapes/shapes_draw_ring.jai"><img src="doc/screenshots/shapes_draw_ring.png" style="max-width: 400px;"></a>
+<a href="examples/shapes/shapes_splines_drawing.jai"><img src="doc/screenshots/shapes_splines_drawing.png" style="max-width: 400px;"></a>
+<a href="examples/textures_bunnymark.jai"><img src="doc/screenshots/textures_bunnymark.png" style="max-width: 400px;"></a>
 
 There are more than shown here ported in the [examples/](examples) folder.
 
@@ -46,7 +53,7 @@ main :: () {
 }
 ```
 
-> Compile using: jai -import_dir .\libs .\main.jai
+> Compile using (on Windows): jai -import_dir .\libs .\main.jai
 
 
 ## Building the examples
@@ -58,6 +65,10 @@ Run the example `.exe` files from the `examples/` directory.
 
 ## Differences from C raylib
 
+* Windows and linux support
+
+* Raygui support
+
 * Some functions which take enum arguments (like `SetConfigFlags` for example) have their argument types changed from C's `int` (or Jai's `s32`) to the actual enum type. Consequently, you can call them like `SetConfigFlags(.FLAG_FULLSCREEN_MODE);`
 
 * An additional set of macros lets you change any of the Begin/End function call pairs (like `BeginMode3D(camera)` and `EndMode3D()`) into an equivalent `PushMode3D(camera)` which will insert an automatic `defer EndXXX()` call into the scope for you.
@@ -65,10 +76,14 @@ Run the example `.exe` files from the `examples/` directory.
 
 ## Regenerating the bindings
 
+> Compile and run: generate.jai
+
+For example (on Windows):
+
 > jai .\generate.jai
 
 > .\generate.exe
 
 ## TODO
 
-* Add support for Linux and MacOS
+* Add support for MacOS
