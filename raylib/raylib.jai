@@ -1649,3 +1649,11 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     raygui_native :: #library,no_dll "lib/linux/raygui";
 }
 
+#if OS == .MACOS {
+    cocoa :: #library,system,link_always "Cocoa";
+    iOKit :: #library,system,link_always "IOKit";
+
+    raylib_native :: #library,no_dll "lib/macos/raylib";
+    raygui_native :: #library,no_dll "lib/macos/raygui";
+}
+

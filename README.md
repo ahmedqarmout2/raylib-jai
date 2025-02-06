@@ -1,6 +1,6 @@
 # raylib-jai bindings
 
-[Raylib](https://www.raylib.com/) is a minimal gamedev library for C and this repository has a script for automatically generating Jai bindings from `raylib.h`, `raymath.h`, `rcamera.h` and `rlgl.h`.
+[Raylib](https://www.raylib.com/) is a minimal gamedev library for C and this repository has a script for automatically generating Jai bindings from `raylib.h`, `raymath.h`, `rcamera.h`, `rlgl.h` and `raygui.h`.
 
 > Tested with Jai version: beta 0.2.008
 
@@ -65,7 +65,7 @@ Run the example `.exe` files from the `examples/` directory.
 
 ## Features
 
-* Windows and linux support
+* Windows, linux and macos support
 
 * Raygui support
 
@@ -83,7 +83,3 @@ For example (on Windows):
 > jai .\generate.jai
 
 > .\generate.exe
-
-## TODO
-
-* Add support for MacOS
