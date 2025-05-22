@@ -492,7 +492,7 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecog
         }
 
         if (!is_jai_struct) {
-            improved_element, found_improvement := Hash_Table.table_find(*g_improved_struct_elements, String.join(struct_name, "_", remainder));
+            found_improvement, improved_element := Hash_Table.table_find_new(*g_improved_struct_elements, String.join(struct_name, "_", remainder));
 
             print_to_builder(output_builder, "    %: %; %\n", remainder, ifx found_improvement then improved_element else jai_type, comment);
         }
@@ -672,7 +672,7 @@ handle_define :: (file_lines: []string, output_builder: *String_Builder, unrecog
     line = String.trim(line);
 
     found, definition, remainder := String.split_from_left(line, " ");
-    improved_definition, found_improvement := Hash_Table.table_find(*g_improved_definitions, definition);
+    found_improvement, improved_definition := Hash_Table.table_find_new(*g_improved_definitions, definition);
     if (found_improvement) {
         print_to_builder(output_builder, "%;\n", improved_definition);
         return;
@@ -884,7 +884,7 @@ convert_function_definition :: (line: string) -> string {
 
     function_name := String.slice(remainder, 0, left_bracket_idx);
 
-    improved_definition, found_improvement := Hash_Table.table_find(*g_improved_function_definitions, function_name);
+    found_improvement, improved_definition := Hash_Table.table_find_new(*g_improved_function_definitions, function_name);
     if (found_improvement) {
         return String.join(function_name, " :: ", improved_definition);
     }
