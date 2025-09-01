@@ -32,3 +32,13 @@ for %%i in (*.jai) do jai -import_dir ../.. -x64 %%i || exit /b
 popd
 
 popd
+
+pushd games
+
+pushd cat_vs_roomba
+
+jai -import_dir ../../.. -x64 src/cat_vs_roomba.jai
+
+popd
+
+popd

@@ -30,3 +30,13 @@ for i in *.jai; do jai-macos -import_dir ../.. -x64 "$i" || break; done
 cd ..
 
 cd ..
+
+cd games
+
+cd cat_vs_roomba
+
+jai -import_dir ../../.. -x64 src/cat_vs_roomba.jai
+
+cd ..
+
+cd ..
