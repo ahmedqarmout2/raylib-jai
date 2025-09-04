@@ -234,11 +234,12 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
 }
 
 populate_improved_function_definitions_table :: () {
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"  , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"     , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased" , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"       , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"    , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"        , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressedRepeat"  , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"           , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased"       , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"             , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"          , "(key: KeyboardKey) -> bool");
 
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonPressed"  , "(button: MouseButton) -> bool");
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonDown"     , "(button: MouseButton) -> bool");

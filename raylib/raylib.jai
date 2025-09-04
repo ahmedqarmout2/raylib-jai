@@ -1095,7 +1095,7 @@ PlayAutomationEvent :: (event: AutomationEvent) #foreign raylib_native;
 
 // Input-related functions: keyboard
 IsKeyPressed :: (key: KeyboardKey) -> bool #foreign raylib_native;
-IsKeyPressedRepeat :: (key: s32) -> bool #foreign raylib_native;
+IsKeyPressedRepeat :: (key: KeyboardKey) -> bool #foreign raylib_native;
 IsKeyDown :: (key: KeyboardKey) -> bool #foreign raylib_native;
 IsKeyReleased :: (key: KeyboardKey) -> bool #foreign raylib_native;
 IsKeyUp :: (key: KeyboardKey) -> bool #foreign raylib_native;
