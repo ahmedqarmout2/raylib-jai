@@ -890,7 +890,7 @@ NPatchLayout :: enum s32 {
 
 // Window-related functions
 InitWindow :: (width: s32, height: s32, title: *u8) #foreign raylib_native;
-CloseWindow :: () #foreign raylib_native;
+#if OS != .WINDOWS CloseWindow :: () #foreign raylib_native;
 WindowShouldClose :: () -> bool #foreign raylib_native;
 IsWindowReady :: () -> bool #foreign raylib_native;
 IsWindowFullscreen :: () -> bool #foreign raylib_native;
@@ -1655,5 +1655,15 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 
     raylib_native :: #library,no_dll "lib/macos/raylib";
     raygui_native :: #library,no_dll "lib/macos/raygui";
+}
+
+// To avoid name collision with user32.lib.
+#if OS == .WINDOWS {
+    RlCloseWindow :: () { CloseWindow(); }
+}
+
+#scope_file;
+#if OS == .WINDOWS {
+    CloseWindow :: () #foreign raylib_native;
 }
 
