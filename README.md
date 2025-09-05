@@ -73,13 +73,8 @@ Run the example `.exe` files from the `examples/` directory.
 
 * An additional set of macros lets you change any of the Begin/End function call pairs (like `BeginMode3D(camera)` and `EndMode3D()`) into an equivalent `PushMode3D(camera)` which will insert an automatic `defer EndXXX()` call into the scope for you.
 
+## Symbol collision on Windows
+Use `RlCloseWindow` instead of `CloseWindow` if you're on Windows.
 
 ## Regenerating the bindings
-
-> Compile and run: generate.jai
-
-For example (on Windows):
-
-> jai .\generate.jai
-
-> .\generate.exe
+> jai generate.jai

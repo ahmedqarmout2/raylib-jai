@@ -1,3 +1,11 @@
+Compiler :: #import "Compiler";
+#run {
+    using Compiler;
+    set_build_options_dc(.{do_output=false});  // No executable for this workspace.
+    generate();
+}
+
+
 Basic      :: #import "Basic";
 File       :: #import "File";
 Hash_Table :: #import "Hash_Table";
@@ -111,7 +119,7 @@ DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
 
-main :: () {
+generate :: () {
     populate_improved_function_definitions_table();
     defer Hash_Table.deinit(*g_improved_function_definitions);
 
