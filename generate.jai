@@ -1,3 +1,11 @@
+Compiler :: #import "Compiler";
+#run {
+    using Compiler;
+    set_build_options_dc(.{do_output=false});  // No executable for this workspace.
+    generate();
+}
+
+
 Basic      :: #import "Basic";
 File       :: #import "File";
 Hash_Table :: #import "Hash_Table";
@@ -93,6 +101,16 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     raylib_native :: #library,no_dll "lib/macos/raylib";
     raygui_native :: #library,no_dll "lib/macos/raygui";
 }
+
+// To avoid name collision with user32.lib.
+#if OS == .WINDOWS {
+    RlCloseWindow :: () { CloseWindow(); }
+}
+
+#scope_file;
+#if OS == .WINDOWS {
+    CloseWindow :: () #foreign raylib_native;
+}
 DONE
 
 RAYMATH_HEADER :: #string DONE
@@ -101,7 +119,7 @@ DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
 
-main :: () {
+generate :: () {
     populate_improved_function_definitions_table();
     defer Hash_Table.deinit(*g_improved_function_definitions);
 
@@ -189,7 +207,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
         }
 
         if (String.starts_with(line, RLAPI_PREFIX)) {
-            handle_rplai(file_lines, *output_builder, *unrecognized_builder);
+            handle_rlapi(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -234,11 +252,12 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
 }
 
 populate_improved_function_definitions_table :: () {
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"  , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"     , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased" , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"       , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"    , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"        , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressedRepeat"  , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"           , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased"       , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"             , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"          , "(key: KeyboardKey) -> bool");
 
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonPressed"  , "(button: MouseButton) -> bool");
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonDown"     , "(button: MouseButton) -> bool");
@@ -738,7 +757,7 @@ handle_typedef :: (file_lines: []string, output_builder: *String_Builder, unreco
     }
 }
 
-handle_rplai :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+handle_rlapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     // Remove RLAPI prefix
@@ -754,7 +773,12 @@ handle_rplai :: (file_lines: []string, output_builder: *String_Builder, unrecogn
 
     function_definition := convert_function_definition(definition);
 
-    print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
+    if String.begins_with(function_definition, "CloseWindow ::") {
+        // To avoid the CloseWindow in user32.
+        print_to_builder(output_builder, "#if OS != .WINDOWS % #foreign raylib_native;\n", function_definition);
+    } else {
+        print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
+    }
 }
 
 handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
