@@ -35,7 +35,7 @@ cd games
 
 cd cat_vs_roomba
 
-jai -import_dir ../../.. -x64 src/cat_vs_roomba.jai
+jai-linux -import_dir ../../.. -x64 src/cat_vs_roomba.jai
 
 cd ..
 
