@@ -1,4 +1,6 @@
 Basic      :: #import "Basic";
+BuildCpp   :: #import "BuildCpp";
+Compiler   :: #import "Compiler";
 File       :: #import "File";
 Hash_Table :: #import "Hash_Table";
 String     :: #import "String";
@@ -11,6 +13,10 @@ print_to_builder :: Basic.print_to_builder;
 g_improved_function_definitions : Table(string, string);
 g_improved_struct_elements      : Table(string, string);
 g_improved_definitions          : Table(string, string);
+
+g_line_counter : int;
+g_lines_count  : int;
+g_generate_raygui_lib := false;
 
 // Even values are the C types
 // Odd values are the jai types
@@ -101,7 +107,19 @@ DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
 
+#run generate();
+
 main :: () {
+    // generate();
+}
+
+generate :: () {
+    read_build_options();
+
+    if (g_generate_raygui_lib) {
+        build_raygui_libs();
+    }
+
     populate_improved_function_definitions_table();
     defer Hash_Table.deinit(*g_improved_function_definitions);
 
@@ -118,8 +136,28 @@ main :: () {
     generate_bindings("raygui" , ""            , ""           , false);
 }
 
-g_line_counter : int;
-g_lines_count  : int;
+read_build_options :: () {
+    options := Compiler.get_build_options();
+    args    := options.compile_time_command_line;
+
+    for arg: args {
+        if arg == {
+          case "-g"; g_generate_raygui_lib = true;
+        }
+    }
+}
+
+build_raygui_libs :: () {
+    print("------------------------------------\n");
+    print("Generating raygui libs ...\n");
+
+    if OS == .WINDOWS {
+        BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "src/raygui.c", "/LD", "/Feraygui.dll", "./raylib/lib/windows/raylib.lib"]);
+    }
+
+    print("Generated raygui libs\n");
+    print("------------------------------------\n");
+}
 
 generate_bindings :: (input_filename: string, file_header: string, file_footer: string, output_unrecognized_code: bool) {
     g_line_counter = -1;
@@ -128,7 +166,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
     print("------------------------------------\n");
     print("Generating bindings for: % ...\n", input_filename);
 
-    input_file := String.join("c_headers/", input_filename, ".h");
+    input_file := String.join("src/", input_filename, ".h");
 
     file, success := File.file_open(input_file);
     if !success {
