@@ -152,6 +152,7 @@ build_raygui_libs :: () {
     print("Generating raygui libs ...\n");
 
     if OS == .WINDOWS {
+        // Not working: BuildCpp.build_cpp_dynamic_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["-I./src", "-L./src", "-shared", "-DRAYGUI_IMPLEMENTATION", "-DBUILD_LIBTYPE_SHARED", "-static-libgcc", "-lopengl32", "-lgdi32", "-lwinmm", "-lraylib"]);
         BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "src/raygui.c", "/LD", "/Feraygui.dll", "./raylib/lib/windows/raylib.lib"]);
     }
 

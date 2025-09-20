@@ -76,10 +76,8 @@ Run the example `.exe` files from the `examples/` directory.
 
 ## Regenerating the bindings
 
-> Compile and run: generate.jai
-
-For example (on Windows):
-
 > jai .\generate.jai
 
-> .\generate.exe
+(Optional) Regenerate raygui lib files
+
+> jai .\generate.jai - -g
