@@ -156,6 +156,8 @@ build_raygui_libs :: () {
         BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "src/raygui.c", "/LD", "/Feraygui.dll", "./raylib/lib/windows/raylib.lib"]);
     } else if OS == .LINUX {
         BuildCpp.build_cpp_static_lib("raylib/lib/linux/raygui", files="src/raygui.c", extra=.["-fpic", "-DRAYGUI_IMPLEMENTATION"]);
+    } else if OS == .MACOS {
+        BuildCpp.build_cpp_static_lib("raylib/lib/macos/raygui", files="src/raygui.c", extra=.["-DRAYGUI_IMPLEMENTATION", "-I./src"]);
     }
 
     print("Generated raygui libs\n");
