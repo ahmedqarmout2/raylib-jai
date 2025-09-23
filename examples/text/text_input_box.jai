@@ -99,7 +99,7 @@ main :: () {
 // NOTE: We limit keys check to keys between 32 (KEY_SPACE) and 126
 IsAnyKeyPressed :: () -> bool {
     keyPressed: bool = false;
-    key: s32 = GetKeyPressed();
+    key: KeyboardKey = GetKeyPressed();
 
     if ((key >= 32) && (key <= 126)) keyPressed = true;
 

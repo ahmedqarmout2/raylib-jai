@@ -153,7 +153,7 @@ build_raygui_libs :: () {
 
     if OS == .WINDOWS {
         // Not working: BuildCpp.build_cpp_dynamic_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["-I./src", "-L./src", "-shared", "-DRAYGUI_IMPLEMENTATION", "-DBUILD_LIBTYPE_SHARED", "-static-libgcc", "-lopengl32", "-lgdi32", "-lwinmm", "-lraylib"]);
-        BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "src/raygui.c", "/LD", "/Feraygui.dll", "./raylib/lib/windows/raylib.lib"]);
+        BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll"]);
     } else if OS == .LINUX {
         BuildCpp.build_cpp_static_lib("raylib/lib/linux/raygui", files="src/raygui.c", extra=.["-fpic", "-DRAYGUI_IMPLEMENTATION"]);
     } else if OS == .MACOS {
@@ -277,11 +277,13 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
 }
 
 populate_improved_function_definitions_table :: () {
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"  , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"     , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased" , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"       , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"    , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"        , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressedRepeat"  , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"           , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased"       , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"             , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "GetKeyPressed"       , "() -> KeyboardKey");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"          , "(key: KeyboardKey) -> bool");
 
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonPressed"  , "(button: MouseButton) -> bool");
     Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonDown"     , "(button: MouseButton) -> bool");
