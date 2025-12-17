@@ -83,11 +83,11 @@ ProcessAudio :: (buffer: *void, frames: u32) #c_call {
             left  : *float = *samples[frame * 2 + 0];
             right : *float = *samples[frame * 2 + 1];
 
-            << left  = pow(abs(<< left), exponent)  * (ifx (<< left < 0.0)  then -1.0 else 1.0);
-            << right = pow(abs(<< right), exponent) * (ifx (<< right < 0.0) then -1.0 else 1.0);
+            left.*  = pow(abs(left.*), exponent)  * (ifx (left.* < 0.0)  then -1.0 else 1.0);
+            right.* = pow(abs(right.*), exponent) * (ifx (right.* < 0.0) then -1.0 else 1.0);
 
-            average += abs(<< left)  / frames;   // accumulating average volume
-            average += abs(<< right) / frames;
+            average += abs(left.*)  / frames;   // accumulating average volume
+            average += abs(right.*) / frames;
         }
 
         // Moving history to the left

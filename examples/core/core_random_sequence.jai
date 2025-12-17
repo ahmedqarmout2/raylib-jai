@@ -112,7 +112,7 @@ ShuffleColorRectSequence :: (rectangles: [..]ColorRect, rectCount: s32) {
         r2: *ColorRect = *rectangles[seq[i1]];
 
         // swap only the color and height
-        tmp: ColorRect = << r1;
+        tmp: ColorRect = r1.*;
         r1.c           = r2.c;
         r1.r.height    = r2.r.height;
         r1.r.y         = r2.r.y;

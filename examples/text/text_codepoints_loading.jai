@@ -126,6 +126,6 @@ CodepointRemoveDuplicates :: (codepoints: *s32, codepointCount: s32, codepointsR
     // NOTE: The size of codepointsNoDups is the same as original array but
     // only required positions are filled (codepointsNoDupsCount)
 
-    <<codepointsResultCount = codepointsNoDupsCount;
+    codepointsResultCount.* = codepointsNoDupsCount;
     return codepointsNoDups;
 }

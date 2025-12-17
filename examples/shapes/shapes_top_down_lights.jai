@@ -189,7 +189,7 @@ SetupBoxes :: (boxes: *Rectangle, count: *s32)
         boxes[i] = Rectangle.{cast(float)GetRandomValue(0,GetScreenWidth()), cast(float)GetRandomValue(0,GetScreenHeight()), cast(float)GetRandomValue(10,100), cast(float)GetRandomValue(10,100) };
     }
 
-    <<count = MAX_BOXES;
+    count.* = MAX_BOXES;
 }
 
 //------------------------------------------------------------------------------------

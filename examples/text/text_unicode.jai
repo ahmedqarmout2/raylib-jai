@@ -171,7 +171,7 @@ main :: () {
                 TextIsEqual(messages[message].language, "Japanese")) font = *fontAsian;
 
             // Calculate size for the message box (approximate the height and width)
-            sz: Vector2 = MeasureTextEx(<< font, messages[message].text, cast(float)font.baseSize, 1.0);
+            sz: Vector2 = MeasureTextEx(font.*, messages[message].text, cast(float)font.baseSize, 1.0);
             if (sz.x > 300) { sz.y *= sz.x/300; sz.x = 300; }
             else if (sz.x < 160) sz.x = 160;
 
@@ -205,7 +205,7 @@ main :: () {
 
             // Draw the main text message
             textRect: Rectangle = .{msgRect.x + horizontalPadding/2, msgRect.y + verticalPadding/2, msgRect.width - horizontalPadding, msgRect.height};
-            DrawTextBoxed(<< font, messages[message].text, textRect, cast(float)font.baseSize, 1.0, true, WHITE);
+            DrawTextBoxed(font.*, messages[message].text, textRect, cast(float)font.baseSize, 1.0, true, WHITE);
 
             // Draw the info text below the main message
             size: s32 = cast(s32)strlen(messages[message].text);

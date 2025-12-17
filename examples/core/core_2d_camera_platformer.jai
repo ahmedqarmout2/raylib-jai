@@ -174,8 +174,8 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
         maxY = max(it.rect.y + it.rect.height, maxY);
     }
 
-    max_val : Vector2 = GetWorldToScreen2D(Vector2.{maxX, maxY}, << camera);
-    min_val : Vector2 = GetWorldToScreen2D(Vector2.{minX, minY}, << camera);
+    max_val : Vector2 = GetWorldToScreen2D(Vector2.{maxX, maxY}, camera.*);
+    min_val : Vector2 = GetWorldToScreen2D(Vector2.{minX, minY}, camera.*);
     
     if max_val.x < cast(float)width camera.offset.x = width - (max_val.x - width/2);
     if max_val.y < cast(float)height camera.offset.y = height - (max_val.y - height/2);
@@ -233,8 +233,8 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
 bbox : Vector2 = .{ 0.2, 0.2 };
 
 UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
-    bboxWorldMin: Vector2 = GetScreenToWorld2D(Vector2.{ (1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height }, << camera);
-    bboxWorldMax: Vector2 = GetScreenToWorld2D(Vector2.{ (1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height }, << camera);
+    bboxWorldMin: Vector2 = GetScreenToWorld2D(Vector2.{ (1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height }, camera.*);
+    bboxWorldMax: Vector2 = GetScreenToWorld2D(Vector2.{ (1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height }, camera.*);
     camera.offset = Vector2.{ (1 - bbox.x)*0.5 * width, (1 - bbox.y)*0.5*height };
 
     if (player.position.x < bboxWorldMin.x) camera.target.x = player.position.x;
