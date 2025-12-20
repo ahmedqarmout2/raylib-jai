@@ -120,7 +120,7 @@ main :: () {
             // Spline control point movement logic
             if (selectedControlPoint != null)
             {
-                <<selectedControlPoint = GetMousePosition();
+                selectedControlPoint.* = GetMousePosition();
                 if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) selectedControlPoint = null;
             }
         }

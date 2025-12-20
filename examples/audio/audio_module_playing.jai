@@ -33,7 +33,7 @@ main :: () {
     // Creates some circles for visual effect
     circles: [MAX_CIRCLES]CircleWave;
 
-    for #v2 < i: 0..MAX_CIRCLES-1 {
+    for < i: 0..MAX_CIRCLES-1 {
         r: s32 = GetRandomValue(10, 40);
         circles[i].alpha      = 0.0;
         circles[i].radius     = cast(float)r;
@@ -114,7 +114,7 @@ main :: () {
 
             ClearBackground(RAYWHITE);
 
-            for #v2 < i: 0..MAX_CIRCLES-1 {
+            for < i: 0..MAX_CIRCLES-1 {
                 DrawCircleV(circles[i].position, circles[i].radius, Fade(circles[i].color, circles[i].alpha));
             }
 

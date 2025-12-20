@@ -26,7 +26,7 @@ copy_string_to_array :: (dst: *[..]u8, src: string) {
 
 strlen :: (s: *u8) -> s64 {
     count: s64 = 0;
-    while <<s {
+    while s.* {
         count += 1;
         s     += 1;
     }

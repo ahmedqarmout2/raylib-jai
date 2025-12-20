@@ -66,7 +66,7 @@ main :: () {
 
         // If a point was selected, move it
         if (curveSelectedPoint) {
-            << curveSelectedPoint = Vector2Add(<<curveSelectedPoint, GetMouseDelta());
+            curveSelectedPoint.* = Vector2Add(curveSelectedPoint.*, GetMouseDelta());
         }
 
         // The mouse is down, and nothing was selected, so see if anything was picked
