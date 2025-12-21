@@ -41,4 +41,10 @@ jai -import_dir ../../.. -x64 src/cat_vs_roomba.jai
 
 popd
 
+pushd classics
+
+jai -import_dir ../../.. -x64 src/snake.jai
+
+popd
+
 popd

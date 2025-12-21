@@ -39,4 +39,10 @@ jai-linux -import_dir ../../.. -x64 src/cat_vs_roomba.jai
 
 cd ..
 
+cd classics
+
+jai-linux -import_dir ../../.. -x64 src/snake.jai
+
+cd ..
+
 cd ..
