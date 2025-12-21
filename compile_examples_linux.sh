@@ -43,6 +43,8 @@ cd classics
 
 jai-linux -import_dir ../../.. -x64 src/snake.jai
 
+jai-linux -import_dir ../../.. -x64 src/space_invaders.jai
+
 cd ..
 
 cd ..

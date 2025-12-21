@@ -45,6 +45,8 @@ pushd classics
 
 jai -import_dir ../../.. -x64 src/snake.jai
 
+jai -import_dir ../../.. -x64 src/space_invaders.jai
+
 popd
 
 popd
