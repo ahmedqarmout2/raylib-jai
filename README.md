@@ -58,9 +58,7 @@ main :: () {
 
 ## Building the examples
 
-Run `compile_examples.bat` with `jai` on your PATH.
-
-Run the example `.exe` files from the `examples/` directory.
+> jai compile_examples_and_games.jai
 
 
 ## Features
@@ -76,8 +74,12 @@ Run the example `.exe` files from the `examples/` directory.
 
 ## Regenerating the bindings
 
-> jai .\generate.jai
+> jai generate.jai
 
 (Optional) Regenerate raygui lib files
 
-> jai .\generate.jai - -g
+> jai generate.jai - -g
+
+For more information
+
+> jai generate.jai - -h
