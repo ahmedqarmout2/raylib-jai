@@ -85,6 +85,7 @@ read_build_options :: () -> (bool, []string) {
 
     for i: 0..args.count-1 {
         arg := args[i];
+
         if (arg == "-h" || arg == "--help") {
              return true, specific_files;
         }

@@ -116,7 +116,12 @@ main :: () {
 generate :: () {
     Compiler.set_build_options_dc(.{ do_output = false });
 
-    read_build_options();
+    print_help := read_build_options();
+
+    if (print_help) {
+        print_help_text();
+        return;
+    }
 
     if (g_generate_raygui_lib) {
         build_raygui_libs();
@@ -138,15 +143,35 @@ generate :: () {
     generate_bindings("raygui" , ""            , ""           , false);
 }
 
-read_build_options :: () {
+read_build_options :: () -> bool {
     options := Compiler.get_build_options();
     args    := options.compile_time_command_line;
 
-    for arg: args {
-        if arg == {
-            case "-g"; g_generate_raygui_lib = true;
+    print_help := false;
+
+    for i: 0..args.count-1 {
+        arg := args[i];
+
+        if (arg == "-h" || arg == "--help") {
+             return true;
         }
+
+        if (arg == "-g" || arg == "--build_raygui") {
+            g_generate_raygui_lib = true;
+            continue;
+        }
+
+        print_help = true;
+        print("Unknown argument '%'.\n", arg);
     }
+    return print_help;
+}
+
+print_help_text :: () {
+    print("Usage: jai generate.jai [- <options>]\n");
+    print("Options:\n");
+    print("    -g, --build_raygui     Build raygui's C files into static lib files\n");
+    print("    -h, --help             Print this text\n");
 }
 
 build_raygui_libs :: () {
