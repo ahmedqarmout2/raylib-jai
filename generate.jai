@@ -114,6 +114,8 @@ main :: () {
 }
 
 generate :: () {
+    Compiler.set_build_options_dc(.{ do_output = false });
+
     read_build_options();
 
     if (g_generate_raygui_lib) {
@@ -142,7 +144,7 @@ read_build_options :: () {
 
     for arg: args {
         if arg == {
-          case "-g"; g_generate_raygui_lib = true;
+            case "-g"; g_generate_raygui_lib = true;
         }
     }
 }
