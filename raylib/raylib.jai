@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai && ./generate.exe
+// jai generate.jai
 //
 
 #import "Basic";
