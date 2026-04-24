@@ -8,17 +8,17 @@
 /*
 ***********************************************************************************************
 *
-*   rlgl v5.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
+*   rlgl v6.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
 *
 *   DESCRIPTION:
-*       An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0)
+*       An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0, ES 3.0)
 *       that provides a pseudo-OpenGL 1.1 immediate-mode style API (rlVertex, rlTranslate, rlRotate...)
 *
 *   ADDITIONAL NOTES:
-*       When choosing an OpenGL backend different than OpenGL 1.1, some internal buffer are
+*       When choosing an OpenGL backend different than OpenGL 1.1, some internal buffers are
 *       initialized on rlglInit() to accumulate vertex data
 *
-*       When an internal state change is required all the stored vertex data is renderer in batch,
+*       When an internal state change is required all the stored vertex data is rendered in a batch,
 *       additionally, rlDrawRenderBatchActive() could be called to force flushing of the batch
 *
 *       Some resources are also loaded for convenience, here the complete list:
@@ -29,6 +29,7 @@
 *       Internal buffer (and resources) must be manually unloaded calling rlglClose()
 *
 *   CONFIGURATION:
+*       #define GRAPHICS_API_OPENGL_SOFTWARE
 *       #define GRAPHICS_API_OPENGL_11
 *       #define GRAPHICS_API_OPENGL_21
 *       #define GRAPHICS_API_OPENGL_33
@@ -36,7 +37,7 @@
 *       #define GRAPHICS_API_OPENGL_ES2
 *       #define GRAPHICS_API_OPENGL_ES3
 *           Use selected OpenGL graphics backend, should be supported by platform
-*           Those preprocessor defines are only used on rlgl module, if OpenGL version is
+*           Those preprocessor defines are only used on the rlgl module, if OpenGL version is
 *           required by any other module, use rlGetVersion() to check it
 *
 *       #define RLGL_IMPLEMENTATION
@@ -44,28 +45,24 @@
 *           If not defined, the library is in header only mode and can be included in other headers
 *           or source files without problems. But only ONE file should hold the implementation
 *
-*       #define RLGL_RENDER_TEXTURES_HINT
-*           Enable framebuffer objects (fbo) support (enabled by default)
-*           Some GPUs could not support them despite the OpenGL version
-*
-*       #define RLGL_SHOW_GL_DETAILS_INFO
+*       #if RLGL_SHOW_GL_DETAILS_INFO
 *           Show OpenGL extensions and capabilities detailed logs on init
 *
-*       #define RLGL_ENABLE_OPENGL_DEBUG_CONTEXT
+*       #if RLGL_ENABLE_OPENGL_DEBUG_CONTEXT
 *           Enable debug context (only available on OpenGL 4.3)
 *
-*       rlgl capabilities could be customized just defining some internal
+*       rlgl capabilities could be customized defining some internal
 *       values before library inclusion (default values listed):
 *
 *       #define RL_DEFAULT_BATCH_BUFFER_ELEMENTS   8192    // Default internal render batch elements limits
 *       #define RL_DEFAULT_BATCH_BUFFERS              1    // Default number of batch buffers (multi-buffering)
 *       #define RL_DEFAULT_BATCH_DRAWCALLS          256    // Default number of batch draw calls (by state changes: mode, texture)
-*       #define RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS    4    // Maximum number of textures units that can be activated on batch drawing (SetShaderValueTexture())
+*       #define RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS    4    // Maximum number of texture units that can be activated on batch drawing (SetShaderValueTexture())
 *
 *       #define RL_MAX_MATRIX_STACK_SIZE             32    // Maximum size of internal Matrix stack
 *       #define RL_MAX_SHADER_LOCATIONS              32    // Maximum number of shader locations supported
-*       #define RL_CULL_DISTANCE_NEAR              0.01    // Default projection matrix near cull distance
-*       #define RL_CULL_DISTANCE_FAR             1000.0    // Default projection matrix far cull distance
+*       #define RL_CULL_DISTANCE_NEAR              0.05    // Default projection matrix near cull distance
+*       #define RL_CULL_DISTANCE_FAR             4000.0    // Default projection matrix far cull distance
 *
 *       When loading a shader, the following vertex attributes and uniform
 *       location names are tried to be set automatically:
@@ -76,7 +73,7 @@
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR        "vertexColor"       // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT      "vertexTangent"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEIDS      "vertexBoneIds"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEINDICES  "vertexBoneIndices" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS  "vertexBoneWeights" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MVP         "mvp"               // model-view-projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW        "matView"           // view matrix
@@ -84,7 +81,7 @@
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MODEL       "matModel"          // model matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL      "matNormal"         // normal matrix (transpose(inverse(matModelView)))
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR       "colDiffuse"        // color diffuse (base tint color, multiplied by texture color)
-*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONE_MATRICES  "boneMatrices"   // bone matrices
+*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONEMATRICES "boneMatrices"     // bone matrices
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0  "texture0"          // texture0 (texture slot active 0)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1  "texture1"          // texture1 (texture slot active 1)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
@@ -96,7 +93,7 @@
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2014-2024 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -117,7 +114,7 @@
 */
 
 
-RLGL_VERSION ::  "5.0";
+RLGL_VERSION ::  "6.0";
 
 // Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
@@ -133,6 +130,8 @@ RLGL_VERSION ::  "5.0";
 
 // Security check in case multiple GRAPHICS_API_OPENGL_* defined
 
+// Software implementation uses OpenGL 1.1 functionality
+
 // OpenGL 2.1 uses most of OpenGL 3.3 Core functionality
 // WARNING: Specific parts are checked with #if defines
 
@@ -140,14 +139,16 @@ RLGL_VERSION ::  "5.0";
 
 // OpenGL ES 3.0 uses OpenGL ES 2.0 functionality (and more)
 
-// Support framebuffer objects by default
-// NOTE: Some driver implementation do not support it, despite they should
-
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
 
 // Default internal render batch elements limits
+        // This is the maximum amount of elements (quads) per batch
+        // NOTE: Be careful with text, every letter maps to a quad
+        // Reducing memory sizes for embedded systems (RPI and HTML5)
+        // NOTE: On HTML5 (emscripten) this is allocated on heap,
+        // by default heap is only 16MB!...just take care...
 
 // Internal Matrix stack
 
@@ -262,7 +263,7 @@ rlVertexBuffer :: struct {
 
 // Draw call type
 // NOTE: Only texture changes register a new draw, other state-change-related elements are not
-// used at this moment (vaoId, shaderId, matrices), raylib just forces a batch draw call if any
+// used at this moment (vaoId, shaderId, matrices), raylib forces a batch draw call if any
 // of those state-change happens (this is done in core module)
 rlDrawCall :: struct {
     mode: s32;                    // Drawing mode: LINES, TRIANGLES, QUADS
@@ -289,7 +290,8 @@ rlRenderBatch :: struct {
 
 // OpenGL version
 rlGlVersion :: enum s32 {
-    RL_OPENGL_11 :: 1;           // OpenGL 1.1
+    RL_OPENGL_SOFTWARE :: 0;  // Software rendering
+    RL_OPENGL_11;               // OpenGL 1.1
     RL_OPENGL_21;               // OpenGL 2.1 (GLSL 120)
     RL_OPENGL_33;               // OpenGL 3.3 (GLSL 330)
     RL_OPENGL_43;               // OpenGL 4.3 (using GLSL 330)
@@ -343,7 +345,7 @@ rlPixelFormat :: enum s32 {
 // NOTE 1: Filtering considers mipmaps if available in the texture
 // NOTE 2: Filter is accordingly set for minification and magnification
 rlTextureFilter :: enum s32 {
-    RL_TEXTURE_FILTER_POINT :: 0;        // No filter, just pixel approximation
+    RL_TEXTURE_FILTER_POINT :: 0;        // No filter, pixel approximation
     RL_TEXTURE_FILTER_BILINEAR;         // Linear filtering
     RL_TEXTURE_FILTER_TRILINEAR;        // Trilinear filtering (linear with mipmaps)
     RL_TEXTURE_FILTER_ANISOTROPIC_4X;   // Anisotropic filtering 4x
@@ -503,6 +505,8 @@ rlEnableVertexBufferElement :: (id: u32) #foreign raylib_native;
 rlDisableVertexBufferElement :: () #foreign raylib_native;
 rlEnableVertexAttribute :: (index: u32) #foreign raylib_native;
 rlDisableVertexAttribute :: (index: u32) #foreign raylib_native;
+rlEnableStatePointer :: (vertexAttribType: s32, buffer: *void) #foreign raylib_native;
+rlDisableStatePointer :: (vertexAttribType: s32) #foreign raylib_native;
 
 // Textures state
 rlActiveTextureSlot :: (slot: s32) #foreign raylib_native;
@@ -539,8 +543,11 @@ rlSetCullFace :: (mode: s32) #foreign raylib_native;
 rlEnableScissorTest :: () #foreign raylib_native;
 rlDisableScissorTest :: () #foreign raylib_native;
 rlScissor :: (x: s32, y: s32, width: s32, height: s32) #foreign raylib_native;
-rlEnableWireMode :: () #foreign raylib_native;
 rlEnablePointMode :: () #foreign raylib_native;
+rlDisablePointMode :: () #foreign raylib_native;
+rlSetPointSize :: (size: float) #foreign raylib_native;
+rlGetPointSize :: () -> float #foreign raylib_native;
+rlEnableWireMode :: () #foreign raylib_native;
 rlDisableWireMode :: () #foreign raylib_native;
 rlSetLineWidth :: (width: float) #foreign raylib_native;
 rlGetLineWidth :: () -> float #foreign raylib_native;
@@ -564,6 +571,7 @@ rlSetBlendFactorsSeparate :: (glSrcRGB: s32, glDstRGB: s32, glSrcAlpha: s32, glD
 rlglInit :: (width: s32, height: s32) #foreign raylib_native;
 rlglClose :: () #foreign raylib_native;
 rlLoadExtensions :: (loader: *void) #foreign raylib_native;
+rlGetProcAddress :: (procName: *u8) -> *void #foreign raylib_native;
 rlGetVersion :: () -> s32 #foreign raylib_native;
 rlSetFramebufferWidth :: (width: s32) #foreign raylib_native;
 rlGetFramebufferWidth :: () -> s32 #foreign raylib_native;
@@ -621,14 +629,19 @@ rlLoadFramebuffer :: () -> u32 #foreign raylib_native;
 rlFramebufferAttach :: (fboId: u32, texId: u32, attachType: rlFramebufferAttachType, texType: rlFramebufferAttachTextureType, mipLevel: s32) #foreign raylib_native;
 rlFramebufferComplete :: (id: u32) -> bool #foreign raylib_native;
 rlUnloadFramebuffer :: (id: u32) #foreign raylib_native;
+// WARNING: Copy and resize framebuffer functionality only defined for software backend
+rlCopyFramebuffer :: (x: s32, y: s32, width: s32, height: s32, format: s32, pixels: *void) #foreign raylib_native;
+rlResizeFramebuffer :: (width: s32, height: s32) #foreign raylib_native;
 
 // Shaders management
-rlLoadShaderCode :: (vsCode: *u8, fsCode: *u8) -> u32 #foreign raylib_native;
-rlCompileShader :: (shaderCode: *u8, type: s32) -> u32 #foreign raylib_native;
-rlLoadShaderProgram :: (vShaderId: u32, fShaderId: u32) -> u32 #foreign raylib_native;
+rlLoadShader :: (code: *u8, type: s32) -> u32 #foreign raylib_native;
+rlLoadShaderProgram :: (vsCode: *u8, fsCode: *u8) -> u32 #foreign raylib_native;
+rlLoadShaderProgramEx :: (vsId: u32, fsId: u32) -> u32 #foreign raylib_native;
+rlLoadShaderProgramCompute :: (csId: u32) -> u32 #foreign raylib_native;
+rlUnloadShader :: (id: u32) #foreign raylib_native;
 rlUnloadShaderProgram :: (id: u32) #foreign raylib_native;
-rlGetLocationUniform :: (shaderId: u32, uniformName: *u8) -> s32 #foreign raylib_native;
-rlGetLocationAttrib :: (shaderId: u32, attribName: *u8) -> s32 #foreign raylib_native;
+rlGetLocationUniform :: (id: u32, uniformName: *u8) -> s32 #foreign raylib_native;
+rlGetLocationAttrib :: (id: u32, attribName: *u8) -> s32 #foreign raylib_native;
 rlSetUniform :: (locIndex: s32, value: *void, uniformType: ShaderUniformDataType, count: s32) #foreign raylib_native;
 rlSetUniformMatrix :: (locIndex: s32, mat: Matrix4) #foreign raylib_native;
 rlSetUniformMatrices :: (locIndex: s32, mat: *Matrix4, count: s32) #foreign raylib_native;
@@ -636,7 +649,6 @@ rlSetUniformSampler :: (locIndex: s32, textureId: u32) #foreign raylib_native;
 rlSetShader :: (id: u32, locs: *s32) #foreign raylib_native;
 
 // Compute shader management
-rlLoadComputeShaderProgram :: (shaderId: u32) -> u32 #foreign raylib_native;
 rlComputeShaderDispatch :: (groupX: u32, groupY: u32, groupZ: u32) #foreign raylib_native;
 
 // Shader buffer storage object management (ssbo)

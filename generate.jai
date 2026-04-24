@@ -31,9 +31,10 @@ TYPE_MAP :: string.[
     "Matrix",         "Matrix4"
 ];
 
-JAI_STRUCTS        :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
-REMOVED_CASTS      :: string.["(float)"];
-KNOWN_FUNC_RETURNS :: string.["void", "Color"];
+JAI_STRUCTS             :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
+REMOVED_CASTS           :: string.["(float)"];
+KNOWN_FUNC_RETURNS      :: string.["void", "Color"];
+INCLUDED_IF_DEFINITIONS :: string.["RL_FLOAT3_TYPE", "RL_FLOAT16_TYPE"];
 
 DOUBLE_POINTER   :: "**";
 SINGLE_POINTER   :: "*";
@@ -259,7 +260,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
         }
 
         if (String.starts_with(line, RLAPI_PREFIX)) {
-            handle_rplai(file_lines, *output_builder, *unrecognized_builder);
+            handle_rlapi(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -270,6 +271,11 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
 
         if (String.starts_with(line, RAYGUIAPI_PREFIX)) {
             handle_rayguiapi(file_lines, *output_builder, *unrecognized_builder);
+            continue;
+        }
+
+        if (String.starts_with(line, IF_BEGIN_PREFIX)) {
+            handle_if_definition(file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -304,48 +310,48 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
 }
 
 populate_improved_function_definitions_table :: () {
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed"        , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressedRepeat"  , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown"           , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased"       , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp"             , "(key: KeyboardKey) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "GetKeyPressed"       , "() -> KeyboardKey");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey"          , "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressed",       "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyPressedRepeat", "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyDown",          "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyReleased",      "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsKeyUp",            "(key: KeyboardKey) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "GetKeyPressed",      "() -> KeyboardKey");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetExitKey",         "(key: KeyboardKey) -> bool");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonPressed"  , "(button: MouseButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonDown"     , "(button: MouseButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonReleased" , "(button: MouseButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonUp"       , "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonPressed",  "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonDown",     "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonReleased", "(button: MouseButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsMouseButtonUp",       "(button: MouseButton) -> bool");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGestureDetected"  , "(gesture: Gesture) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "GetGestureDetected" , "() -> Gesture");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGestureDetected",  "(gesture: Gesture) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "GetGestureDetected", "() -> Gesture");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "IsWindowState"    , "(flag: ConfigFlags) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetWindowState"   , "(flags: ConfigFlags)");
-    Hash_Table.table_add(*g_improved_function_definitions, "ClearWindowState" , "(flags: ConfigFlags)");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsWindowState",    "(flag: ConfigFlags) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetWindowState",   "(flags: ConfigFlags)");
+    Hash_Table.table_add(*g_improved_function_definitions, "ClearWindowState", "(flags: ConfigFlags)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "UpdateCamera", "(camera: *Camera, mode: CameraMode)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetConfigFlags", "(flags: ConfigFlags)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogLevel" , "(logType: TraceLogLevel)");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogExit"  , "(logType: TraceLogLevel)");
-    Hash_Table.table_add(*g_improved_function_definitions, "TraceLog"         , "(logLevel: TraceLogLevel, text: *u8, args: ..*u8)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogLevel", "(logType: TraceLogLevel)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTraceLogExit",  "(logType: TraceLogLevel)");
+    Hash_Table.table_add(*g_improved_function_definitions, "TraceLog",         "(logLevel: TraceLogLevel, text: *u8, args: ..*u8)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValue"  , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValueV" , "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValue",  "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetShaderValueV", "(shader: Shader, uniformLoc: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonPressed"  , "(gamepad: s32, button: GamepadButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonDown"     , "(gamepad: s32, button: GamepadButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonReleased" , "(gamepad: s32, button: GamepadButton) -> bool");
-    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonUp"       , "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonPressed",  "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonDown",     "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonReleased", "(gamepad: s32, button: GamepadButton) -> bool");
+    Hash_Table.table_add(*g_improved_function_definitions, "IsGamepadButtonUp",       "(gamepad: s32, button: GamepadButton) -> bool");
 
     Hash_Table.table_add(*g_improved_function_definitions, "GetGamepadAxisMovement", "(gamepad: s32, axis: GamepadAxis) -> float");
 
     Hash_Table.table_add(*g_improved_function_definitions, "ImageKernelConvolution", "(image: *Image, kernel: *float, kernelSize: s32)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetTextureFilter", "(texture: Texture2D, filter: TextureFilter)");
-    Hash_Table.table_add(*g_improved_function_definitions, "SetTextureWrap"  , "(texture: Texture2D, wrap: TextureWrap)");
+    Hash_Table.table_add(*g_improved_function_definitions, "SetTextureWrap",   "(texture: Texture2D, wrap: TextureWrap)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "BeginBlendMode", "(mode: BlendMode)");
 
@@ -361,10 +367,10 @@ populate_improved_function_definitions_table :: () {
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetMouseCursor", "(cursor: MouseCursor)");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "rlLoadTexture", "(data: *void, width: s32, height: s32, format: PixelFormat, mipmapCount: s32) -> u32");
+    Hash_Table.table_add(*g_improved_function_definitions, "rlLoadTexture",        "(data: *void, width: s32, height: s32, format: PixelFormat, mipmapCount: s32) -> u32");
     Hash_Table.table_add(*g_improved_function_definitions, "rlLoadTextureCubemap", "(data: *void, size: s32, format: PixelFormat, mipmapCount: s32) -> u32");
-    Hash_Table.table_add(*g_improved_function_definitions, "rlFramebufferAttach", "(fboId: u32, texId: u32, attachType: rlFramebufferAttachType, texType: rlFramebufferAttachTextureType, mipLevel: s32)");
-    Hash_Table.table_add(*g_improved_function_definitions, "rlSetUniform", "(locIndex: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
+    Hash_Table.table_add(*g_improved_function_definitions, "rlFramebufferAttach",  "(fboId: u32, texId: u32, attachType: rlFramebufferAttachType, texType: rlFramebufferAttachTextureType, mipLevel: s32)");
+    Hash_Table.table_add(*g_improved_function_definitions, "rlSetUniform",         "(locIndex: s32, value: *void, uniformType: ShaderUniformDataType, count: s32)");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetMaterialTexture", "(material: *Material, mapType: MaterialMapIndex, texture: Texture2D)");
 
@@ -376,25 +382,25 @@ populate_improved_function_definitions_table :: () {
 populate_improved_struct_elements_table :: () {
     Hash_Table.table_add(*g_improved_struct_elements, "Camera3D_projection", "CameraProjection");
 
-    Hash_Table.table_add(*g_improved_struct_elements, "Image_format"  , "PixelFormat");
+    Hash_Table.table_add(*g_improved_struct_elements, "Image_format",   "PixelFormat");
     Hash_Table.table_add(*g_improved_struct_elements, "Texture_format", "PixelFormat");
 
     Hash_Table.table_add(*g_improved_struct_elements, "NPatchInfo_layout", "NPatchLayout");
 }
 
 populate_improved_definitions :: () {
-    Hash_Table.table_add(*g_improved_definitions, "MOUSE_LEFT_BUTTON"   , "MOUSE_LEFT_BUTTON   :: MouseButton.MOUSE_BUTTON_LEFT");
-    Hash_Table.table_add(*g_improved_definitions, "MOUSE_RIGHT_BUTTON"  , "MOUSE_RIGHT_BUTTON  :: MouseButton.MOUSE_BUTTON_RIGHT");
-    Hash_Table.table_add(*g_improved_definitions, "MOUSE_MIDDLE_BUTTON" , "MOUSE_MIDDLE_BUTTON :: MouseButton.MOUSE_BUTTON_MIDDLE");
+    Hash_Table.table_add(*g_improved_definitions, "MOUSE_LEFT_BUTTON",   "MOUSE_LEFT_BUTTON   :: MouseButton.MOUSE_BUTTON_LEFT");
+    Hash_Table.table_add(*g_improved_definitions, "MOUSE_RIGHT_BUTTON",  "MOUSE_RIGHT_BUTTON  :: MouseButton.MOUSE_BUTTON_RIGHT");
+    Hash_Table.table_add(*g_improved_definitions, "MOUSE_MIDDLE_BUTTON", "MOUSE_MIDDLE_BUTTON :: MouseButton.MOUSE_BUTTON_MIDDLE");
 
-    Hash_Table.table_add(*g_improved_definitions, "MATERIAL_MAP_DIFFUSE"  , "MATERIAL_MAP_DIFFUSE  :: MaterialMapIndex.MATERIAL_MAP_ALBEDO");
-    Hash_Table.table_add(*g_improved_definitions, "MATERIAL_MAP_SPECULAR" , "MATERIAL_MAP_SPECULAR :: MaterialMapIndex.MATERIAL_MAP_METALNESS");
+    Hash_Table.table_add(*g_improved_definitions, "MATERIAL_MAP_DIFFUSE",  "MATERIAL_MAP_DIFFUSE  :: MaterialMapIndex.MATERIAL_MAP_ALBEDO");
+    Hash_Table.table_add(*g_improved_definitions, "MATERIAL_MAP_SPECULAR", "MATERIAL_MAP_SPECULAR :: MaterialMapIndex.MATERIAL_MAP_METALNESS");
 
-    Hash_Table.table_add(*g_improved_definitions, "SHADER_LOC_MAP_DIFFUSE"  , "SHADER_LOC_MAP_DIFFUSE  :: ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO");
-    Hash_Table.table_add(*g_improved_definitions, "SHADER_LOC_MAP_SPECULAR" , "SHADER_LOC_MAP_SPECULAR :: ShaderLocationIndex.SHADER_LOC_MAP_METALNESS");
+    Hash_Table.table_add(*g_improved_definitions, "SHADER_LOC_MAP_DIFFUSE",  "SHADER_LOC_MAP_DIFFUSE  :: ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO");
+    Hash_Table.table_add(*g_improved_definitions, "SHADER_LOC_MAP_SPECULAR", "SHADER_LOC_MAP_SPECULAR :: ShaderLocationIndex.SHADER_LOC_MAP_METALNESS");
 
-    Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_DIFFUSE"  , "RL_SHADER_LOC_MAP_DIFFUSE  :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_ALBEDO");
-    Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_SPECULAR" , "RL_SHADER_LOC_MAP_SPECULAR :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_METALNESS");
+    Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_DIFFUSE",  "RL_SHADER_LOC_MAP_DIFFUSE  :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_ALBEDO");
+    Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_SPECULAR", "RL_SHADER_LOC_MAP_SPECULAR :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_METALNESS");
 }
 
 increment_line_counter :: () -> bool {
@@ -420,11 +426,6 @@ is_empty_line_or_comments_or_ignored :: (file_lines: []string, output_builder: *
     prefix = "//";
     if (String.starts_with(trimmed_line, prefix)) {
         print_to_builder(output_builder, "%\n", line);
-        return true;
-    }
-
-    if (String.starts_with(trimmed_line, IF_BEGIN_PREFIX)) {
-        handle_ignored(file_lines, unrecognized_builder);
         return true;
     }
 
@@ -454,32 +455,6 @@ handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) 
             return;
         }
         print_to_builder(output_builder, "%\n", line);
-    }
-}
-
-handle_ignored :: (file_lines: []string, unrecognized_builder: *String_Builder) {
-    open_ifs := 0;
-    while (true) {
-        line := String.trim(file_lines[g_line_counter]);
-
-        if (String.starts_with(line, IF_BEGIN_PREFIX)) {
-            open_ifs += 1;
-        }
-
-        print_to_builder(unrecognized_builder, "%\n", line);
-
-        if (String.starts_with(line, IF_END_PREFIX)) {
-            open_ifs -= 1;
-
-            if (open_ifs == 0) {
-                return;
-            }
-        }
-
-        if (!increment_line_counter()) {
-            print("EOF while looking for the end of an ignored block\n");
-            return;
-        }
     }
 }
 
@@ -535,6 +510,11 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecog
         line := file_lines[g_line_counter];
 
         if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
+            continue;
+        }
+
+        if (String.starts_with(line, IF_BEGIN_PREFIX)) {
+            handle_if_definition(file_lines, output_builder, unrecognized_builder);
             continue;
         }
 
@@ -796,21 +776,66 @@ handle_typedef :: (file_lines: []string, output_builder: *String_Builder, unreco
     code_parts := String.split(code, " ");
 
     if (code_parts.count == 2) {
-        is_jai_struct := false;
-        struct_name   := code_parts[1];
+        code_part   := code_parts[0];
+        struct_name := code_parts[1];
         for JAI_STRUCTS {
             if (it == struct_name) {
                 print_to_builder(output_builder, "// struct % is already defined in jai.\n", struct_name);
-                is_jai_struct = true;
                 return;
             }
         }
 
-        print_to_builder(output_builder, "% :: %;\n", struct_name, code_parts[0]);
+        // Handle single and double pointer. For example: Transform *ModelAnimPose; or Transform **framePoses;
+        pointer_prefix := "";
+        if (String.starts_with(struct_name, DOUBLE_POINTER)) {
+            pointer_prefix = DOUBLE_POINTER;              
+            struct_name = String.slice(struct_name, pointer_prefix.count, struct_name.count - pointer_prefix.count);
+        } else if (String.starts_with(struct_name, SINGLE_POINTER)) {
+            pointer_prefix = SINGLE_POINTER;
+            struct_name = String.slice(struct_name, pointer_prefix.count, struct_name.count - pointer_prefix.count);
+        }
+
+        code_part = String.join(pointer_prefix, code_part);
+
+        print_to_builder(output_builder, "% :: %;\n", struct_name, code_part);
     }
 }
 
-handle_rplai :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+handle_if_definition :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[g_line_counter];
+
+    for INCLUDED_IF_DEFINITIONS {
+        if (String.contains(line, it)) {
+            return;
+        }
+    }
+
+    open_ifs := 0;
+    while (true) {
+        line := String.trim(file_lines[g_line_counter]);
+
+        if (String.starts_with(line, IF_BEGIN_PREFIX)) {
+            open_ifs += 1;
+        }
+
+        print_to_builder(unrecognized_builder, "%\n", line);
+
+        if (String.starts_with(line, IF_END_PREFIX)) {
+            open_ifs -= 1;
+
+            if (open_ifs == 0) {
+                return;
+            }
+        }
+
+        if (!increment_line_counter()) {
+            print("EOF while looking for the end of an ignored block\n");
+            return;
+        }
+    }
+}
+
+handle_rlapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     line := file_lines[g_line_counter];
 
     // Remove RLAPI prefix

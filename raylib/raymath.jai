@@ -26,24 +26,29 @@ RAD2DEG :: (180.0/PI);
 *     - Functions use always a "result" variable for return (except C++ operators)
 *     - Functions are always defined inline
 *     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
-*     - No compound literals used to make sure libray is compatible with C++
+*     - No compound literals used to make sure the library is compatible with C++
 *
 *   CONFIGURATION:
 *       #define RAYMATH_IMPLEMENTATION
-*           Generates the implementation of the library into the included file.
+*           Generates the implementation of the library into the included file
 *           If not defined, the library is in header only mode and can be included in other headers
-*           or source files without problems. But only ONE file should hold the implementation.
+*           or source files without problems. But only ONE file should hold the implementation
 *
 *       #define RAYMATH_STATIC_INLINE
-*           Define static inline functions code, so #include header suffices for use.
-*           This may use up lots of memory.
+*           Define static inline functions code, so #include header suffices for use
+*           This may use up lots of memory
 *
 *       #define RAYMATH_DISABLE_CPP_OPERATORS
 *           Disables C++ operator overloads for raymath types.
 *
+*       #define RAYMATH_USE_SIMD_INTRINSICS   1
+*           Try to enable SIMD intrinsics for MatrixMultiply()
+*           Note that users enabling it must be aware of the target platform where application will
+*           run to support the selected SIMD intrinsic, for now, only SSE is supported
+*
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2015-2024 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2015-2026 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -66,7 +71,6 @@ RAD2DEG :: (180.0/PI);
 
 
 // Function specifiers definition
-
 
 //----------------------------------------------------------------------------------
 // Defines and Macros
@@ -95,6 +99,7 @@ float3 :: struct {
 float16 :: struct {
     v: [16]float; 
 }
+
 
 
 //----------------------------------------------------------------------------------
@@ -150,14 +155,18 @@ Vector2LengthSqr :: (v: Vector2) -> float #foreign raylib_native;
 // Calculate two vectors dot product
 Vector2DotProduct :: (v1: Vector2, v2: Vector2) -> float #foreign raylib_native;
 
+// Calculate two vectors cross product
+Vector2CrossProduct :: (v1: Vector2, v2: Vector2) -> float #foreign raylib_native;
+
 // Calculate distance between two vectors
 Vector2Distance :: (v1: Vector2, v2: Vector2) -> float #foreign raylib_native;
 
 // Calculate square distance between two vectors
 Vector2DistanceSqr :: (v1: Vector2, v2: Vector2) -> float #foreign raylib_native;
 
-// Calculate angle between two vectors
-// NOTE: Angle is calculated from origin point (0, 0)
+// Calculate the signed angle from v1 to v2, relative to the origin (0, 0)
+// NOTE: Coordinate system convention: positive X right, positive Y down
+// positive angles appear clockwise, and negative angles appear counterclockwise
 Vector2Angle :: (v1: Vector2, v2: Vector2) -> float #foreign raylib_native;
 
 // Calculate angle defined by a two vectors line
@@ -213,7 +222,6 @@ Vector2Clamp :: (v: Vector2, min: Vector2, max: Vector2) -> Vector2 #foreign ray
 Vector2ClampValue :: (v: Vector2, min: float, max: float) -> Vector2 #foreign raylib_native;
 
 
-
 // Check whether two given vectors are almost equal
 Vector2Equals :: (p: Vector2, q: Vector2) -> s32 #foreign raylib_native;
 
@@ -221,7 +229,7 @@ Vector2Equals :: (p: Vector2, q: Vector2) -> s32 #foreign raylib_native;
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 Vector2Refract :: (v: Vector2, n: Vector2, r: float) -> Vector2 #foreign raylib_native;
 
 
@@ -336,7 +344,7 @@ Vector3Max :: (v1: Vector3, v2: Vector3) -> Vector3 #foreign raylib_native;
 Vector3Barycenter :: (p: Vector3, a: Vector3, b: Vector3, c: Vector3) -> Vector3 #foreign raylib_native;
 
 // Projects a Vector3 from screen space into object space
-// NOTE: We are avoiding calling other raymath functions despite available
+// NOTE: Self-contained function, no other raymath functions are called
 Vector3Unproject :: (source: Vector3, projection: Matrix4, view: Matrix4) -> Vector3 #foreign raylib_native;
 
 // Get Vector3 as float array
@@ -353,7 +361,6 @@ Vector3Clamp :: (v: Vector3, min: Vector3, max: Vector3) -> Vector3 #foreign ray
 Vector3ClampValue :: (v: Vector3, min: float, max: float) -> Vector3 #foreign raylib_native;
 
 
-
 // Check whether two given vectors are almost equal
 Vector3Equals :: (p: Vector3, q: Vector3) -> s32 #foreign raylib_native;
 
@@ -361,7 +368,7 @@ Vector3Equals :: (p: Vector3, q: Vector3) -> s32 #foreign raylib_native;
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 Vector3Refract :: (v: Vector3, n: Vector3, r: float) -> Vector3 #foreign raylib_native;
 
 
@@ -369,23 +376,31 @@ Vector3Refract :: (v: Vector3, n: Vector3, r: float) -> Vector3 #foreign raylib_
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vector4 math
 //----------------------------------------------------------------------------------
-
+// Get  vector zero
 Vector4Zero :: () -> Vector4 #foreign raylib_native;
 
+// Get vector one
 Vector4One :: () -> Vector4 #foreign raylib_native;
 
+// Add two vectors
 Vector4Add :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
 
+// Add value to vector components
 Vector4AddValue :: (v: Vector4, add: float) -> Vector4 #foreign raylib_native;
 
+// Substract vectors
 Vector4Subtract :: (v1: Vector4, v2: Vector4) -> Vector4 #foreign raylib_native;
 
+// Substract value from vector components
 Vector4SubtractValue :: (v: Vector4, add: float) -> Vector4 #foreign raylib_native;
 
+// Vector length
 Vector4Length :: (v: Vector4) -> float #foreign raylib_native;
 
+// Vector square length
 Vector4LengthSqr :: (v: Vector4) -> float #foreign raylib_native;
 
+// Vectors dot product
 Vector4DotProduct :: (v1: Vector4, v2: Vector4) -> float #foreign raylib_native;
 
 // Calculate distance between two vectors
@@ -394,6 +409,7 @@ Vector4Distance :: (v1: Vector4, v2: Vector4) -> float #foreign raylib_native;
 // Calculate square distance between two vectors
 Vector4DistanceSqr :: (v1: Vector4, v2: Vector4) -> float #foreign raylib_native;
 
+// Scale vector components by value (multiply)
 Vector4Scale :: (v: Vector4, scale: float) -> Vector4 #foreign raylib_native;
 
 // Multiply vector by vector
@@ -456,6 +472,10 @@ MatrixSubtract :: (left: Matrix4, right: Matrix4) -> Matrix4 #foreign raylib_nat
 // Get two matrix multiplication
 // NOTE: When multiplying matrices... the order matters!
 MatrixMultiply :: (left: Matrix4, right: Matrix4) -> Matrix4 #foreign raylib_native;
+
+// Multiply matrix components by value
+MatrixMultiplyValue :: (left: Matrix4, value: float) -> Matrix4 #foreign raylib_native;
+
 
 // Get translation matrix
 MatrixTranslate :: (x: float, y: float, z: float) -> Matrix4 #foreign raylib_native;
@@ -588,8 +608,8 @@ QuaternionFromAxisAngle :: (axis: Vector3, angle: float) -> Quaternion #foreign 
 QuaternionToAxisAngle :: (q: Quaternion, outAxis: *Vector3, outAngle: *float) #foreign raylib_native;
 
 
-        // This occurs when the angle is zero.
-        // Not a problem: just set an arbitrary normalized axis.
+        // This occurs when the angle is zero
+        // Not a problem, set an arbitrary normalized axis
 
 
 // Get the quaternion equivalent to Euler angles
@@ -606,9 +626,30 @@ QuaternionTransform :: (q: Quaternion, mat: Matrix4) -> Quaternion #foreign rayl
 // Check whether two given quaternions are almost equal
 QuaternionEquals :: (p: Quaternion, q: Quaternion) -> s32 #foreign raylib_native;
 
-// Decompose a transformation matrix into its rotational, translational and scaling components
+// Compose a transformation matrix from rotational, translational and scaling components
+// TODO: This function is not following raymath conventions defined in header: NOT self-contained
+MatrixCompose :: (translation: Vector3, rotation: Quaternion, scale: Vector3) -> Matrix4 #foreign raylib_native;
+
+
+// Decompose a transformation matrix into its rotational, translational and scaling components and remove shear
+// TODO: This function is not following raymath conventions defined in header: NOT self-contained
 MatrixDecompose :: (mat: Matrix4, translation: *Vector3, rotation: *Quaternion, scale: *Vector3) #foreign raylib_native;
-        // Set to identity if close to zero
+
+    // X Scale
+
+    // Compute XY shear and make col2 orthogonal
+
+    // Y Scale
+
+    // Compute XZ and YZ shears and make col3 orthogonal
+
+    // Z Scale
+
+    // matColumns are now orthonormal in O(3). Now ensure its in SO(3) by enforcing det = 1
+
+    // Set Scale
+
+    // Extract Rotation
 
 
 
