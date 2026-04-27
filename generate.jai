@@ -88,6 +88,7 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
 
 #if OS == .LINUX {
     libm :: #library,system,link_always "libm";
+    x11  :: #library,system,link_always "X11";
 
     raylib_native :: #library,no_dll "lib/linux/raylib";
     raygui_native :: #library,no_dll "lib/linux/raygui";
