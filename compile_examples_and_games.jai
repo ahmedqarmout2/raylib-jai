@@ -50,7 +50,7 @@ compile :: () {
         return;
     }
 
-    // Specify a list of files to compile using the "-f"/"-file" option. This is useful when working on a single example/game
+    // Specify a list of files to compile using the "-f"/"--file" option. This is useful when working on a single example/game
     if (specific_files.count > 0) {
         for specific_files {
             if String.ends_with(it, ".jai") {
