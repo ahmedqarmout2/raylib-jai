@@ -129,9 +129,9 @@ main :: ()
 //------------------------------------------------------------------------------------
 // Module Functions Definition
 //------------------------------------------------------------------------------------
-FillAudioBuffer :: (i: int, buffer: []float, envelopeValue: float, audioTime: *float)
+FillAudioBuffer :: (i: s32, buffer: []float, envelopeValue: float, audioTime: *float)
 {
-    frequency: int = 440;
+    frequency: s32 = 440;
     buffer[i] = envelopeValue*sin(2.0*PI*frequency*((.*)audioTime));
     (.*)audioTime += (1.0/SAMPLE_RATE);
 }
