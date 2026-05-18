@@ -40,7 +40,7 @@ main :: ()
 
     // Set the number of samples the stream will keep in memory at a time to BUFFER_SIZE
     SetAudioStreamBufferSizeDefault(BUFFER_SIZE);
-    buffer : [BUFFER_SIZE]float;
+    buffer: [BUFFER_SIZE]float;
 
     // Init raw audio stream (sample rate: 44100, sample size: 32bit-float, channels: 1-mono)
     stream: AudioStream = LoadAudioStream(SAMPLE_RATE, 32, 1);

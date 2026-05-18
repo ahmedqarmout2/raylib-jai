@@ -13,63 +13,71 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [audio] example - processing mixed output");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [audio] example - mixed processor");
 
-    InitAudioDevice();         // Initialize audio device
-    defer CloseAudioDevice();  // Close audio device (music streaming is automatically stopped)
+    InitAudioDevice();              // Initialize audio device
 
     AttachAudioMixedProcessor(ProcessAudio);
-    defer DetachAudioMixedProcessor(ProcessAudio);  // Disconnect audio processor
 
     music: Music = LoadMusicStream("resources/country.mp3");
-    defer UnloadMusicStream(music);   // Unload music stream buffers from RAM
-
     sound: Sound = LoadSound("resources/coin.wav");
-    defer UnloadSound(sound);
 
     PlayMusicStream(music);
 
-    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateMusicStream(music);   // Update music buffer with new stream data
 
         // Modify processing variables
-        if (IsKeyPressed(.KEY_LEFT))  exponent -= 0.05;
+        //----------------------------------------------------------------------------------
+        if (IsKeyPressed(.KEY_LEFT)) exponent -= 0.05;
         if (IsKeyPressed(.KEY_RIGHT)) exponent += 0.05;
 
         if (exponent <= 0.5) exponent = 0.5;
         if (exponent >= 3.0) exponent = 3.0;
 
         if (IsKeyPressed(.KEY_SPACE)) PlaySound(sound);
-        //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawText("MUSIC SHOULD BE PLAYING!", 255, 150, 20, LIGHTGRAY);
+            DrawText("MUSIC SHOULD BE PLAYING!", 255, 150, 20, LIGHTGRAY);
 
-        DrawText(TextFormat("EXPONENT = %.2f", exponent), 215, 180, 20, LIGHTGRAY);
+            DrawText(TextFormat("EXPONENT = %.2f", exponent), 215, 180, 20, LIGHTGRAY);
 
-        DrawRectangle(199, 199, 402, 34, LIGHTGRAY);
-        for 0..399 {
-            i := cast(s32)it;
-            DrawLine(201 + i, 232 - cast(s32)(averageVolume[i] * 32), 201 + i, 232, MAROON);
-        }
-        DrawRectangleLines(199, 199, 402, 34, GRAY);
+            DrawRectangle(199, 199, 402, 34, LIGHTGRAY);
+            for i: 0..399
+            {
+                DrawLine(201 + cast(s32)i, 232 - cast(s32)(averageVolume[i]*32), 201 + cast(s32)i, 232, MAROON);
+            }
+            DrawRectangleLines(199, 199, 402, 34, GRAY);
 
-        DrawText("PRESS SPACE TO PLAY OTHER SOUND", 200, 250, 20, LIGHTGRAY);
-        DrawText("USE LEFT AND RIGHT ARROWS TO ALTER DISTORTION", 140, 280, 20, LIGHTGRAY);
+            DrawText("PRESS SPACE TO PLAY OTHER SOUND", 200, 250, 20, LIGHTGRAY);
+            DrawText("USE LEFT AND RIGHT ARROWS TO ALTER DISTORTION", 140, 280, 20, LIGHTGRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadMusicStream(music);   // Unload music stream buffers from RAM
+
+    DetachAudioMixedProcessor(ProcessAudio);  // Disconnect audio processor
+
+    CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
 ProcessAudio :: (buffer: *void, frames: u32) #c_call {
@@ -78,8 +86,7 @@ ProcessAudio :: (buffer: *void, frames: u32) #c_call {
         samples: *float = cast(*float)buffer;   // Samples internally stored as <float>s
         average: float = 0.0;                   // Temporary average volume
 
-        for i: 0..frames-1 {
-            frame := cast(u32) i;
+        for frame: 0..frames-1 {
             left  : *float = *samples[frame * 2 + 0];
             right : *float = *samples[frame * 2 + 1];
 

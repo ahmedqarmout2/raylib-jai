@@ -22,11 +22,9 @@ main :: () {
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);  // NOTE: Try to enable MSAA 4X
 
-    InitWindow(screenWidth, screenHeight, "raylib [audio] example - module playing (streaming)");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [audio] example - module playing");
 
-    InitAudioDevice();            // Initialize audio device
-    defer CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
+    InitAudioDevice();                  // Initialize audio device
 
     colors: [14]Color = Color.[ ORANGE, RED, GOLD, LIME, BLUE, VIOLET, BROWN, LIGHTGRAY, PINK, YELLOW, GREEN, SKYBLUE, PURPLE, BEIGE ];
 
@@ -44,10 +42,8 @@ main :: () {
     }
 
     music: Music = LoadMusicStream("resources/mini1111.xm");
-    defer UnloadMusicStream(music);          // Unload music stream buffers from RAM
-
     music.looping = false; 
-    pitch : float = 1.0;
+    pitch: float = 1.0;
 
     PlayMusicStream(music);
 
@@ -57,27 +53,31 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateMusicStream(music);      // Update music buffer with new stream data
 
         // Restart music playing (stop and play)
-        if (IsKeyPressed(.KEY_SPACE)) {
+        if (IsKeyPressed(.KEY_SPACE))
+        {
             StopMusicStream(music);
             PlayMusicStream(music);
             pause = false;
         }
 
         // Pause/Resume music playing
-        if (IsKeyPressed(.KEY_P)) {
+        if (IsKeyPressed(.KEY_P))
+        {
             pause = !pause;
 
             if (pause) PauseMusicStream(music);
             else ResumeMusicStream(music);
         }
 
-        if (IsKeyDown(.KEY_DOWN))    pitch -= 0.01;
+        if (IsKeyDown(.KEY_DOWN)) pitch -= 0.01;
         else if (IsKeyDown(.KEY_UP)) pitch += 0.01;
 
         SetMusicPitch(music, pitch);
@@ -87,34 +87,35 @@ main :: () {
 
         // Color circles animation
         i: = MAX_CIRCLES - 1;
-        while ((i >= 0) && !pause) {
+        while ((i >= 0) && !pause)
+        {
             defer i -= 1;
+
             circles[i].alpha += circles[i].speed;
             circles[i].radius += circles[i].speed*10.0;
 
             if (circles[i].alpha > 1.0) circles[i].speed *= -1;
 
-            if (circles[i].alpha <= 0.0) {
-                r: s32 = GetRandomValue(10, 40);
-                circles[i].alpha      = 0.0;
-                circles[i].radius     = cast(float)r;
-                circles[i].position.x = cast(float)GetRandomValue(r, screenWidth  - r);
-                circles[i].position.y = cast(float)GetRandomValue(r, screenHeight - r);
-                circles[i].speed      = cast(float)GetRandomValue(1, 100)/2000.0;
-                circles[i].color      = colors[GetRandomValue(0, 13)];
+            if (circles[i].alpha <= 0.0)
+            {
+                circles[i].alpha = 0.0;
+                circles[i].radius = cast(float)GetRandomValue(10, 40);
+                circles[i].position.x = cast(float)GetRandomValue(cast(s32)circles[i].radius, cast(s32)(screenWidth - circles[i].radius));
+                circles[i].position.y = cast(float)GetRandomValue(cast(s32)circles[i].radius, cast(s32)(screenHeight - circles[i].radius));
+                circles[i].color = colors[GetRandomValue(0, 13)];
+                circles[i].speed = cast(float)GetRandomValue(1, 100)/2000.0;
             }
         }
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
-            for < i: 0..MAX_CIRCLES-1 {
+            for < i: 0..MAX_CIRCLES-1
+            {
                 DrawCircleV(circles[i].position, circles[i].radius, Fade(circles[i].color, circles[i].alpha));
             }
 
@@ -130,7 +131,17 @@ main :: () {
             DrawText("PRESS P TO PAUSE/RESUME", 40, 70, 20, BLACK);
             DrawText("PRESS UP/DOWN TO CHANGE SPEED", 40, 100, 20, BLACK);
             DrawText(TextFormat("SPEED: %f", pitch), 40, 130, 20, MAROON);
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadMusicStream(music);          // Unload music stream buffers from RAM
+
+    CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

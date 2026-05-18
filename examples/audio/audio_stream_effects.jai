@@ -1,7 +1,7 @@
 #import "raylib";
 #import "Basic";
 
-delayBuffer: *float;
+delayBuffer     : [..]float;
 delayBufferSize : u32 = 0;
 delayReadIndex  : u32 = 2;
 delayWriteIndex : u32 = 0;
@@ -15,43 +15,43 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - stream effects");
-    defer CloseWindow(); // Close window and OpenGL context
 
-    InitAudioDevice();             // Initialize audio device
-    defer CloseAudioDevice();      // Close audio device
+    InitAudioDevice();              // Initialize audio device
 
-    music : Music = LoadMusicStream("resources/country.mp3");
-    defer UnloadMusicStream(music);
+    music: Music = LoadMusicStream("resources/country.mp3");
 
     // Allocate buffer for the delay effect
-    delayBufferSize = 48000*2;     // 1 second delay (device sampleRate*channels)
-    delayBuffer = cast(*float)alloc(delayBufferSize * size_of(float));
-    defer free(delayBuffer);
+    delayBufferSize = 48000*2;      // 1 second delay (device sampleRate*channels)
+    array_resize(*delayBuffer, delayBufferSize);
 
     PlayMusicStream(music);
 
-    timePlayed : float = 0.0;          // Time played normalized [0.0f..1.0f]
-    pause      : bool  = false;             // Music playing paused
-    
-    enableEffectLPF   : bool = false; // Enable effect low-pass-filter
-    enableEffectDelay : bool = false; // Enable effect delay (1 second)
+    timePlayed: float = 0.0;        // Time played normalized [0.0f..1.0f]
+    pause: bool = false;            // Music playing paused
 
-    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    enableEffectLPF: bool = false;   // Enable effect low-pass-filter
+    enableEffectDelay: bool = false; // Enable effect delay (1 second)
+
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateMusicStream(music);   // Update music buffer with new stream data
 
         // Restart music playing (stop and play)
-        if (IsKeyPressed(.KEY_SPACE)) {
+        if (IsKeyPressed(.KEY_SPACE))
+        {
             StopMusicStream(music);
             PlayMusicStream(music);
         }
 
         // Pause/Resume music playing
-        if (IsKeyPressed(.KEY_P)) {
+        if (IsKeyPressed(.KEY_P))
+        {
             pause = !pause;
 
             if (pause) PauseMusicStream(music);
@@ -59,19 +59,21 @@ main :: () {
         }
 
         // Add/Remove effect: lowpass filter
-        if (IsKeyPressed(.KEY_F)) {
+        if (IsKeyPressed(.KEY_F))
+        {
             enableEffectLPF = !enableEffectLPF;
             if (enableEffectLPF) AttachAudioStreamProcessor(music.stream, AudioProcessEffectLPF);
             else DetachAudioStreamProcessor(music.stream, AudioProcessEffectLPF);
         }
 
         // Add/Remove effect: delay
-        if (IsKeyPressed(.KEY_D)) {
+        if (IsKeyPressed(.KEY_D))
+        {
             enableEffectDelay = !enableEffectDelay;
             if (enableEffectDelay) AttachAudioStreamProcessor(music.stream, AudioProcessEffectDelay);
             else DetachAudioStreamProcessor(music.stream, AudioProcessEffectDelay);
         }
-        
+
         // Get normalized time played for current music stream
         timePlayed = GetMusicTimePlayed(music)/GetMusicTimeLength(music);
 
@@ -80,9 +82,7 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
@@ -94,13 +94,24 @@ main :: () {
 
             DrawText("PRESS SPACE TO RESTART MUSIC", 215, 230, 20, LIGHTGRAY);
             DrawText("PRESS P TO PAUSE/RESUME MUSIC", 208, 260, 20, LIGHTGRAY);
-            
-            // TODO: should we reset temp storage because of get_c_string
+
             DrawText(TextFormat("PRESS F TO TOGGLE LPF EFFECT: %s", get_c_string(ifx enableEffectLPF then "ON" else "OFF")), 200, 320, 20, GRAY);
             DrawText(TextFormat("PRESS D TO TOGGLE DELAY EFFECT: %s", get_c_string(ifx enableEffectDelay then "ON" else "OFF")), 180, 350, 20, GRAY);
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadMusicStream(music);   // Unload music stream buffers from RAM
+
+    CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
+
+    array_free(delayBuffer);       // Free delay buffer
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
 
