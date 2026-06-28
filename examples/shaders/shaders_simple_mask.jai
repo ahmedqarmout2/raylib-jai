@@ -2,12 +2,13 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -15,7 +16,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - simple shader mask");
+    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - simple mask");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -65,7 +66,9 @@ main :: () {
     SetTargetFPS(60);                   // Set  to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_FIRST_PERSON);

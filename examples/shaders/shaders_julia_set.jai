@@ -2,11 +2,6 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
-
 // A few good julia sets
 pointsOfInterest: [6][2]float = .[
     .[-0.348827, 0.607167],
@@ -23,22 +18,25 @@ zoomSpeed     : float = 1.01;
 offsetSpeedMul: float = 2.0;
 startingZoom  : float = 0.75;
 
-main :: () {
+GLSL_VERSION :: 330;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - julia sets");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Load julia set shader
     // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
     shader: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/julia_set.fs", GLSL_VERSION));
-    defer UnloadShader(shader);               // Unload shader
 
     // Create a RenderTexture2D to be used for render to texture
     target: RenderTexture2D = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-    defer UnloadRenderTexture(target);        // Unload render texture
 
     // c constant to use in z^2 + c
     c: [2]float = .[pointsOfInterest[0][0], pointsOfInterest[0][1]];
@@ -64,7 +62,9 @@ main :: () {
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         // Press [1 - 6] to reset c to a point of interest
@@ -73,7 +73,8 @@ main :: () {
             IsKeyPressed(.KEY_THREE) ||
             IsKeyPressed(.KEY_FOUR) ||
             IsKeyPressed(.KEY_FIVE) ||
-            IsKeyPressed(.KEY_SIX)) {
+            IsKeyPressed(.KEY_SIX))
+        {
                  if (IsKeyPressed(.KEY_ONE))   { c[0] = pointsOfInterest[0][0]; c[1] = pointsOfInterest[0][1]; }
             else if (IsKeyPressed(.KEY_TWO))   { c[0] = pointsOfInterest[1][0]; c[1] = pointsOfInterest[1][1]; }
             else if (IsKeyPressed(.KEY_THREE)) { c[0] = pointsOfInterest[2][0]; c[1] = pointsOfInterest[2][1]; }
@@ -85,7 +86,8 @@ main :: () {
         }
 
         // If "R" is pressed, reset zoom and offset.
-        if (IsKeyPressed(.KEY_R)) {
+        if (IsKeyPressed(.KEY_R))
+        {
             zoom = startingZoom;
             offset[0] = 0.0;
             offset[1] = 0.0;
@@ -100,7 +102,8 @@ main :: () {
         else if (IsKeyPressed(.KEY_LEFT))  incrementSpeed -= 1;
 
         // If either left or right button is pressed, zoom in/out.
-        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT) || IsMouseButtonDown(.MOUSE_BUTTON_RIGHT)) {
+        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT) || IsMouseButtonDown(.MOUSE_BUTTON_RIGHT))
+        {
             // Change zoom. If Mouse left -> zoom in. Mouse right -> zoom out.
             zoom *= ifx IsMouseButtonDown(.MOUSE_BUTTON_LEFT) then zoomSpeed else 1.0/zoomSpeed;
 
@@ -130,11 +133,8 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            // Using a render texture to draw Julia set
-            BeginTextureMode(target);       // Enable drawing to texture
-            defer EndTextureMode();
-
+        // Using a render texture to draw Julia set
+        BeginTextureMode(target);       // Enable drawing to texture
             ClearBackground(BLACK);     // Clear the render texture
 
             // Draw a rectangle in shader mode to be used as shader canvas
@@ -142,32 +142,37 @@ main :: () {
             // so shader can not be applied here directly because input vertexTexCoord
             // do not represent full screen coordinates (space where want to apply shader)
             DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
-        }
+        EndTextureMode();
 
         BeginDrawing();
-        defer EndDrawing();
+            ClearBackground(BLACK);     // Clear screen background
 
-        ClearBackground(BLACK);     // Clear screen background
-
-        {
             // Draw the saved texture and rendered julia set with shader
             // NOTE: We do not invert texture on Y, already considered inside shader
             BeginShaderMode(shader);
-            defer EndShaderMode();
+                // WARNING: If FLAG_WINDOW_HIGHDPI is enabled, HighDPI monitor scaling should be considered
+                // when rendering the RenderTexture2D to fit in the HighDPI scaled Window
+                DrawTextureEx(target.texture, Vector2.{ 0.0, 0.0 }, 0.0, 1.0, WHITE);
+            EndShaderMode();
 
-            // WARNING: If FLAG_WINDOW_HIGHDPI is enabled, HighDPI monitor scaling should be considered
-            // when rendering the RenderTexture2D to fit in the HighDPI scaled Window
-            DrawTextureEx(target.texture, Vector2.{0.0, 0.0}, 0.0, 1.0, WHITE);
-        }
-
-        if (showControls) {
-            DrawText("Press Mouse buttons right/left to zoom in/out and move", 10, 15, 10, RAYWHITE);
-            DrawText("Press KEY_F1 to toggle these controls", 10, 30, 10, RAYWHITE);
-            DrawText("Press KEYS [1 - 6] to change point of interest", 10, 45, 10, RAYWHITE);
-            DrawText("Press KEY_LEFT | KEY_RIGHT to change speed", 10, 60, 10, RAYWHITE);
-            DrawText("Press KEY_SPACE to stop movement animation", 10, 75, 10, RAYWHITE);
-            DrawText("Press KEY_R to recenter the camera", 10, 90, 10, RAYWHITE);
-        }
+            if (showControls)
+            {
+                DrawText("Press Mouse buttons right/left to zoom in/out and move", 10, 15, 10, RAYWHITE);
+                DrawText("Press KEY_F1 to toggle these controls", 10, 30, 10, RAYWHITE);
+                DrawText("Press KEYS [1 - 6] to change point of interest", 10, 45, 10, RAYWHITE);
+                DrawText("Press KEY_LEFT | KEY_RIGHT to change speed", 10, 60, 10, RAYWHITE);
+                DrawText("Press KEY_SPACE to stop movement animation", 10, 75, 10, RAYWHITE);
+                DrawText("Press KEY_R to recenter the camera", 10, 90, 10, RAYWHITE);
+            }
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+        // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadShader(shader);               // Unload shader
+    UnloadRenderTexture(target);        // Unload render texture
+
+    CloseWindow();                      // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

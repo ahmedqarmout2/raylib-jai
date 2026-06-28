@@ -2,16 +2,17 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
-
 SHADOWMAP_RESOLUTION :: 1024;
 
 cam: Camera;
 
-main :: () {
+GLSL_VERSION :: 330;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -19,22 +20,21 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - shapes and texture shaders");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - shapes textures");
 
     fudesumi: Texture2D = LoadTexture("resources/fudesumi.png");
-    defer UnloadTexture(fudesumi);    // Unload texture
 
     // Load shader to be used on some parts drawing
     // NOTE 1: Using GLSL 330 shader version, on OpenGL ES 2.0 use GLSL 100 shader version
     // NOTE 2: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
     shader: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/grayscale.fs", GLSL_VERSION));
-    defer UnloadShader(shader);       // Unload shader
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
@@ -51,7 +51,7 @@ main :: () {
             DrawText("USING DEFAULT SHADER", 20, 40, 10, RED);
 
             DrawCircle(80, 120, 35, DARKBLUE);
-            DrawCircleGradient(80, 220, 60, GREEN, SKYBLUE);
+            DrawCircleGradient(Vector2.{ 80, 220 }, 60, GREEN, SKYBLUE);
             DrawCircleLines(80, 340, 80, DARKBLUE);
 
 
@@ -92,4 +92,12 @@ main :: () {
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadShader(shader);       // Unload shader
+    UnloadTexture(fudesumi);    // Unload texture
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

@@ -4,14 +4,15 @@
 
 #load "shared/rlights.jai";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
-
 MAX_INSTANCES :: 10000;
 
-main :: () {
+GLSL_VERSION :: 330;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -20,7 +21,6 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - mesh instancing");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -35,10 +35,10 @@ main :: () {
 
     // Define transforms to be uploaded to GPU for instances
     transforms: [MAX_INSTANCES]Matrix4;   // Pre-multiplied transformations passed to rlgl
-    defer array_free(transforms);
 
     // Translate and rotate cubes randomly
-    for i: 0..MAX_INSTANCES-1 {
+    for i: 0..MAX_INSTANCES-1
+    {
         translation: Matrix4 = MatrixTranslate(cast(float)GetRandomValue(-50, 50), cast(float)GetRandomValue(-50, 50), cast(float)GetRandomValue(-50, 50));
         axis: Vector3 = Vector3Normalize(Vector3.{cast(float)GetRandomValue(0, 360), cast(float)GetRandomValue(0, 360), cast(float)GetRandomValue(0, 360)});
         angle: float = cast(float)GetRandomValue(0, 10)*DEG2RAD;
@@ -80,7 +80,9 @@ main :: () {
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_ORBITAL);
@@ -93,27 +95,34 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        {
             BeginMode3D(camera);
-            defer EndMode3D();
 
-            // Draw cube mesh with default material (BLUE)
-            DrawMesh(cube, matDefault, MatrixTranslate(-10.0, 0.0, 0.0));
+                // Draw cube mesh with default material (BLUE)
+                DrawMesh(cube, matDefault, MatrixTranslate(-10.0, 0.0, 0.0));
 
-            // Draw meshes instanced using material containing instancing shader (RED + lighting),
-            // transforms[] for the instances should be provided, they are dynamically
-            // updated in GPU every frame, so we can animate the different mesh instances
-            DrawMeshInstanced(cube, matInstances, transforms.data, MAX_INSTANCES);
+                // Draw meshes instanced using material containing instancing shader (RED + lighting),
+                // transforms[] for the instances should be provided, they are dynamically
+                // updated in GPU every frame, so we can animate the different mesh instances
+                DrawMeshInstanced(cube, matInstances, transforms.data, MAX_INSTANCES);
 
-            // Draw cube mesh with default material (BLUE)
-            DrawMesh(cube, matDefault, MatrixTranslate(10.0, 0.0, 0.0));
-        }
+                // Draw cube mesh with default material (BLUE)
+                DrawMesh(cube, matDefault, MatrixTranslate(10.0, 0.0, 0.0));
 
-        DrawFPS(10, 10);
+            EndMode3D();
+
+            DrawFPS(10, 10);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    array_free(transforms);    // Free transforms
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

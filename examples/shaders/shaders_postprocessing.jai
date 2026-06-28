@@ -2,11 +2,6 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
-
 MAX_POSTPRO_SHADERS :: 12;
 
 PostproShader :: enum {
@@ -41,7 +36,13 @@ postproShaderText: []*u8 = .[
     //"FXAA"
 ];
 
-main :: () {
+GLSL_VERSION :: 330;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -51,8 +52,7 @@ main :: () {
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);      // Enable Multi Sampling Anti Aliasing 4x (if available)
 
-    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - postprocessing shader");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - postprocessing");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -92,24 +92,17 @@ main :: () {
     // Create a RenderTexture2D to be used for render to texture
     target: RenderTexture2D = LoadRenderTexture(screenWidth, screenHeight);
 
-    defer {
-        // Unload all postpro shaders
-        for i: 0..MAX_POSTPRO_SHADERS-1 UnloadShader(shaders[i]);
-
-        UnloadTexture(texture);         // Unload texture
-        UnloadModel(model);             // Unload model
-        UnloadRenderTexture(target);    // Unload render texture
-    };
-
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_ORBITAL);
 
-             if (IsKeyPressed(.KEY_RIGHT)) currentShader += 1;
+        if (IsKeyPressed(.KEY_RIGHT)) currentShader += 1;
         else if (IsKeyPressed(.KEY_LEFT))  currentShader -= 1;
 
         if (currentShader >= MAX_POSTPRO_SHADERS) currentShader = 0;
@@ -118,41 +111,45 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginTextureMode(target);       // Enable drawing to texture
-            defer EndTextureMode();               // End drawing to texture (now we have a texture available for next passes)
-
+        BeginTextureMode(target);       // Enable drawing to texture
             ClearBackground(RAYWHITE);  // Clear texture background
 
             BeginMode3D(camera);        // Begin 3d mode drawing
-            defer EndMode3D();                // End 3d mode drawing, returns to orthographic 2d mode
-
-            DrawModel(model, position, 0.1, WHITE);   // Draw 3d model with texture
-            DrawGrid(10, 1.0);     // Draw a grid
-        }
+                DrawModel(model, position, 0.1, WHITE);   // Draw 3d model with texture
+                DrawGrid(10, 1.0);     // Draw a grid
+            EndMode3D();                // End 3d mode drawing, returns to orthographic 2d mode
+        EndTextureMode();               // End drawing to texture (now we have a texture available for next passes)
 
         BeginDrawing();
-        defer EndDrawing();
+            ClearBackground(RAYWHITE);  // Clear screen background
 
-        ClearBackground(RAYWHITE);  // Clear screen background
-
-        {
             // Render generated texture using selected postprocessing shader
             BeginShaderMode(shaders[currentShader]);
-            defer EndShaderMode();
+                // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+                DrawTextureRec(target.texture, Rectangle.{0, 0, cast(float)target.texture.width, cast(float)-target.texture.height}, Vector2.{0, 0}, WHITE);
+            EndShaderMode();
 
-            // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-            DrawTextureRec(target.texture, Rectangle.{0, 0, cast(float)target.texture.width, cast(float)-target.texture.height}, Vector2.{0, 0}, WHITE);
-        }
+            // Draw 2d shapes and text over drawn texture
+            DrawRectangle(0, 9, 580, 30, Fade(LIGHTGRAY, 0.7));
 
-        // Draw 2d shapes and text over drawn texture
-        DrawRectangle(0, 9, 580, 30, Fade(LIGHTGRAY, 0.7));
-
-        DrawText("(c) Church 3D model by Alberto Cano", screenWidth - 200, screenHeight - 20, 10, GRAY);
-        DrawText("CURRENT POSTPRO SHADER:", 10, 15, 20, BLACK);
-        DrawText(postproShaderText[currentShader], 330, 15, 20, RED);
-        DrawText("< >", 540, 10, 30, DARKBLUE);
-        DrawFPS(700, 15);
+            DrawText("(c) Church 3D model by Alberto Cano", screenWidth - 200, screenHeight - 20, 10, GRAY);
+            DrawText("CURRENT POSTPRO SHADER:", 10, 15, 20, BLACK);
+            DrawText(postproShaderText[currentShader], 330, 15, 20, RED);
+            DrawText("< >", 540, 10, 30, DARKBLUE);
+            DrawFPS(700, 15);
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    // Unload all postpro shaders
+    for i: 0..MAX_POSTPRO_SHADERS-1 UnloadShader(shaders[i]);
+
+    UnloadTexture(texture);         // Unload texture
+    UnloadModel(model);             // Unload model
+    UnloadRenderTexture(target);    // Unload render texture
+
+    CloseWindow();                  // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

@@ -2,18 +2,19 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
-
 RayLocs :: struct {
     camPos       : s32;
     camDir       : s32;
     screenCenter : s32;
 };
 
-main :: () {
+GLSL_VERSION :: 330;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -21,17 +22,14 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - write depth buffer");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - hybrid rendering");
 
     // This Shader calculates pixel depth and color using raymarch
     shdrRaymarch: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/hybrid_raymarch.fs", GLSL_VERSION));
-    defer UnloadShader(shdrRaymarch);
 
     // This Shader is a standard rasterization fragment shader with the addition of depth writing
     // You are required to write depth for all shaders if one shader does it
     shdrRaster: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/hybrid_raster.fs", GLSL_VERSION));
-    defer UnloadShader(shdrRaster);
 
     // Declare Struct used to store camera locs.
     marchLocs: RayLocs;
@@ -47,7 +45,6 @@ main :: () {
 
     // Use Customized function to create writable depth texture buffer
     target: RenderTexture2D = LoadRenderTextureDepthTex(screenWidth, screenHeight);
-    defer UnloadRenderTextureDepthTex(target);
 
     // Define the camera to look into our 3d world
     camera: Camera = .{
@@ -64,7 +61,9 @@ main :: () {
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_ORBITAL);
@@ -79,63 +78,65 @@ main :: () {
         
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            // Draw into our custom render texture (framebuffer)
-            BeginTextureMode(target);
-            defer EndTextureMode();
-
+        // Draw into our custom render texture (framebuffer)
+        BeginTextureMode(target);
             ClearBackground(WHITE);
 
             // Raymarch Scene
-            rlEnableDepthTest(); //Manually enable Depth Test to handle multiple rendering methods.
-
-            {
+            rlEnableDepthTest(); // Manually enable Depth Test to handle multiple rendering methods
             BeginShaderMode(shdrRaymarch);
-            defer EndShaderMode();
-
-            DrawRectangleRec(Rectangle.{0, 0, cast(float)screenWidth, cast(float)screenHeight}, WHITE);
-            }
+                DrawRectangleRec(Rectangle.{ 0,0, cast(float)screenWidth, cast(float)screenHeight },WHITE);
+            EndShaderMode();
 
             // Rasterize Scene
             BeginMode3D(camera);
-            defer EndMode3D();
+                BeginShaderMode(shdrRaster);
+                    DrawCubeWiresV(Vector3.{ 0.0, 0.5, 1.0 }, Vector3.{ 1.0, 1.0, 1.0 }, RED);
+                    DrawCubeV(Vector3.{ 0.0, 0.5, 1.0 }, Vector3.{ 1.0, 1.0, 1.0 }, PURPLE);
+                    DrawCubeWiresV(Vector3.{ 0.0, 0.5, -1.0 }, Vector3.{ 1.0, 1.0, 1.0 }, DARKGREEN);
+                    DrawCubeV(Vector3.{ 0.0, 0.5, -1.0 }, Vector3.{ 1.0, 1.0, 1.0 }, YELLOW);
+                    DrawGrid(10, 1.0);
+                EndShaderMode();
+            EndMode3D();
+        EndTextureMode();
 
-            BeginShaderMode(shdrRaster);
-            defer EndShaderMode();
-
-            DrawCubeWiresV(Vector3.{0.0, 0.5, 1.0}, Vector3.{1.0, 1.0, 1.0}, RED);
-            DrawCubeV(Vector3.{0.0, 0.5, 1.0}, Vector3.{1.0, 1.0, 1.0}, PURPLE);
-            DrawCubeWiresV(Vector3.{0.0, 0.5, -1.0}, Vector3.{1.0, 1.0, 1.0}, DARKGREEN);
-            DrawCubeV(Vector3.{0.0, 0.5, -1.0}, Vector3.{1.0, 1.0, 1.0}, YELLOW);
-            DrawGrid(10, 1.0);
-        }
-
-        // Draw into screen our custom render texture 
+        // Draw into screen our custom render texture
         BeginDrawing();
-        defer EndDrawing();
+            ClearBackground(RAYWHITE);
 
-        ClearBackground(RAYWHITE);
+            DrawTextureRec(target.texture, Rectangle.{ 0, 0, cast(float)screenWidth, cast(float)-screenHeight }, Vector2.{ 0, 0 }, WHITE);
 
-        DrawTextureRec(target.texture, Rectangle.{0, 0, cast(float)screenWidth, cast(float)-screenHeight}, Vector2.{0, 0}, WHITE);
-        DrawFPS(10, 10);
+            DrawFPS(10, 10);
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadRenderTextureDepthTex(target);
+    UnloadShader(shdrRaymarch);
+    UnloadShader(shdrRaster);
+
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
 //------------------------------------------------------------------------------------
 // Define custom functions required for the example
 //------------------------------------------------------------------------------------
 // Load custom render texture, create a writable depth texture buffer
-LoadRenderTextureDepthTex :: (width: s32, height: s32) -> RenderTexture2D {
+LoadRenderTextureDepthTex :: (width: s32, height: s32) -> RenderTexture2D
+{
     target: RenderTexture2D;
 
     target.id = rlLoadFramebuffer(); // Load an empty framebuffer
 
-    if (target.id > 0) {
+    if (target.id > 0)
+    {
         rlEnableFramebuffer(target.id);
 
         // Create color texture (default to RGBA)
-        target.texture.id     = rlLoadTexture(null, width, height, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+        target.texture.id     = rlLoadTexture(null, width, height, .RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
         target.texture.width   = width;
         target.texture.height  = height;
         target.texture.format  = .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
@@ -163,8 +164,10 @@ LoadRenderTextureDepthTex :: (width: s32, height: s32) -> RenderTexture2D {
 }
 
 // Unload render texture from GPU memory (VRAM)
-UnloadRenderTextureDepthTex :: (target: RenderTexture2D) {
-    if (target.id > 0) {
+UnloadRenderTextureDepthTex :: (target: RenderTexture2D)
+{
+    if (target.id > 0)
+    {
         // Color texture attached to FBO is deleted
         rlUnloadTexture(target.texture.id);
         rlUnloadTexture(target.depth.id);

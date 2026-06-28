@@ -5,12 +5,13 @@
 
 #load "shared/rlights.jai";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -19,7 +20,6 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - hot reloading");
-    defer CloseWindow(); // Close window and OpenGL context
 
     fragShaderFileName: string = to_string(TextFormat("resources/shaders/glsl%i/reload.fs", GLSL_VERSION));
     fragShaderFileModTime, size, succ := file_modtime_and_size(fragShaderFileName);
@@ -27,7 +27,6 @@ main :: () {
     // Load raymarching shader
     // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
     shader: Shader = LoadShader(null, fragShaderFileName.data);
-    defer UnloadShader(shader);           // Unload shader
 
     // Get shader locations for required uniforms
     resolutionLoc: s32 = GetShaderLocation(shader, "resolution");
@@ -43,7 +42,9 @@ main :: () {
     SetTargetFPS(60);                       // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())            // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         totalTime += GetFrameTime();
@@ -55,11 +56,13 @@ main :: () {
         SetShaderValue(shader, mouseLoc, *mousePos, .SHADER_UNIFORM_VEC2);
 
         // Hot shader reloading
-        if (shaderAutoReloading || (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT))) {
+        if (shaderAutoReloading || (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT)))
+        {
             currentFragShaderModTime, size, succ := file_modtime_and_size(fragShaderFileName);
 
             // Check if shader file has been modified
-            if (currentFragShaderModTime != fragShaderFileModTime) {
+            if (currentFragShaderModTime != fragShaderFileModTime)
+            {
                 // Try reloading updated shader
                 updatedShader: Shader = LoadShader(null, fragShaderFileName.data);
 
@@ -86,24 +89,32 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
+        defer 
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        {
             // We only draw a white full-screen rectangle, frame is generated in shader
             BeginShaderMode(shader);
-            defer EndShaderMode();
 
-            DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
-        }
+                DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
 
+            EndShaderMode();
+    
         t := get_c_string(ifx shaderAutoReloading then "AUTO" else "MANUAL");
         DrawText(TextFormat("PRESS [A] to TOGGLE SHADER AUTOLOADING: %s", t), 10, 10, 10, ifx shaderAutoReloading then RED else BLACK);
         if (!shaderAutoReloading) DrawText("MOUSE CLICK to SHADER RE-LOADING", 10, 30, 10, BLACK);
 
         x := get_c_string(calendar_to_string(to_calendar(fragShaderFileModTime, .LOCAL)));
         DrawText(TextFormat("Shader last modification: %s", x), 10, 430, 10, BLACK);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadShader(shader);           // Unload shader
+
+    CloseWindow();                  // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

@@ -1,11 +1,6 @@
 #import "raylib";
 #import "Basic";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
-
 MAX_PALETTES       :: 3;
 COLORS_PER_PALETTE :: 8;
 VALUES_PER_COLOR   :: 3;
@@ -49,7 +44,13 @@ paletteText: []*u8 = .[
     "RKBV (2-strip film)"
 ];
 
-main :: () {
+GLSL_VERSION :: 330;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -57,14 +58,12 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - color palette switch");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - palette switch");
 
     // Load shader to be used on some parts drawing
     // NOTE 1: Using GLSL 330 shader version, on OpenGL ES 2.0 use GLSL 100 shader version
     // NOTE 2: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
     shader: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/palette_switch.fs", GLSL_VERSION));
-    defer UnloadShader(shader);       // Unload shader
 
     // Get variable (uniform) location on the shader to connect with the program
     // NOTE: If uniform variable could not be found in the shader, function returns -1
@@ -76,7 +75,9 @@ main :: () {
     SetTargetFPS(60);                       // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())            // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
              if (IsKeyPressed(.KEY_RIGHT)) currentPalette += 1;
@@ -93,26 +94,35 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        {
+
             BeginShaderMode(shader);
-            defer EndShaderMode();
 
-            for i:0..COLORS_PER_PALETTE-1 {
-                // Draw horizontal screen-wide rectangles with increasing "palette index"
-                // The used palette index is encoded in the RGB components of the pixel
-                DrawRectangle(0, lineHeight*cast(s32)i, GetScreenWidth(), lineHeight, Color.{cast(u8)i, cast(u8)i, cast(u8)i, 255});
-            }
-        }
+                for i:0..COLORS_PER_PALETTE-1
+                {
+                    // Draw horizontal screen-wide rectangles with increasing "palette index"
+                    // The used palette index is encoded in the RGB components of the pixel
+                    DrawRectangle(0, lineHeight*cast(s32)i, GetScreenWidth(), lineHeight, Color.{cast(u8)i, cast(u8)i, cast(u8)i, 255});
+                }
 
-        DrawText("< >", 10, 10, 30, DARKBLUE);
-        DrawText("CURRENT PALETTE:", 60, 15, 20, RAYWHITE);
-        DrawText(paletteText[currentPalette], 300, 15, 20, RED);
+            EndShaderMode();
 
-        DrawFPS(700, 15);
+            DrawText("< >", 10, 10, 30, DARKBLUE);
+            DrawText("CURRENT PALETTE:", 60, 15, 20, RAYWHITE);
+            DrawText(paletteText[currentPalette], 300, 15, 20, RED);
+
+            DrawFPS(700, 15);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadShader(shader);       // Unload shader
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

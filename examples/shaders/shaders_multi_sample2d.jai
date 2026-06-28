@@ -1,12 +1,13 @@
 #import "raylib";
 #import "Basic";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -14,21 +15,17 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib - multiple sample2D");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - multi sample2d");
 
     imRed: Image = GenImageColor(800, 450, Color.{255, 0, 0, 255});
     texRed: Texture = LoadTextureFromImage(imRed);
-    defer UnloadTexture(texRed);      // Unload texture
     UnloadImage(imRed);
 
     imBlue: Image = GenImageColor(800, 450, Color.{0, 0, 255, 255});
     texBlue: Texture = LoadTextureFromImage(imBlue);
-    defer UnloadTexture(texBlue);     // Unload texture
     UnloadImage(imBlue);
 
     shader: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/color_mix.fs", GLSL_VERSION));
-    defer UnloadShader(shader);       // Unload shader
 
     // Get an additional sampler2D location to be enabled on drawing
     texBlueLoc: s32 = GetShaderLocation(shader, "texture1");
@@ -40,7 +37,9 @@ main :: () {
     SetTargetFPS(60);                           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())                // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
              if (IsKeyDown(.KEY_RIGHT)) dividerValue += 0.01;
@@ -55,25 +54,34 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        {
             BeginShaderMode(shader);
-            defer EndShaderMode();
 
-            // WARNING: Additional samplers are enabled for all draw calls in the batch,
-            // EndShaderMode() forces batch drawing and consequently resets active textures
-            // to let other sampler2D to be activated on consequent drawings (if required)
-            SetShaderValueTexture(shader, texBlueLoc, texBlue);
+                // WARNING: Additional samplers are enabled for all draw calls in the batch,
+                // EndShaderMode() forces batch drawing and consequently resets active textures
+                // to let other sampler2D to be activated on consequent drawings (if required)
+                SetShaderValueTexture(shader, texBlueLoc, texBlue);
 
-            // We are drawing texRed using default sampler2D texture0 but
-            // an additional texture units is enabled for texBlue (sampler2D texture1)
-            DrawTexture(texRed, 0, 0, WHITE);
-        }
+                // We are drawing texRed using default sampler2D texture0 but
+                // an additional texture units is enabled for texBlue (sampler2D texture1)
+                DrawTexture(texRed, 0, 0, WHITE);
 
-        DrawText("Use KEY_LEFT/KEY_RIGHT to move texture mixing in shader!", 80, GetScreenHeight() - 40, 20, RAYWHITE);
+            EndShaderMode();
+
+            DrawText("Use KEY_LEFT/KEY_RIGHT to move texture mixing in shader!", 80, GetScreenHeight() - 40, 20, RAYWHITE);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadShader(shader);       // Unload shader
+    UnloadTexture(texRed);      // Unload texture
+    UnloadTexture(texBlue);     // Unload texture
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

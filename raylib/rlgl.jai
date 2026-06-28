@@ -613,9 +613,9 @@ rlDrawVertexArrayInstanced :: (offset: s32, count: s32, instances: s32) #foreign
 rlDrawVertexArrayElementsInstanced :: (offset: s32, count: s32, buffer: *void, instances: s32) #foreign raylib_native;
 
 // Textures management
-rlLoadTexture :: (data: *void, width: s32, height: s32, format: PixelFormat, mipmapCount: s32) -> u32 #foreign raylib_native;
+rlLoadTexture :: (data: *void, width: s32, height: s32, format: rlPixelFormat, mipmapCount: s32) -> u32 #foreign raylib_native;
 rlLoadTextureDepth :: (width: s32, height: s32, useRenderBuffer: bool) -> u32 #foreign raylib_native;
-rlLoadTextureCubemap :: (data: *void, size: s32, format: PixelFormat, mipmapCount: s32) -> u32 #foreign raylib_native;
+rlLoadTextureCubemap :: (data: *void, size: s32, format: rlPixelFormat, mipmapCount: s32) -> u32 #foreign raylib_native;
 rlUpdateTexture :: (id: u32, offsetX: s32, offsetY: s32, width: s32, height: s32, format: s32, data: *void) #foreign raylib_native;
 rlGetGlTextureFormats :: (format: s32, glInternalFormat: *u32, glFormat: *u32, glType: *u32) #foreign raylib_native;
 rlGetPixelFormatName :: (format: u32) -> *u8 #foreign raylib_native;

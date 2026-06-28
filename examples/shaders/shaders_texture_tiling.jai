@@ -2,12 +2,13 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -36,6 +37,7 @@ main :: () {
     // Set the texture tiling using a shader
     tiling: [2]float = .[3.0, 3.0];
     shader: Shader = LoadShader(null, TextFormat("resources/shaders/glsl%i/tiling.fs", GLSL_VERSION));
+    SetTextureWrap(texture, .TEXTURE_WRAP_REPEAT);
     SetShaderValue(shader, GetShaderLocation(shader, "tiling"), *tiling, .SHADER_UNIFORM_VEC2);
     model.materials[0].shader = shader;
 
@@ -45,7 +47,8 @@ main :: () {
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose()) {       // Detect window close button or ESC key
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_FREE);

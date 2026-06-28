@@ -4,12 +4,13 @@
 
 #load "shared/rlights.jai";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -18,9 +19,7 @@ main :: () {
     screenHeight : s32 : 450;
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
-
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - basic lighting");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -34,7 +33,6 @@ main :: () {
     shader: Shader = LoadShader(
         TextFormat("resources/shaders/glsl%i/lighting.vs", GLSL_VERSION),
         TextFormat("resources/shaders/glsl%i/lighting.fs", GLSL_VERSION));
-    defer UnloadShader(shader);   // Unload shader
 
     // Get some required shader locations
     shader.locs[cast(s32) ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
@@ -57,7 +55,9 @@ main :: () {
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_ORBITAL);
@@ -79,32 +79,41 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        {
             BeginMode3D(camera);
-            defer EndMode3D();
 
-            {
                 BeginShaderMode(shader);
-                defer EndShaderMode();
 
-                DrawPlane(Vector3Zero(), Vector2.{10.0, 10.0}, WHITE);
-                DrawCube(Vector3Zero(), 2.0, 4.0, 2.0, WHITE);
-            }
+                    DrawPlane(Vector3Zero(), Vector2.{10.0, 10.0}, WHITE);
+                    DrawCube(Vector3Zero(), 2.0, 4.0, 2.0, WHITE);
 
-            // Draw spheres to show where the lights are
-            for i: 0..MAX_LIGHTS-1 {
-                if (lights[i].enabled) DrawSphereEx(lights[i].position, 0.2, 8, 8, lights[i].color);
-                else DrawSphereWires(lights[i].position, 0.2, 8, 8, ColorAlpha(lights[i].color, 0.3));
-            }
+                EndShaderMode();
 
-            DrawGrid(10, 1.0);
-        }
-        DrawFPS(10, 10);
-        DrawText("Use keys [Y][R][G][B] to toggle lights", 10, 40, 20, DARKGRAY);
+                // Draw spheres to show where the lights are
+                for i: 0..MAX_LIGHTS-1
+                {
+                    if (lights[i].enabled) DrawSphereEx(lights[i].position, 0.2, 8, 8, lights[i].color);
+                    else DrawSphereWires(lights[i].position, 0.2, 8, 8, ColorAlpha(lights[i].color, 0.3));
+                }
+
+                DrawGrid(10, 1.0);
+
+            EndMode3D();
+        
+            DrawFPS(10, 10);
+
+            DrawText("Use keys [Y][R][G][B] to toggle lights", 10, 40, 20, DARKGRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadShader(shader);   // Unload shader
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

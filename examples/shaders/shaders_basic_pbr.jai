@@ -4,12 +4,13 @@
 
 #load "shared/rlights.jai";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -19,7 +20,6 @@ main :: () {
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - basic pbr");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -33,7 +33,6 @@ main :: () {
     shader: Shader = LoadShader(
         TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION),
         TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
-    defer UnloadShader(shader);   // Unload shader
 
     shader.locs[ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(shader, "albedoMap");
     // WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture
@@ -71,15 +70,6 @@ main :: () {
     // There could be more complex models consisting of multiple meshes and
     // multiple materials defined for those meshes... but always 1 mesh = 1 material
     car: Model = LoadModel("resources/models/old_car_new.glb");
-    defer {
-        // Unbind (disconnect) shader from car.material[0] 
-        // to avoid UnloadMaterial() trying to unload it automatically
-        s: Shader;
-        car.materials[0].shader = s;
-        UnloadMaterial(car.materials[0]);
-        car.materials[0].maps = null;
-        UnloadModel(car);
-    };
 
     // Assign already setup PBR shader to model.materials[0], used by models.meshes[0]
     car.materials[0].shader = shader;
@@ -100,15 +90,6 @@ main :: () {
     // Load floor model mesh and assign material parameters
     // NOTE: A basic plane shape can be generated instead of being loaded from a model file
     floor: Model = LoadModel("resources/models/plane.glb");
-    defer {
-        // Unbind (disconnect) shader from car.material[0] 
-        // to avoid UnloadMaterial() trying to unload it automatically
-        s: Shader;
-        floor.materials[0].shader = s;
-        UnloadMaterial(floor.materials[0]);
-        floor.materials[0].maps = null;
-        UnloadModel(floor);
-    };
 
     //Mesh floorMesh = GenMeshPlane(10, 10, 10, 10);
     //GenMeshTangents(&floorMesh);      // TODO: Review tangents generation
@@ -150,7 +131,9 @@ main :: () {
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_ORBITAL);
@@ -172,44 +155,66 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
         
-        ClearBackground(BLACK);
+            ClearBackground(BLACK);
         
-        {
             BeginMode3D(camera);
-            defer EndMode3D();
 
-            // Set floor model texture tiling and emissive color parameters on shader
-            SetShaderValue(shader, textureTilingLoc, *floorTextureTiling, .SHADER_UNIFORM_VEC2);
-            floorEmissiveColor: Vector4 = ColorNormalize(floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color);
-            SetShaderValue(shader, emissiveColorLoc, *floorEmissiveColor, .SHADER_UNIFORM_VEC4);
+                // Set floor model texture tiling and emissive color parameters on shader
+                SetShaderValue(shader, textureTilingLoc, *floorTextureTiling, .SHADER_UNIFORM_VEC2);
+                floorEmissiveColor: Vector4 = ColorNormalize(floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color);
+                SetShaderValue(shader, emissiveColorLoc, *floorEmissiveColor, .SHADER_UNIFORM_VEC4);
 
-            DrawModel(floor, Vector3.{0.0, 0.0, 0.0}, 5.0, WHITE);   // Draw floor model
+                DrawModel(floor, Vector3.{0.0, 0.0, 0.0}, 5.0, WHITE);   // Draw floor model
 
-            // Set old car model texture tiling, emissive color and emissive intensity parameters on shader
-            SetShaderValue(shader, textureTilingLoc, *carTextureTiling, .SHADER_UNIFORM_VEC2);
-            carEmissiveColor: Vector4 = ColorNormalize(car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color);
-            SetShaderValue(shader, emissiveColorLoc, *carEmissiveColor, .SHADER_UNIFORM_VEC4);
-            emissiveIntensity: float = 0.01;
-            SetShaderValue(shader, emissiveIntensityLoc, *emissiveIntensity, .SHADER_UNIFORM_FLOAT);
+                // Set old car model texture tiling, emissive color and emissive intensity parameters on shader
+                SetShaderValue(shader, textureTilingLoc, *carTextureTiling, .SHADER_UNIFORM_VEC2);
+                carEmissiveColor: Vector4 = ColorNormalize(car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color);
+                SetShaderValue(shader, emissiveColorLoc, *carEmissiveColor, .SHADER_UNIFORM_VEC4);
+                emissiveIntensity: float = 0.01;
+                SetShaderValue(shader, emissiveIntensityLoc, *emissiveIntensity, .SHADER_UNIFORM_FLOAT);
 
-            DrawModel(car, Vector3.{0.0, 0.0, 0.0}, 0.25, WHITE);   // Draw car model
+                DrawModel(car, Vector3.{0.0, 0.0, 0.0}, 0.25, WHITE);   // Draw car model
 
-            // Draw spheres to show the lights positions
-            for i: 0..MAX_LIGHTS-1 {
-                lightColor: Color = lights[i].color;
+                // Draw spheres to show the lights positions
+                for i: 0..MAX_LIGHTS-1
+                {
+                    lightColor: Color = lights[i].color;
 
-                if (lights[i].enabled) DrawSphereEx(lights[i].position, 0.2, 8, 8, lightColor);
-                else DrawSphereWires(lights[i].position, 0.2, 8, 8, ColorAlpha(lightColor, 0.3));
-            }
-        }
+                    if (lights[i].enabled) DrawSphereEx(lights[i].position, 0.2, 8, 8, lightColor);
+                    else DrawSphereWires(lights[i].position, 0.2, 8, 8, ColorAlpha(lightColor, 0.3));
+                }
 
-        DrawText("Toggle lights: [1][2][3][4]", 10, 40, 20, LIGHTGRAY);
+            EndMode3D();
 
-        DrawText("(c) Old Rusty Car model by Renafox (https://skfb.ly/LxRy)", screenWidth - 320, screenHeight - 20, 10, LIGHTGRAY);
+            DrawText("Toggle lights: [1][2][3][4]", 10, 40, 20, LIGHTGRAY);
 
-        DrawFPS(10, 10);
+            DrawText("(c) Old Rusty Car model by Renafox (https://skfb.ly/LxRy)", screenWidth - 320, screenHeight - 20, 10, LIGHTGRAY);
+
+            DrawFPS(10, 10);
+    
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    // Unbind (disconnect) shader from car.material[0]
+    // to avoid UnloadMaterial() trying to unload it automatically
+    s1: Shader = ---;
+    car.materials[0].shader = s1;
+    UnloadMaterial(car.materials[0]);
+    car.materials[0].maps = null;
+    UnloadModel(car);
+
+    s2: Shader = ---;
+    floor.materials[0].shader = s2;
+    UnloadMaterial(floor.materials[0]);
+    floor.materials[0].maps = null;
+    UnloadModel(floor);
+
+    UnloadShader(shader);       // Unload Shader
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
