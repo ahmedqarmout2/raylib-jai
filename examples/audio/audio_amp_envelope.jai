@@ -74,7 +74,7 @@ main :: ()
         {
             if ((env.state != .IDLE) || (env.currentValue > 0.0))
             {
-                for i:0..BUFFER_SIZE-1
+                for i: 0..BUFFER_SIZE-1
                 {
                     UpdateEnvelope(*env);
                     FillAudioBuffer(i, buffer, env.currentValue, *audioTime);
@@ -83,7 +83,7 @@ main :: ()
             else
             {
                 // Clear buffer if silent to avoid looping noise
-                for i:0..BUFFER_SIZE-1 buffer[i] = 0;
+                for i: 0..BUFFER_SIZE-1 buffer[i] = 0;
                 audioTime = 0.0;
             }
 
@@ -129,7 +129,7 @@ main :: ()
 //------------------------------------------------------------------------------------
 // Module Functions Definition
 //------------------------------------------------------------------------------------
-FillAudioBuffer :: (i: s32, buffer: []float, envelopeValue: float, audioTime: *float)
+FillAudioBuffer :: (i: s64, buffer: []float, envelopeValue: float, audioTime: *float)
 {
     frequency: s32 = 440;
     buffer[i] = envelopeValue*sin(2.0*PI*frequency*((.*)audioTime));
