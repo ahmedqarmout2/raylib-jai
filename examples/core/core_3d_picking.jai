@@ -2,14 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d picking");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -28,19 +31,24 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         if (IsCursorHidden()) UpdateCamera(*camera, .CAMERA_FIRST_PERSON);
 
         // Toggle camera controls
-        if (IsMouseButtonPressed(.MOUSE_BUTTON_RIGHT)) {
+        if (IsMouseButtonPressed(.MOUSE_BUTTON_RIGHT))
+        {
             if (IsCursorHidden()) EnableCursor();
             else DisableCursor();
         }
 
-        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT)) {
-            if (!collision.hit) {
+        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT))
+        {
+            if (!collision.hit)
+            {
                 ray = GetScreenToWorldRay(GetMousePosition(), camera);
 
                 // Check collision between ray and box
@@ -56,29 +64,29 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
-            {
-                BeginMode3D(camera);
-                defer EndMode3D();
+            BeginMode3D(camera);
 
-                if (collision.hit) {
+                if (collision.hit)
+                {
                     DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, RED);
                     DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, MAROON);
 
                     DrawCubeWires(cubePosition, cubeSize.x + 0.2, cubeSize.y + 0.2, cubeSize.z + 0.2, GREEN);
-                } else {
+                }
+                else
+                {
                     DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, GRAY);
                     DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, DARKGRAY);
                 }
 
                 DrawRay(ray, MAROON);
                 DrawGrid(10, 1.0);
-            }
+
+            EndMode3D();
 
             DrawText("Try clicking on the box with your mouse!", 240, 10, 20, DARKGRAY);
 
@@ -87,7 +95,13 @@ main :: () {
             DrawText("Right click mouse to toggle camera controls", 10, 430, 10, GRAY);
 
             DrawFPS(10, 10);
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

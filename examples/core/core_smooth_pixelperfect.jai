@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -15,9 +19,7 @@ main :: () {
 
     virtualRatio : float : cast(float)screenWidth/cast(float)virtualScreenWidth;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - smooth pixel-perfect camera");
-    defer CloseWindow(); // Close window and OpenGL context
-
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - smooth pixelperfect");
 
     worldSpaceCamera: Camera2D;  // Game world camera
     worldSpaceCamera.zoom = 1.0;
@@ -26,7 +28,6 @@ main :: () {
     screenSpaceCamera.zoom = 1.0;
 
     target: RenderTexture2D = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight); // This is where we'll draw all our objects.
-    defer UnloadRenderTexture(target);    // Unload render texture
 
     rec01 : Rectangle = .{ 70.0, 35.0, 20.0, 20.0 };
     rec02 : Rectangle = .{ 90.0, 55.0, 30.0, 10.0 };
@@ -46,7 +47,9 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         rotation += 60.0*GetFrameTime();   // Rotate the rectangles, 60 degrees per second
@@ -70,39 +73,34 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginTextureMode(target);
-            defer EndTextureMode();
-
+        BeginTextureMode(target);
             ClearBackground(RAYWHITE);
 
-            {
-                BeginMode2D(worldSpaceCamera);
-                defer EndMode2D();
-
+            BeginMode2D(worldSpaceCamera);
                 DrawRectanglePro(rec01, origin, rotation, BLACK);
                 DrawRectanglePro(rec02, origin, -rotation, RED);
                 DrawRectanglePro(rec03, origin, rotation + 45.0, BLUE);
-            }
-        }
+            EndMode2D();
+        EndTextureMode();
 
-        {
-            BeginDrawing();
-            defer EndDrawing();
-
+        BeginDrawing();
             ClearBackground(RED);
 
-            {
-                BeginMode2D(screenSpaceCamera);
-                defer EndMode2D();
-
+            BeginMode2D(screenSpaceCamera);
                 DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0, WHITE);
-            }
+            EndMode2D();
 
             DrawText(TextFormat("Screen resolution: %ix%i", screenWidth, screenHeight), 10, 10, 20, DARKBLUE);
             DrawText(TextFormat("World resolution: %ix%i", virtualScreenWidth, virtualScreenHeight), 10, 40, 20, DARKGREEN);
             DrawFPS(GetScreenWidth() - 95, 10);
-        }
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadRenderTexture(target);    // Unload render texture
+
+    CloseWindow();                  // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

@@ -5,7 +5,11 @@
 exponent: float = 1.0;       // Audio exponentiation value
 averageVolume: [400]float;   // Average volume history
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization and De-Initialization
@@ -80,7 +84,8 @@ main :: () {
     //--------------------------------------------------------------------------------------
 }
 
-ProcessAudio :: (buffer: *void, frames: u32) #c_call {
+ProcessAudio :: (buffer: *void, frames: u32) #c_call
+{
     new_context: #Context;
     push_context new_context {
         samples: *float = cast(*float)buffer;   // Samples internally stored as <float>s

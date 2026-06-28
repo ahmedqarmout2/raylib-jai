@@ -4,22 +4,26 @@
 
 MAX_BUILDINGS : s32 : 100;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera");
-    defer CloseWindow(); // Close window and OpenGL context
 
-    player : Rectangle = .{400, 280, 40, 40};
-    buildings: [MAX_BUILDINGS]Rectangle;
-    buildColors: [MAX_BUILDINGS]Color;
+    player := Rectangle.{ 400, 280, 40, 40 };
+    buildings: [MAX_BUILDINGS] Rectangle;
+    buildColors: [MAX_BUILDINGS] Color;
 
     spacing : s32 = 0;
 
-    for i: 0..MAX_BUILDINGS-1 {
+    for i: 0..MAX_BUILDINGS-1
+    {
         buildings[i].width  = cast(float)GetRandomValue(50, 200);
         buildings[i].height = cast(float)GetRandomValue(100, 800);
         buildings[i].y = screenHeight - 130.0 - buildings[i].height;
@@ -27,7 +31,11 @@ main :: () {
 
         spacing += cast(s32)buildings[i].width;
 
-        buildColors[i] = Color.{ cast(u8)GetRandomValue(200, 240), cast(u8)GetRandomValue(200, 240), cast(u8)GetRandomValue(200, 250), 255 };
+        buildColors[i] = Color.{
+            cast(u8)GetRandomValue(200, 240),
+            cast(u8)GetRandomValue(200, 240),
+            cast(u8)GetRandomValue(200, 250),
+            255};
     }
 
     camera: Camera2D;
@@ -36,10 +44,12 @@ main :: () {
     camera.rotation = 0.0;
     camera.zoom = 1.0;
 
-    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         // Player movement
@@ -64,7 +74,8 @@ main :: () {
         else if (camera.zoom < 0.1) camera.zoom = 0.1;
 
         // Camera reset (zoom and rotation)
-        if (IsKeyPressed(.KEY_R)) {
+        if (IsKeyPressed(.KEY_R))
+        {
             camera.zoom = 1.0;
             camera.rotation = 0.0;
         }
@@ -72,15 +83,11 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
-            {
-                BeginMode2D(camera);
-                defer EndMode2D();
+            BeginMode2D(camera);
 
                 DrawRectangle(-6000, 320, 13000, 8000, DARKGRAY);
 
@@ -90,7 +97,8 @@ main :: () {
 
                 DrawLine(cast(s32)camera.target.x, -screenHeight * 10, cast(s32)camera.target.x, screenHeight * 10, GREEN);
                 DrawLine(-screenWidth * 10, cast(s32)camera.target.y, screenWidth * 10, cast(s32)camera.target.y, GREEN);
-            }
+
+            EndMode2D();
 
             DrawText("SCREEN AREA", 640, 10, 20, RED);
 
@@ -102,12 +110,18 @@ main :: () {
             DrawRectangle( 10, 10, 250, 113, Fade(SKYBLUE, 0.5));
             DrawRectangleLines( 10, 10, 250, 113, BLUE);
 
-            DrawText("Free 2d camera controls:", 20, 20, 10, BLACK);
-            DrawText("- Right/Left to move Offset", 40, 40, 10, DARKGRAY);
+            DrawText("Free 2D camera controls:", 20, 20, 10, BLACK);
+            DrawText("- Right/Left to move player", 40, 40, 10, DARKGRAY);
             DrawText("- Mouse Wheel to Zoom in-out", 40, 60, 10, DARKGRAY);
             DrawText("- A / S to Rotate", 40, 80, 10, DARKGRAY);
             DrawText("- R to reset Zoom and Rotation", 40, 100, 10, DARKGRAY);
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

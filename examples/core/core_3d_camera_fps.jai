@@ -54,11 +54,10 @@ main :: ()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    screenWidth: s32 = 1920;
-    screenHeight: s32 = 1080;
+    screenWidth  : s32 : 800;
+    screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera fps");
-    defer CloseWindow();  // Close window and OpenGL context
 
     // Initialize camera variables
     // NOTE: UpdateCameraFPS() takes care of the rest
@@ -94,11 +93,7 @@ main :: ()
         UpdateBody(*player, lookRotation.x, sideway, forward, IsKeyPressed(.KEY_SPACE), crouching);
 
         delta: float = GetFrameTime();
-        headLerp = lerp(
-            headLerp,
-            ifx crouching then CROUCH_HEIGHT else STAND_HEIGHT,
-            20.0 * delta
-        );
+        headLerp = lerp(headLerp, ifx crouching then CROUCH_HEIGHT else STAND_HEIGHT, 20.0 * delta);
 
         camera.position = Vector3.{
             player.position.x,
@@ -106,11 +101,14 @@ main :: ()
             player.position.z,
         };
 
-        if player.isGrounded && ((forward != 0) || (sideway != 0)) {
+        if player.isGrounded && ((forward != 0) || (sideway != 0))
+        {
             headTimer += delta * 3.0;
             walkLerp = lerp(walkLerp, 1.0, 10.0 * delta);
             camera.fovy = lerp(camera.fovy, 55.0, 5.0 * delta);
-        } else {
+        }
+        else
+        {
             walkLerp = lerp(walkLerp, 0.0, 10.0 * delta);
             camera.fovy = lerp(camera.fovy, 60.0, 5.0 * delta);
         }
@@ -123,43 +121,39 @@ main :: ()
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
-                ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-                BeginMode3D(camera);
-                    DrawLevel();
-                EndMode3D();
+            BeginMode3D(camera);
+                DrawLevel();
+            EndMode3D();
 
-                // Draw info box
-                DrawRectangle(5, 5, 330, 75, Fade(SKYBLUE, 0.5));
-                DrawRectangleLines(5, 5, 330, 75, BLUE);
+            // Draw info box
+            DrawRectangle(5, 5, 330, 75, Fade(SKYBLUE, 0.5));
+            DrawRectangleLines(5, 5, 330, 75, BLUE);
 
-                DrawText("Camera controls:", 15, 15, 10, BLACK);
-                DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
-                DrawText("- Look around: arrow keys or mouse", 15, 45, 10, BLACK);
-                DrawText(
-                    TextFormat(
-                        "- Velocity Len: (%06.3f)",
-                        Vector2Length(Vector2.{ player.velocity.x, player.velocity.z })
-                    ),
-                    15, 60, 10, BLACK
-                );
+            DrawText("Camera controls:", 15, 15, 10, BLACK);
+            DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
+            DrawText("- Look around: arrow keys or mouse", 15, 45, 10, BLACK);
+            DrawText(TextFormat("- Velocity Len: (%06.3f)", Vector2Length(Vector2.{ player.velocity.x, player.velocity.z })), 15, 60, 10, BLACK);
 
-        }
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition
 //----------------------------------------------------------------------------------
 // Update body considering current world state
-UpdateBody :: (
-    body: *Body, rot: float, side: int, forward: int, jumpPressed: bool, crouchHold: bool
-) {
+UpdateBody :: (body: *Body, rot: float, side: int, forward: int, jumpPressed: bool, crouchHold: bool)
+{
     input := Vector2.{ cast(float)side, cast(float)(-forward) };
 
     #if NORMALIZE_INPUT {
@@ -175,17 +169,16 @@ UpdateBody :: (
     {
         body.velocity.y = JUMP_FORCE;
         body.isGrounded = false;
+
+        // Sound can be played at this moment
+        //SetSoundPitch(fxJump, 1.0f + (GetRandomValue(-100, 100)*0.001));
+        //PlaySound(fxJump);
     }
 
     front := Vector3.{ sin(rot), 0.0, cos(rot) };
     right := Vector3.{ cos(-rot), 0.0, sin(-rot) };
 
-    desiredDir := Vector3.{
-        input.x * right.x + input.y * front.x,
-        0.0,
-        input.x * right.z + input.y * front.z
-    };
-
+    desiredDir := Vector3.{ input.x * right.x + input.y * front.x, 0.0, input.x * right.z + input.y * front.z };
     body.dir = Vector3Lerp(body.dir, desiredDir, CONTROL * delta);
 
     decel: float = ifx body.isGrounded then FRICTION else AIR_DRAG;
@@ -222,7 +215,8 @@ UpdateBody :: (
 }
 
 // Update camera for FPS behaviour
-UpdateCameraFPS :: (camera: *Camera) {
+UpdateCameraFPS :: (camera: *Camera)
+{
     up := Vector3.{ 0.0, 1.0, 0.0 };
     targetOffset := Vector3.{ 0.0, 0.0, -1.0 };
 
@@ -245,9 +239,7 @@ UpdateCameraFPS :: (camera: *Camera) {
 
     // Rotate view vector around right axis
     pitchAngle: float = -lookRotation.y - lean.y;
-
-    // Clamp angle so it doesn't go past straight up or straight down
-    pitchAngle = clamp(pitchAngle, -PI/2 + 0.0001, PI/2 - 0.0001);  // Note: modules/Math also has PI64 for more juice
+    pitchAngle = clamp(pitchAngle, -PI/2 + 0.0001, PI/2 - 0.0001);  // Clamp angle so it doesn't go past straight up or straight down
     pitch: Vector3 = Vector3RotateByAxisAngle(yaw, right, pitchAngle);
 
     // Head animation
@@ -268,27 +260,25 @@ UpdateCameraFPS :: (camera: *Camera) {
 }
 
 // Draw game level
-DrawLevel :: () {
+DrawLevel :: ()
+{
     floorExtent := 25;
     tileSize := 5.0;
     tileColor1 := Color.{ 150, 200, 200, 255 };
 
     // Floor tiles
-    x, y := -floorExtent;
-
-    for y: -floorExtent..floorExtent for x: -floorExtent..floorExtent {
-        if (y & 1) != 0 && (x & 1) != 0 {
-            DrawPlane(
-                Vector3.{x * tileSize, 0.0, y * tileSize},
-                Vector2.{tileSize, tileSize},
-                tileColor1,
-            );
-        } else if (y & 1) == 0 && (x & 1) == 0 {
-            DrawPlane(
-                Vector3.{x * tileSize, 0.0, y * tileSize},
-                Vector2.{tileSize, tileSize},
-                LIGHTGRAY,
-            );
+    for y: -floorExtent..floorExtent
+    {
+        for x: -floorExtent..floorExtent
+        {
+            if (y & 1) != 0 && (x & 1) != 0
+            {
+                DrawPlane(Vector3.{x * tileSize, 0.0, y * tileSize}, Vector2.{tileSize, tileSize}, tileColor1);
+            }
+            else if (y & 1) == 0 && (x & 1) == 0
+            {
+                DrawPlane(Vector3.{x * tileSize, 0.0, y * tileSize}, Vector2.{tileSize, tileSize},LIGHTGRAY);
+            }
         }
     }
 

@@ -2,14 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera mode");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define the camera to look into our 3d world
     camera: Camera3D;
@@ -24,32 +27,39 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
-        // Update your variables here
+        // TODO: Update your variables here
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        {
             BeginMode3D(camera);
-            defer EndMode3D();
 
-            DrawCube(cubePosition, 2.0, 2.0, 2.0, RED);
-            DrawCubeWires(cubePosition, 2.0, 2.0, 2.0, MAROON);
+                DrawCube(cubePosition, 2.0, 2.0, 2.0, RED);
+                DrawCubeWires(cubePosition, 2.0, 2.0, 2.0, MAROON);
 
-            DrawGrid(10, 1.0);
-        }
+                DrawGrid(10, 1.0);
 
-        DrawText("Welcome to the third dimension!", 10, 40, 20, DARKGRAY);
+            EndMode3D();
 
-        DrawFPS(10, 10);
+            DrawText("Welcome to the third dimension!", 10, 40, 20, DARKGRAY);
+
+            DrawFPS(10, 10);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
