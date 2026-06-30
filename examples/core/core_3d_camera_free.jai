@@ -2,14 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera free");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define the camera to look into our 3d world
     camera: Camera3D;
@@ -26,31 +29,30 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_FREE);
 
-        if (IsKeyPressed(#char "Z")) camera.target = Vector3.{ 0.0, 0.0, 0.0 };
+        if (IsKeyPressed(.KEY_Z)) camera.target = Vector3.{ 0.0, 0.0, 0.0 };
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
-            {
                 BeginMode3D(camera);
-                defer EndMode3D();
 
                 DrawCube(cubePosition, 2.0, 2.0, 2.0, RED);
                 DrawCubeWires(cubePosition, 2.0, 2.0, 2.0, MAROON);
 
                 DrawGrid(10, 1.0);
-            }
+            
+            EndMode3D();
 
             DrawRectangle( 10, 10, 320, 93, Fade(SKYBLUE, 0.5));
             DrawRectangleLines( 10, 10, 320, 93, BLUE);
@@ -59,7 +61,13 @@ main :: () {
             DrawText("- Mouse Wheel to Zoom in-out", 40, 40, 10, DARKGRAY);
             DrawText("- Mouse Wheel Pressed to Pan", 40, 60, 10, DARKGRAY);
             DrawText("- Z to zoom to (0, 0, 0)", 40, 80, 10, DARKGRAY);
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

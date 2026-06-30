@@ -6,7 +6,11 @@ delayBufferSize : u32 = 0;
 delayReadIndex  : u32 = 2;
 delayWriteIndex : u32 = 0;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -121,7 +125,8 @@ main :: () {
 // Audio effect: lowpass filter
 low: [2]float = .[ 0.0, 0.0 ];
 
-AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {    
+AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call
+{
     cutoff : float : 70.0 / 44100.0; // 70 Hz lowpass filter
     k      : float : cast(float)(cutoff / (cutoff + 0.1591549431)); // RC filter formula
 
@@ -142,7 +147,8 @@ AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call {
 }
 
 // Audio effect: delay
-AudioProcessEffectDelay :: (buffer: *void, frames: u32) #c_call {
+AudioProcessEffectDelay :: (buffer: *void, frames: u32) #c_call
+{
     _buffer: *float = cast(*float)buffer;
 
     i : u32 = 0;

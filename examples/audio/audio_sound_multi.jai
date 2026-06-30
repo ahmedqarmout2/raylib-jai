@@ -6,7 +6,11 @@ MAX_SOUNDS : s32 : 10;
 soundArray   : [MAX_SOUNDS]Sound;
 currentSound : s32;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization

@@ -18,14 +18,19 @@ EnvItem :: struct {
     color: Color;
 }
 
-main :: () {
+CameraFunc :: #type (camera: *Camera2D, player: *Player, items: []EnvItem, delta: float, w: s32, h: s32);
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera platformer");
-    defer CloseWindow(); // Close window and OpenGL context
 
     player: Player;
     player.position = Vector2.{ 400, 280 };
@@ -45,8 +50,6 @@ main :: () {
     camera.rotation = 0.0;
     camera.zoom = 1.0;
 
-    CameraFunc :: #type (camera: *Camera2D, player: *Player, items: []EnvItem, delta: float, w: s32, h: s32);
-
     cameraUpdaters: [5]CameraFunc = .[
         UpdateCameraCenter,
         UpdateCameraCenterInsideMap,
@@ -54,7 +57,7 @@ main :: () {
         UpdateCameraEvenOutOnLanding,
         UpdateCameraPlayerBoundsPush
     ];
-    
+
     cameraOption         : s32 = 0;
     cameraUpdatersLength : s32 = 5;
     
@@ -66,22 +69,25 @@ main :: () {
         "Player push camera on getting too close to screen edge"
     ];
 
-    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())
+    {
         // Update
         //----------------------------------------------------------------------------------
         deltaTime : float = GetFrameTime();
-        
+
         UpdatePlayer(*player, envItems, deltaTime);
 
         camera.zoom += (cast(float)GetMouseWheelMove()*0.05);
 
         if camera.zoom > 3.0 camera.zoom = 3.0;
         else if camera.zoom < 0.25 camera.zoom = 0.25;
-        
-        if IsKeyPressed(.KEY_R) {
+
+        if IsKeyPressed(.KEY_R)
+        {
             camera.zoom = 1.0;
             player.position = Vector2.{ 400, 280 };
         }
@@ -94,15 +100,11 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(LIGHTGRAY);
 
-            {
-                BeginMode2D(camera);
-                defer EndMode2D();
+            BeginMode2D(camera);
 
                 for envItems  DrawRectangleRec(it.rect, it.color);
 
@@ -110,36 +112,48 @@ main :: () {
                 DrawRectangleRec(playerRect, RED);
 
                 DrawCircleV(player.position, 5.0, GOLD);
-            }
+
+            EndMode2D();
 
             DrawText("Controls:", 20, 20, 10, BLACK);
             DrawText("- Right/Left to move", 40, 40, 10, DARKGRAY);
             DrawText("- Space to jump", 40, 60, 10, DARKGRAY);
-            DrawText("- Mouse Wheel to Zoom in-out, R to reset zoom", 40, 80, 10, DARKGRAY);
-            DrawText("- C to change camera mode", 40, 100, 10, DARKGRAY);
-            DrawText("Current camera mode:", 20, 120, 10, BLACK);
-            DrawText(get_c_string(cameraDescriptions[cameraOption]), 40, 140, 10, DARKGRAY);
-        }
+            DrawText("- Mouse Wheel to Zoom in-out", 40, 80, 10, DARKGRAY);
+            DrawText("- R to reset position + zoom", 40, 100, 10, DARKGRAY);
+            DrawText("- C to change camera mode", 40, 120, 10, DARKGRAY);
+            DrawText("Current camera mode:", 20, 140, 10, BLACK);
+            DrawText(get_c_string(cameraDescriptions[cameraOption]), 40, 160, 10, DARKGRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
-UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float) {
+UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float)
+{
     if (IsKeyDown(.KEY_LEFT)) player.position.x -= PLAYER_HOR_SPD*delta;
     if (IsKeyDown(.KEY_RIGHT)) player.position.x += PLAYER_HOR_SPD*delta;
-    if (IsKeyDown(.KEY_SPACE) && player.canJump) {
+    if (IsKeyDown(.KEY_SPACE) && player.canJump)
+    {
         player.speed = -PLAYER_JUMP_SPD;
         player.canJump = false;
     }
 
     hitObstacle: bool = false;
-    for envItems {
+    for envItems
+    {
         p : *Vector2 = *player.position;
         if (it.blocking &&
             it.rect.x <= p.x &&
             it.rect.x + it.rect.width >= p.x &&
             it.rect.y >= p.y &&
-            it.rect.y <= p.y + player.speed*delta) {
+            it.rect.y <= p.y + player.speed*delta)
+        {
             hitObstacle = true;
             player.speed = 0.0;
             p.y = it.rect.y;
@@ -147,19 +161,23 @@ UpdatePlayer :: (player: *Player, envItems: []EnvItem, delta: float) {
         }
     }
 
-    if (!hitObstacle) {
+    if (!hitObstacle)
+    {
         player.position.y += player.speed*delta;
         player.speed += G*delta;
         player.canJump = false;
-    } else player.canJump = true;
+    }
+    else player.canJump = true;
 }
 
-UpdateCameraCenter :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
+UpdateCameraCenter :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32)
+{
     camera.offset = Vector2.{ width/2.0, height/2.0 };
     camera.target = player.position;
 }
 
-UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
+UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32)
+{
     camera.target = player.position;
     camera.offset = Vector2.{ width/2.0, height/2.0 };
     minX: float = 1000;
@@ -167,7 +185,8 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
     maxX: float = -1000;
     maxY: float = -1000;
 
-    for envItems {
+    for envItems
+    {
         minX = min(it.rect.x, minX);
         maxX = max(it.rect.x + it.rect.width, maxX);
         minY = min(it.rect.y, minY);
@@ -183,7 +202,8 @@ UpdateCameraCenterInsideMap :: (camera: *Camera2D, player: *Player, envItems: []
     if min_val.y > 0 camera.offset.y = height/2 - min_val.y;
 }
 
-UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
+UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32)
+{
     minSpeed: float = 30;
     minEffectLength: float = 10;
     fractionSpeed: float = 0.8;
@@ -192,7 +212,8 @@ UpdateCameraCenterSmoothFollow :: (camera: *Camera2D, player: *Player, envItems:
     diff: Vector2 = Vector2Subtract(player.position, camera.target);
     length: float = Vector2Length(diff);
 
-    if (length > minEffectLength) {
+    if (length > minEffectLength)
+    {
         speed: float = max(fractionSpeed*length, minSpeed);
         camera.target = Vector2Add(camera.target, Vector2Scale(diff, speed*delta/length));
     }
@@ -202,19 +223,24 @@ evenOutSpeed  : float = 700;
 eveningOut    : s32 = 0;
 evenOutTarget : float;
 
-UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
+UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32)
+{
     camera.offset   = Vector2.{ width/2.0, height/2.0 };
     camera.target.x = player.position.x;
 
-    if (eveningOut) {
-        if (evenOutTarget > camera.target.y) {
+    if (eveningOut)
+    {
+        if (evenOutTarget > camera.target.y)
+        {
             camera.target.y += evenOutSpeed*delta;
 
             if (camera.target.y > evenOutTarget) {
                 camera.target.y = evenOutTarget;
                 eveningOut = 0;
             }
-        } else {
+        }
+        else
+        {
             camera.target.y -= evenOutSpeed*delta;
 
             if (camera.target.y < evenOutTarget) {
@@ -222,8 +248,11 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
                 eveningOut = 0;
             }
         }
-    } else {
-        if (player.canJump && (player.speed == 0) && (player.position.y != camera.target.y)) {
+    }
+    else
+    {
+        if (player.canJump && (player.speed == 0) && (player.position.y != camera.target.y))
+        {
             eveningOut = 1;
             evenOutTarget = player.position.y;
         }
@@ -232,7 +261,8 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
 
 bbox : Vector2 = .{ 0.2, 0.2 };
 
-UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32) {
+UpdateCameraPlayerBoundsPush :: (camera: *Camera2D, player: *Player, envItems: []EnvItem, delta: float, width: s32, height: s32)
+{
     bboxWorldMin: Vector2 = GetScreenToWorld2D(Vector2.{ (1 - bbox.x)*0.5*width, (1 - bbox.y)*0.5*height }, camera.*);
     bboxWorldMax: Vector2 = GetScreenToWorld2D(Vector2.{ (1 + bbox.x)*0.5*width, (1 + bbox.y)*0.5*height }, camera.*);
     camera.offset = Vector2.{ (1 - bbox.x)*0.5 * width, (1 - bbox.y)*0.5*height };

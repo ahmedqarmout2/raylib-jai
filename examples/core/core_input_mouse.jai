@@ -2,14 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - mouse input");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - input mouse");
 
     ballPosition : Vector2 = .{ -100.0, -100.0 };
     ballColor    : Color   = DARKBLUE;
@@ -17,9 +20,17 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
+        if (IsKeyPressed(.KEY_H))
+        {
+            if (IsCursorHidden()) ShowCursor();
+            else HideCursor();
+        }
+
         ballPosition = GetMousePosition();
 
         if      (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT))    ballColor = MAROON;
@@ -34,13 +45,23 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawCircleV(ballPosition, 40, ballColor);
+            DrawCircleV(ballPosition, 40, ballColor);
 
-        DrawText("move ball with mouse and click mouse button to change color", 10, 10, 20, DARKGRAY);
+            DrawText("move ball with mouse and click mouse button to change color", 10, 10, 20, DARKGRAY);
+            DrawText("Press 'H' to toggle cursor visibility", 10, 30, 20, DARKGRAY);
+
+            if (IsCursorHidden()) DrawText("CURSOR HIDDEN", 20, 60, 20, RED);
+            else DrawText("CURSOR VISIBLE", 20, 60, 20, LIME);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

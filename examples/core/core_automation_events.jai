@@ -20,7 +20,11 @@ EnvElement :: struct {
     color    : Color;
 };
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -29,7 +33,6 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - automation events");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Define player
     player: Player;
@@ -66,18 +69,22 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())
+    {
         // Update
         //----------------------------------------------------------------------------------
         deltaTime : float = 0.015; //GetFrameTime();
 
         // Dropped files logic
         //----------------------------------------------------------------------------------
-        if (IsFileDropped()) {
+        if (IsFileDropped())
+        {
             droppedFiles: FilePathList = LoadDroppedFiles();
 
             // Supports loading .rgs style files (text or binary) and .png style palette images
-            if (IsFileExtension(droppedFiles.paths[0], ".txt;.rae")) {
+            if (IsFileExtension(droppedFiles.paths[0], ".txt;.rae"))
+            {
                 UnloadAutomationEventList(aelist);
                 aelist = LoadAutomationEventList(droppedFiles.paths[0]);
 
@@ -106,33 +113,38 @@ main :: () {
         //----------------------------------------------------------------------------------
         if (IsKeyDown(.KEY_LEFT))  player.position.x -= PLAYER_HOR_SPD*deltaTime;
         if (IsKeyDown(.KEY_RIGHT)) player.position.x += PLAYER_HOR_SPD*deltaTime;
-        if (IsKeyDown(.KEY_SPACE) && player.canJump) {
+        if (IsKeyDown(.KEY_SPACE) && player.canJump)
+        {
             player.speed = -PLAYER_JUMP_SPD;
             player.canJump = false;
         }
 
         hitObstacle: s32 = 0;
-        for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
+        for i: 0..MAX_ENVIRONMENT_ELEMENTS-1
+        {
             element: EnvElement = envElements[i];
             if (element.blocking &&
                 element.rect.x <= player.position.x &&
                 element.rect.x + element.rect.width >= player.position.x &&
                 element.rect.y >= player.position.y &&
-                element.rect.y <= player.position.y + player.speed*deltaTime) {
+                element.rect.y <= player.position.y + player.speed*deltaTime)
+                {
                 hitObstacle = 1;
                 player.speed = 0.0;
                 player.position.y = element.rect.y;
             }
         }
 
-        if (!hitObstacle) {
+        if (!hitObstacle)
+        {
             player.position.y += player.speed*deltaTime;
             player.speed += GRAVITY*deltaTime;
             player.canJump = false;
         }
         else player.canJump = true;
 
-        if (IsKeyPressed(.KEY_R)) {
+        if (IsKeyPressed(.KEY_R))
+        {
             // Reset game state
             player.position = Vector2.{ 400, 280 };
             player.speed = 0;
@@ -149,13 +161,16 @@ main :: () {
         // NOTE: Logic must be before Camera update because it depends on mouse-wheel value, 
         // that can be set by the played event... but some other inputs could be affected
         //----------------------------------------------------------------------------------
-        if (eventPlaying) {
+        if (eventPlaying)
+        {
             // NOTE: Multiple events could be executed in a single frame
-            while (playFrameCounter == aelist.events[currentPlayFrame].frame) {
+            while (playFrameCounter == aelist.events[currentPlayFrame].frame)
+            {
                 PlayAutomationEvent(aelist.events[currentPlayFrame]);
                 currentPlayFrame += 1;
 
-                if (currentPlayFrame == aelist.count) {
+                if (currentPlayFrame == aelist.count)
+                {
                     eventPlaying = false;
                     currentPlayFrame = 0;
                     playFrameCounter = 0;
@@ -183,7 +198,8 @@ main :: () {
         if (camera.zoom > 3.0) camera.zoom = 3.0;
         else if (camera.zoom < 0.25) camera.zoom = 0.25;
 
-        for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
+        for i: 0..MAX_ENVIRONMENT_ELEMENTS-1
+        {
             element: EnvElement = envElements[i];
             minX = min(element.rect.x, minX);
             maxX = max(element.rect.x + element.rect.width, maxX);
@@ -201,23 +217,31 @@ main :: () {
         //----------------------------------------------------------------------------------
         
         // Toggle events recording
-        if (IsKeyPressed(.KEY_S)) {
-            if (!eventPlaying) {
-                if (eventRecording) {
+        if (IsKeyPressed(.KEY_S))
+        {
+            if (!eventPlaying)
+            {
+                if (eventRecording)
+                {
                     StopAutomationEventRecording();
                     eventRecording = false;
                     
                     ExportAutomationEventList(aelist, "automation.rae");
                     
                     TraceLog(.LOG_INFO, "RECORDED FRAMES: %i", aelist.count);
-                } else {
+                }
+                else
+                {
                     SetAutomationEventBaseFrame(180);
                     StartAutomationEventRecording();
                     eventRecording = true;
                 }
             }
-        } else if (IsKeyPressed(.KEY_A)) {
-            if (!eventRecording && (aelist.count > 0)) {
+        }
+        else if (IsKeyPressed(.KEY_A))
+        {
+            if (!eventRecording && (aelist.count > 0))
+            {
                 // Reset scene state to play
                 eventPlaying = true;
                 playFrameCounter = 0;
@@ -234,16 +258,19 @@ main :: () {
             }
         }
         
-        if (eventPlaying) {
+        if (eventPlaying)
+        {
             // NOTE: Multiple events could be executed in a single frame
-            while (playFrameCounter == aelist.events[currentPlayFrame].frame) {
+            while (playFrameCounter == aelist.events[currentPlayFrame].frame)
+            {
                 TraceLog(.LOG_INFO, "PLAYING: PlayFrameCount: %i | currentPlayFrame: %i | Event Frame: %i, param: %i", 
                     playFrameCounter, currentPlayFrame, aelist.events[currentPlayFrame].frame, aelist.events[currentPlayFrame].params[0]);
                 
                 PlayAutomationEvent(aelist.events[currentPlayFrame]);
                 currentPlayFrame += 1;
 
-                if (currentPlayFrame == aelist.count) {
+                if (currentPlayFrame == aelist.count)
+                {
                     eventPlaying = false;
                     currentPlayFrame = 0;
                     playFrameCounter = 0;
@@ -262,15 +289,11 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(LIGHTGRAY);
 
-            {
-                BeginMode2D(camera);
-                defer EndMode2D();
+            BeginMode2D(camera);
 
                 // Draw environment elements
                 for i: 0..MAX_ENVIRONMENT_ELEMENTS-1 {
@@ -279,7 +302,7 @@ main :: () {
 
                 // Draw player rectangle
                 DrawRectangleRec(Rectangle.{ player.position.x - 20, player.position.y - 40, 40, 40 }, RED);
-            }
+            EndMode2D();
 
             // Draw game controls
             DrawRectangle(10, 10, 290, 145, Fade(SKYBLUE, 0.5));
@@ -294,20 +317,29 @@ main :: () {
             DrawText("- A: REPLAY LAST RECORDED INPUT EVENTS", 30, 130, 10, BLACK);
 
             // Draw automation events recording indicator
-            if (eventRecording) {
+            if (eventRecording)
+            {
                 DrawRectangle(10, 160, 290, 30, Fade(RED, 0.3));
                 DrawRectangleLines(10, 160, 290, 30, Fade(MAROON, 0.8));
                 DrawCircle(30, 175, 10, MAROON);
 
                 if (((frameCounter/15)%2) == 1) DrawText(TextFormat("RECORDING EVENTS... [%i]", aelist.count), 50, 170, 10, MAROON);
-            } else if (eventPlaying) {
+            }
+            else if (eventPlaying)
+            {
                 DrawRectangle(10, 160, 290, 30, Fade(LIME, 0.3));
                 DrawRectangleLines(10, 160, 290, 30, Fade(DARKGREEN, 0.8));
                 DrawTriangle(Vector2.{ 20, 155 + 10 }, Vector2.{ 20, 155 + 30 }, Vector2.{ 40, 155 + 20 }, DARKGREEN);
 
                 if (((frameCounter/15)%2) == 1) DrawText(TextFormat("PLAYING RECORDED EVENTS... [%i]", currentPlayFrame), 50, 170, 10, DARKGREEN);
             }
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

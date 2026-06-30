@@ -12,7 +12,11 @@ CircleWave :: struct {
     color    : Color;
 };
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
