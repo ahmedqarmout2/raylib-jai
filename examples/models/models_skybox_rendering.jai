@@ -2,12 +2,13 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -15,7 +16,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - skybox loading and drawing");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - skybox rendering");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -37,10 +38,9 @@ main :: () {
     skybox.materials[0].shader = LoadShader(TextFormat("resources/shaders/glsl%i/skybox.vs", GLSL_VERSION),
                                             TextFormat("resources/shaders/glsl%i/skybox.fs", GLSL_VERSION));
 
-    value: s32 = cast(s32)(ifx useHDR then 1 else 0);
     SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "environmentMap"), *(s32.[cast(s32)MaterialMapIndex.MATERIAL_MAP_CUBEMAP]), .SHADER_UNIFORM_INT);
-    SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "doGamma"), *(s32.[value]), .SHADER_UNIFORM_INT);
-    SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "vflipped"), *(s32.[value]), .SHADER_UNIFORM_INT);
+    SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "doGamma"), *(s32.[cast(s32)(ifx useHDR then 1 else 0)]), .SHADER_UNIFORM_INT);
+    SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "vflipped"), *(s32.[cast(s32)(ifx useHDR then 1 else 0)]), .SHADER_UNIFORM_INT);
 
     // Load cubemap shader and setup required shader locations
     shdrCubemap: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/cubemap.vs", GLSL_VERSION),
@@ -61,7 +61,7 @@ main :: () {
         // NOTE 1: New texture is generated rendering to texture, shader calculates the sphere->cube coordinates mapping
         // NOTE 2: It seems on some Android devices WebGL, fbo does not properly support a FLOAT-based attachment,
         // despite texture can be successfully created.. so using PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 instead of PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
-        skybox.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(shdrCubemap, panorama, 1024, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+        skybox.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(shdrCubemap, panorama, 1024, .RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 
         UnloadTexture(panorama);        // Texture not required anymore, cubemap already generated
     }
@@ -102,7 +102,7 @@ main :: () {
                         panorama: Texture2D = LoadTexture(droppedFiles.paths[0]);
 
                         // Generate cubemap from panorama texture
-                        skybox.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(shdrCubemap, panorama, 1024, .PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+                        skybox.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(shdrCubemap, panorama, 1024, .RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
                         
                         UnloadTexture(panorama);    // Texture not required anymore, cubemap already generated
                     }
@@ -161,7 +161,7 @@ main :: () {
 }
 
 // Generate cubemap texture from HDR texture
-GenTextureCubemap :: (shader: Shader, panorama: Texture2D, size: s32, format: PixelFormat) -> TextureCubemap
+GenTextureCubemap :: (shader: Shader, panorama: Texture2D, size: s32, format: rlPixelFormat) -> TextureCubemap
 {
     cubemap: TextureCubemap;
 
@@ -244,7 +244,7 @@ GenTextureCubemap :: (shader: Shader, panorama: Texture2D, size: s32, format: Pi
     cubemap.width = size;
     cubemap.height = size;
     cubemap.mipmaps = 1;
-    cubemap.format = format;
+    cubemap.format = cast(PixelFormat)format;
 
     return cubemap;
 }

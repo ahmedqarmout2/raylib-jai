@@ -59,8 +59,7 @@ main :: ()
 
     // Set shader value: ambient light level
     ambientLoc: s32 = GetShaderLocation(shader, "ambient");
-    value: [4]float = .[0.2, 0.2, 0.2, 1.0];
-    SetShaderValue(shader, ambientLoc, *value, .SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader, ambientLoc, *(float.[0.2, 0.2, 0.2, 1.0]), .SHADER_UNIFORM_VEC4);
 
     // Create one light
     CreateLight(.LIGHT_DIRECTIONAL, Vector3.{50.0, 50.0, 0.0}, Vector3Zero(), WHITE, shader);

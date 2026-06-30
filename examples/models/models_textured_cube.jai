@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,7 +14,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - draw cube texture");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - textured cube");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -72,7 +76,8 @@ main :: () {
 //------------------------------------------------------------------------------------
 // Draw cube textured
 // NOTE: Cube position is the center position
-DrawCubeTexture :: (texture: Texture2D, position: Vector3, width: float, height: float, length: float, color: Color) {
+DrawCubeTexture :: (texture: Texture2D, position: Vector3, width: float, height: float, length: float, color: Color)
+{
     x: float = position.x;
     y: float = position.y;
     z: float = position.z;
@@ -133,7 +138,8 @@ DrawCubeTexture :: (texture: Texture2D, position: Vector3, width: float, height:
 }
 
 // Draw cube with texture piece applied to all faces
-DrawCubeTextureRec :: (texture: Texture2D, source: Rectangle, position: Vector3, width: float, height: float, length: float, color: Color) {
+DrawCubeTextureRec :: (texture: Texture2D, source: Rectangle, position: Vector3, width: float, height: float, length: float, color: Color)
+{
     x: float = position.x;
     y: float = position.y;
     z: float = position.z;

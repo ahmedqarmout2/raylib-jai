@@ -4,7 +4,11 @@
 
 FLT_MAX :: FLOAT32_MAX;     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -50,6 +54,7 @@ main :: () {
 
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
+
     // Main game loop
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
@@ -117,7 +122,8 @@ main :: () {
 
             // Check ray collision against model meshes
             meshHitInfo: RayCollision;
-            for m: 0..tower.meshCount-1 {
+            for m: 0..tower.meshCount-1
+            {
                 // NOTE: We consider the model.transform for the collision check but 
                 // it can be checked against any transform Matrix, used when checking against same
                 // model drawn multiple times with multiple transforms

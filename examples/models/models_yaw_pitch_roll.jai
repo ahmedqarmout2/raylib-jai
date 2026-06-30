@@ -2,14 +2,18 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     //SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - plane rotations (yaw, pitch, roll)");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - yaw pitch roll");
 
     camera: Camera;
     camera.position = Vector3.{ 0.0, 50.0, -120.0 };// Camera position perspective
@@ -20,6 +24,9 @@ main :: () {
 
     model: Model = LoadModel("resources/models/obj/plane.obj");                  // Load model
     texture: Texture2D = LoadTexture("resources/models/obj/plane_diffuse.png");  // Load model texture
+
+    SetTextureWrap(texture, .TEXTURE_WRAP_REPEAT);       // Force Repeat to avoid issue on Web version
+
     model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;            // Set map diffuse texture
 
     pitch: float = 0.0;

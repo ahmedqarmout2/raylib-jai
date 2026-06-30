@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,7 +14,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - drawing billboards");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - billboard rendering");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -69,10 +73,13 @@ main :: () {
                 DrawGrid(10, 1.0);        // Draw a grid
 
                 // Draw order matters!
-                if (distanceStatic > distanceRotating)  {
+                if (distanceStatic > distanceRotating)
+                {
                     DrawBillboard(camera, bill, billPositionStatic, 2.0, WHITE);
                     DrawBillboardPro(camera, bill, source, billPositionRotating, billUp, size, origin, rotation, WHITE);
-                } else {
+                }
+                else
+                {
                     DrawBillboardPro(camera, bill, source, billPositionRotating, billUp, size, origin, rotation, WHITE);
                     DrawBillboard(camera, bill, billPositionStatic, 2.0, WHITE);
                 }

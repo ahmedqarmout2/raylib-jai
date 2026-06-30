@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,25 +14,27 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - loading gltf animations");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - loading gltf");
 
     // Define the camera to look into our 3d world
     camera: Camera;
     camera.position = Vector3.{ 6.0, 6.0, 6.0 };    // Camera position
     camera.target = Vector3.{ 0.0, 2.0, 0.0 };      // Camera looking at point
     camera.up = Vector3.{ 0.0, 1.0, 0.0 };          // Camera up vector (rotation towards target)
-    camera.fovy = 45.0;                                // Camera field-of-view Y
-    camera.projection = .CAMERA_PERSPECTIVE;             // Camera projection type
+    camera.fovy = 45.0;                             // Camera field-of-view Y
+    camera.projection = .CAMERA_PERSPECTIVE;        // Camera projection type
 
     // Load gltf model
     model: Model = LoadModel("resources/models/gltf/robot.glb");
     position: Vector3 = .{ 0.0, 0.0, 0.0 }; // Set model position
     
-    // Load gltf model animations
-    animsCount: s32 = 0;
-    animIndex: s32 = 0;
-    animCurrentFrame: s32 = 0;
-    modelAnimations: *ModelAnimation = LoadModelAnimations("resources/models/gltf/robot.glb", *animsCount);
+    // Load model animations
+    animCount: s32 = 0;
+    anims: *ModelAnimation = LoadModelAnimations("resources/models/gltf/robot.glb", *animCount);
+
+    // Animation playing variables
+    animIndex: s32 = 0;         // Current animation playing
+    animCurrentFrame: s32 = 0;  // Current animation frame
 
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -41,13 +47,12 @@ main :: () {
         UpdateCamera(*camera, .CAMERA_ORBITAL);
 
         // Select current animation
-        if (IsMouseButtonPressed(.MOUSE_BUTTON_RIGHT)) animIndex = (animIndex + 1)%animsCount;
-        else if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT)) animIndex = (animIndex + animsCount - 1)%animsCount;
+        if (IsKeyPressed(.KEY_RIGHT)) animIndex = (animIndex + 1)%animCount;
+        else if (IsKeyPressed(.KEY_LEFT)) animIndex = (animIndex + animCount - 1)%animCount;
 
         // Update model animation
-        anim: ModelAnimation = modelAnimations[animIndex];
-        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-        UpdateModelAnimation(model, anim, animCurrentFrame);
+        animCurrentFrame = (animCurrentFrame + 1)%anims[animIndex].keyframeCount;
+        UpdateModelAnimation(model, anims[animIndex], cast(float)animCurrentFrame);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -57,12 +62,15 @@ main :: () {
             ClearBackground(RAYWHITE);
 
             BeginMode3D(camera);
-                DrawModel(model, position, 1.0, WHITE);    // Draw animated model
+
+                DrawModel(model, position, 1.0, WHITE);
+
                 DrawGrid(10, 1.0);
+
             EndMode3D();
 
-            DrawText("Use the LEFT/RIGHT mouse buttons to switch animation", 10, 10, 20, GRAY);
-            DrawText(TextFormat("Animation: %s", anim.name.data), 10, GetScreenHeight() - 20, 10, DARKGRAY);
+            DrawText(TextFormat("Current animation: %s", *anims[animIndex].name), 10, 40, 20, MAROON);
+            DrawText("Use the LEFT/RIGHT keys to switch animation", 10, 10, 20, GRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -70,7 +78,8 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadModel(model);         // Unload model and meshes/material
+    UnloadModelAnimations(anims, animCount); // Unload model animations data
+    UnloadModel(model);         // Unload model
 
     CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

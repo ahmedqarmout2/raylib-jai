@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -65,11 +69,14 @@ main :: () {
 
         // Check map collisions using image data and player position
         // TODO: Improvement: Just check player surrounding cells for collision
-        for y: 0..cubicmap.height-1 {
-            for x: 0..cubicmap.width-1 {
+        for y: 0..cubicmap.height-1
+        {
+            for x: 0..cubicmap.width-1
+            {
                 if ((mapPixels[y*cubicmap.width + x].r == 255) &&       // Collision: white pixel, only check R channel
                     (CheckCollisionCircleRec(playerPos, playerRadius,
-                    Rectangle.{ mapPosition.x - 0.5 + x*1.0, mapPosition.z - 0.5 + y*1.0, 1.0, 1.0 }))) {
+                    Rectangle.{ mapPosition.x - 0.5 + x*1.0, mapPosition.z - 0.5 + y*1.0, 1.0, 1.0 })))
+                {
                     // Collision detected, reset camera position
                     camera.position = oldCamPos;
                 }

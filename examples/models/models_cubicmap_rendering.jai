@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,7 +14,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - cubesmap loading and drawing");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - cubicmap rendering");
 
     // Define the camera to look into our 3d world
     camera: Camera;

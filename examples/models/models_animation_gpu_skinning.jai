@@ -2,12 +2,13 @@
 #import "Basic";
 #import "Math";
 
-#if OS == .WINDOWS || OS == .MACOS
-    GLSL_VERSION :: 330;
-else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    GLSL_VERSION :: 100;
+GLSL_VERSION :: 330;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -15,7 +16,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - GPU skinning");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - animation gpu skinning");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -26,23 +27,23 @@ main :: () {
     camera.projection = .CAMERA_PERSPECTIVE;         // Camera projection type
 
     // Load gltf model
-    characterModel: Model = LoadModel("resources/models/gltf/greenman.glb"); // Load character model
-    
-    // Load skinning shader
-    skinningShader: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/skinning.vs", GLSL_VERSION),
-                                       TextFormat("resources/shaders/glsl%i/skinning.fs", GLSL_VERSION));
-    
-    characterModel.materials[1].shader = skinningShader;
-    
-    // Load gltf model animations
-    animsCount: s32 = 0;
-    animIndex: s32 = 0;
-    animCurrentFrame: s32 = 0;
-    modelAnimations: *ModelAnimation = LoadModelAnimations("resources/models/gltf/greenman.glb", *animsCount);
-
+    model: Model = LoadModel("resources/models/gltf/greenman.glb"); // Load character model
     position: Vector3 = .{ 0.0, 0.0, 0.0 }; // Set model position
 
-    DisableCursor();                    // Limit cursor to relative movement inside the window
+    // Load skinning shader
+    // WARNING: GPU skinning must be enabled in raylib with a compilation flag,
+    // if not enabled, CPU skinning will be used instead
+    skinningShader: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/skinning.vs", GLSL_VERSION),
+                                       TextFormat("resources/shaders/glsl%i/skinning.fs", GLSL_VERSION));
+    model.materials[1].shader = skinningShader;
+
+    // Load gltf model animations
+    animCount: s32 = 0;
+    anims: *ModelAnimation = LoadModelAnimations("resources/models/gltf/greenman.glb", *animCount);
+
+    // Animation playing variables
+    animIndex: s32 = 0;         // Current animation playing
+    animCurrentFrame: s32 = 0;  // Current animation frame
 
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -55,14 +56,12 @@ main :: () {
         UpdateCamera(*camera, .CAMERA_THIRD_PERSON);
         
         // Select current animation
-        if (IsKeyPressed(.KEY_T)) animIndex = (animIndex + 1)%animsCount;
-        else if (IsKeyPressed(.KEY_G)) animIndex = (animIndex + animsCount - 1)%animsCount;
+        if (IsKeyPressed(.KEY_T)) animIndex = (animIndex + 1)%animCount;
+        else if (IsKeyPressed(.KEY_G)) animIndex = (animIndex + animCount - 1)%animCount;
 
         // Update model animation
-        anim: ModelAnimation = modelAnimations[animIndex];
-        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-        characterModel.transform = MatrixTranslate(position.x, position.y, position.z);
-        UpdateModelAnimationBones(characterModel, anim, animCurrentFrame);
+        animCurrentFrame = (animCurrentFrame + 1)%anims[animIndex].keyframeCount;
+        UpdateModelAnimation(model, anims[animIndex], cast(float)animCurrentFrame);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -73,13 +72,13 @@ main :: () {
 
             BeginMode3D(camera);
             
-                // Draw character mesh, pose calculation is done in shader (GPU skinning)
-                DrawMesh(characterModel.meshes[0], characterModel.materials[1], characterModel.transform);
+                DrawModel(model, position, 1.0, WHITE);
 
                 DrawGrid(10, 1.0);
                 
             EndMode3D();
 
+            DrawText(TextFormat("Current animation: %s", *anims[animIndex].name), 10, 40, 20, MAROON);
             DrawText("Use the T/G to switch animation", 10, 10, 20, GRAY);
 
         EndDrawing();
@@ -88,10 +87,10 @@ main :: () {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadModelAnimations(modelAnimations, animsCount); // Unload model animation
-    UnloadModel(characterModel);    // Unload model and meshes/material
+    UnloadModelAnimations(anims, animCount); // Unload model animation
+    UnloadModel(model);             // Unload model and meshes/material
     UnloadShader(skinningShader);   // Unload GPU skinning shader
-    
+
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

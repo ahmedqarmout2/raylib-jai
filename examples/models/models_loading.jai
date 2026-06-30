@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,7 +14,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - models loading");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - loading");
 
     // Define the camera to look into our 3d world
     camera: Camera;
@@ -33,8 +37,6 @@ main :: () {
 
     selected: bool = false;          // Selected object flag
 
-    DisableCursor();                // Limit cursor to relative movement inside the window
-
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
@@ -43,7 +45,7 @@ main :: () {
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(*camera, .CAMERA_FIRST_PERSON);
+        UpdateCamera(*camera, .CAMERA_ORBITAL);
 
         // Load new models/textures on drag&drop
         if (IsFileDropped())

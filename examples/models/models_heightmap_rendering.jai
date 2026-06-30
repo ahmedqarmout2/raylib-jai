@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,15 +14,15 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - heightmap loading and drawing");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - heightmap rendering");
 
     // Define our custom camera to look into our 3d world
     camera: Camera;
     camera.position = Vector3.{ 18.0, 21.0, 18.0 };     // Camera position
     camera.target = Vector3.{ 0.0, 0.0, 0.0 };          // Camera looking at point
     camera.up = Vector3.{ 0.0, 1.0, 0.0 };              // Camera up vector (rotation towards target)
-    camera.fovy = 45.0;                                    // Camera field-of-view Y
-    camera.projection = .CAMERA_PERSPECTIVE;                 // Camera projection type
+    camera.fovy = 45.0;                                 // Camera field-of-view Y
+    camera.projection = .CAMERA_PERSPECTIVE;            // Camera projection type
 
     image: Image = LoadImage("resources/heightmap.png");     // Load heightmap image (RAM)
     texture: Texture2D = LoadTextureFromImage(image);        // Convert image to texture (VRAM)

@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
@@ -14,7 +18,7 @@ main :: () {
     moonRadius: float = 0.16;
     moonOrbitRadius: float = 1.5;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - rlgl module usage with push/pop matrix transformations");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - rlgl solar system");
 
     // Define the camera to look into our 3d world
     camera: Camera;

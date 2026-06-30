@@ -1,4 +1,4 @@
-#version 100
+#version 120
 
 #define MAX_BONE_NUM 64
 

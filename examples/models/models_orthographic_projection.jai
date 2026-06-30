@@ -5,13 +5,17 @@
 FOVY_PERSPECTIVE   :: 45.0;
 WIDTH_ORTHOGRAPHIC :: 10.0;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - geometric shapes");
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - orthographic projection");
 
     // Define the camera to look into our 3d world
     camera: Camera = .{ .{ 0.0, 10.0, 10.0 }, .{ 0.0, 0.0, 0.0 }, .{ 0.0, 1.0, 0.0 }, FOVY_PERSPECTIVE, .CAMERA_PERSPECTIVE };

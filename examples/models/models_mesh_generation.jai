@@ -4,7 +4,11 @@
 
 NUM_MODELS :: 9;               // Parametric 3d shapes to generate
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -31,17 +35,8 @@ main :: () {
     models[7] = LoadModelFromMesh(GenMeshPoly(5, 2.0));
     models[8] = LoadModelFromMesh(GenMeshCustom());
     
-    // Generated meshes could be exported as .obj files
-    //ExportMesh(models[0].meshes[0], "plane.obj");
-    //ExportMesh(models[1].meshes[0], "cube.obj");
-    //ExportMesh(models[2].meshes[0], "sphere.obj");
-    //ExportMesh(models[3].meshes[0], "hemisphere.obj");
-    //ExportMesh(models[4].meshes[0], "cylinder.obj");
-    //ExportMesh(models[5].meshes[0], "torus.obj");
-    //ExportMesh(models[6].meshes[0], "knot.obj");
-    //ExportMesh(models[7].meshes[0], "poly.obj");
-    //ExportMesh(models[8].meshes[0], "custom.obj");
-
+    // NOTE: Generated meshes could be exported using ExportMesh()
+ 
     // Set checked texture as default diffuse component for all models material
     for i: 0..NUM_MODELS-1 models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 

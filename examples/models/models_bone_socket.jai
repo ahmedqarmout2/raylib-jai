@@ -7,7 +7,11 @@ BONE_SOCKET_HAT    :: 0;
 BONE_SOCKET_HAND_R :: 1;
 BONE_SOCKET_HAND_L :: 2;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -45,18 +49,22 @@ main :: () {
     boneSocketIndex: [BONE_SOCKETS]s32 = .[-1, -1, -1];
 
     // search bones for sockets 
-    for i: 0..characterModel.boneCount-1 {
-        if (TextIsEqual(characterModel.bones[i].name.data, "socket_hat")) {
+    for i: 0..characterModel.skeleton.boneCount-1
+    {
+        if (TextIsEqual(characterModel.skeleton.bones[i].name.data, "socket_hat"))
+        {
             boneSocketIndex[BONE_SOCKET_HAT] = i;
             continue;
         }
         
-        if (TextIsEqual(characterModel.bones[i].name.data, "socket_hand_R")) {
+        if (TextIsEqual(characterModel.skeleton.bones[i].name.data, "socket_hand_R"))
+        {
             boneSocketIndex[BONE_SOCKET_HAND_R] = i;
             continue;
         }
         
-        if (TextIsEqual(characterModel.bones[i].name.data, "socket_hand_L")) {
+        if (TextIsEqual(characterModel.skeleton.bones[i].name.data, "socket_hand_L"))
+        {
             boneSocketIndex[BONE_SOCKET_HAND_L] = i;
             continue;
         }
@@ -71,7 +79,8 @@ main :: () {
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose()) {       // Detect window close button or ESC key
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_THIRD_PERSON);
@@ -91,8 +100,8 @@ main :: () {
         
         // Update model animation
         anim: ModelAnimation = modelAnimations[animIndex];
-        animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-        UpdateModelAnimation(characterModel, anim, animCurrentFrame);
+        animCurrentFrame = (animCurrentFrame + 1)%anim.keyframeCount;
+        UpdateModelAnimation(characterModel, anim, cast(float)animCurrentFrame);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -105,15 +114,16 @@ main :: () {
                 // Draw character
                 characterRotate: Quaternion = QuaternionFromAxisAngle(Vector3.{0.0, 1.0, 0.0}, angle*DEG2RAD);
                 characterModel.transform = MatrixMultiply(QuaternionToMatrix(characterRotate), MatrixTranslate(position.x, position.y, position.z));
-                UpdateModelAnimation(characterModel, anim, animCurrentFrame);
+                UpdateModelAnimation(characterModel, anim, cast(float)animCurrentFrame);
                 DrawMesh(characterModel.meshes[0], characterModel.materials[1], characterModel.transform);
 
                 // Draw equipments (hat, sword, shield)
-                for i: 0..BONE_SOCKETS-1 {
+                for i: 0..BONE_SOCKETS-1
+                {
                     if (!showEquip[i]) continue;
 
-                    transform: *Transform = *anim.framePoses[animCurrentFrame][boneSocketIndex[i]];
-                    inRotation: Quaternion = characterModel.bindPose[boneSocketIndex[i]].rotation;
+                    transform: *Transform = *anim.keyframePoses[animCurrentFrame][boneSocketIndex[i]];
+                    inRotation: Quaternion = characterModel.skeleton.bindPose[boneSocketIndex[i]].rotation;
                     outRotation: Quaternion  = transform.rotation;
                     
                     // Calculate socket rotation (angle between bone in initial pose and same bone in current animation frame)

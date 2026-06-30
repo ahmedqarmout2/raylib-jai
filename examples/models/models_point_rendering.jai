@@ -5,7 +5,11 @@
 MAX_POINTS :: 10000000;     // 10 million
 MIN_POINTS :: 1000;         // 1 thousand
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
@@ -29,7 +33,7 @@ main :: () {
     mesh: Mesh = GenMeshPoints(numPoints);
     model: Model = LoadModelFromMesh(mesh);
     
-    //SetTargetFPS(60);
+    SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
     // Main game loop
@@ -64,15 +68,12 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+
             ClearBackground(BLACK);
 
             BeginMode3D(camera);
-
                 // The new method only uploads the points once to the GPU
-                if (useDrawModelPoints)
-                {
-                    DrawModelPoints(model, position, 1.0, WHITE);
-                }
+                if (useDrawModelPoints) DrawModelPoints(model, position, 1.0, WHITE);
                 else
                 {
                     // The old method must continually draw the "points" (lines)
@@ -96,7 +97,6 @@ main :: () {
 
                 // Draw a unit sphere for reference
                 DrawSphereWires(position, 1.0, 10, 10, YELLOW);
-                
             EndMode3D();
 
             // Draw UI text
@@ -122,6 +122,9 @@ main :: () {
     //--------------------------------------------------------------------------------------
 }
 
+//------------------------------------------------------------------------------------
+// Module Functions Definition
+//------------------------------------------------------------------------------------
 // Generate a spherical point cloud
 GenMeshPoints :: (numPoints: s32) -> Mesh
 {
@@ -133,7 +136,8 @@ GenMeshPoints :: (numPoints: s32) -> Mesh
     };
 
     // https://en.wikipedia.org/wiki/Spherical_coordinate_system
-    for i: 0..numPoints-1 {
+    for i: 0..numPoints-1
+    {
         theta: float = PI*GetRandomValue(0, S32_MAX)/S32_MAX;
         phi: float = 2.0*PI*GetRandomValue(0, S32_MAX)/S32_MAX;
         r: float = 10.0*GetRandomValue(0, S32_MAX)/S32_MAX;
@@ -154,4 +158,30 @@ GenMeshPoints :: (numPoints: s32) -> Mesh
     UploadMesh(*mesh, false);
     
     return mesh;
+}
+
+// Draw a model points
+// WARNING: OpenGL ES 2.0 does not support point mode drawing
+DrawModelPoints :: (model: Model, position: Vector3, scale: float, tint: Color)
+{
+    rlEnablePointMode();
+    rlDisableBackfaceCulling();
+
+    DrawModel(model, position, scale, tint);
+
+    rlEnableBackfaceCulling();
+    rlDisablePointMode();
+}
+
+// Draw a model points
+// WARNING: OpenGL ES 2.0 does not support point mode drawing
+DrawModelPointsEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color)
+{
+    rlEnablePointMode();
+    rlDisableBackfaceCulling();
+
+    DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
+
+    rlEnableBackfaceCulling();
+    rlDisablePointMode();
 }
