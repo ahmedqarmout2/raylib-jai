@@ -2,13 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - draw rectangle rounded");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - rounded rectangle drawing");
 
     roundness : float = 0.2;
     width     : float = 200.0;

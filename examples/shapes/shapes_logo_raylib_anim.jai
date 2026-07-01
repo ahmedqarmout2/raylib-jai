@@ -2,13 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - raylib logo animation");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - logo raylib anim");
 
     logoPositionX: s32 = screenWidth/2 - 128;
     logoPositionY: s32 = screenHeight/2 - 128;

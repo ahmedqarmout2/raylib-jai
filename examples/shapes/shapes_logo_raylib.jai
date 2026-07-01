@@ -2,13 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - raylib logo using shapes");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - logo raylib");
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------

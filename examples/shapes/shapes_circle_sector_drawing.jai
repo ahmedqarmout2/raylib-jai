@@ -8,7 +8,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - draw circle sector");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - circle sector drawing");
 
     center: Vector2 = .{(GetScreenWidth() - 300)/2.0, GetScreenHeight()/2.0 };
 

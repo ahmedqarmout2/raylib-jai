@@ -2,13 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - basic shapes drawing");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - basic shapes");
 
     rotation: float = 0.0;
 
@@ -33,8 +37,10 @@ main :: () {
 
             // Circle shapes and lines
             DrawCircle(screenWidth/5, 120, 35, DARKBLUE);
-            DrawCircleGradient(screenWidth/5, 220, 60, GREEN, SKYBLUE);
+            DrawCircleGradient(Vector2.{ screenWidth/5.0, 220.0 }, 60, GREEN, SKYBLUE);
             DrawCircleLines(screenWidth/5, 340, 80, DARKBLUE);
+            DrawEllipse(screenWidth/5, 120, 25, 20, YELLOW);
+            DrawEllipseLines(screenWidth/5, 120, 30, 25, YELLOW);
 
             // Rectangle shapes and lines
             DrawRectangle(screenWidth/4*2 - 60, 100, 120, 60, RED);

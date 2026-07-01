@@ -10,13 +10,17 @@ MAX_RECS_Y          :: 450/RECS_HEIGHT;
 
 PLAY_TIME_IN_FRAMES :: 240;                 // At 60 fps = 4 seconds
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - easings rectangle array");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - easings rectangles");
 
     recs: [MAX_RECS_X*MAX_RECS_Y]Rectangle;
 

@@ -2,13 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - draw ring");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - ring drawing");
 
     center: Vector2 = .{(GetScreenWidth() - 300)/2.0, GetScreenHeight()/2.0 };
 

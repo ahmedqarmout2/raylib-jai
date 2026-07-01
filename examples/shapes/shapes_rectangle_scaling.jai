@@ -4,13 +4,17 @@
 
 MOUSE_SCALE_MARK_SIZE :: 12;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - rectangle scaling mouse");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - rectangle scaling");
 
     rec: Rectangle = .{ 100, 100, 200, 80 };
 

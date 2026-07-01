@@ -2,14 +2,18 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     SetConfigFlags(.FLAG_MSAA_4X_HINT);
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - cubic-bezier lines");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - lines bezier");
 
     startPoint: Vector2 = .{ 30, 30 };
     endPoint: Vector2 = .{ cast(float)screenWidth - 30, cast(float)screenHeight - 30 };

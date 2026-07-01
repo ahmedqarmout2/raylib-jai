@@ -56,7 +56,7 @@ main :: ()
 
             EndMode3D();
 
-            DrawText("Enemy: 100/100", (int)cubeScreenPosition.x - MeasureText("Enemy: 100/100", 20)/2, cast(s32)cubeScreenPosition.y, 20, BLACK);
+            DrawText("Enemy: 100/100", cast(s32)cubeScreenPosition.x - MeasureText("Enemy: 100/100", 20)/2, cast(s32)cubeScreenPosition.y, 20, BLACK);
 
             DrawText(TextFormat("Cube position in screen space coordinates: [%i, %i]", cast(s32)cubeScreenPosition.x, cast(s32)cubeScreenPosition.y), 10, 10, 20, LIME);
             DrawText("Text 2d should be always on top of the cube", 10, 40, 20, GRAY);

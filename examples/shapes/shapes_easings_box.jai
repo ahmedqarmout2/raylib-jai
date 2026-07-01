@@ -2,13 +2,17 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - easings box anim");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - easings box");
 
     // Box variables to be animated with easings
     rec: Rectangle = .{ GetScreenWidth()/2.0, -100, 100, 100 };

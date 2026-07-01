@@ -19,7 +19,11 @@ SplineType :: enum s32 {
     SPLINE_BEZIER;           // Cubic Bezier
 };
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
@@ -78,15 +82,19 @@ main :: () {
         }
 
         // Spline point focus and selection logic
-        for i: 0..pointCount - 1
+        if ((selectedPoint == -1) && ((splineTypeActive != cast(s32) SplineType.SPLINE_BEZIER) || (selectedControlPoint == null)))
         {
-            if (CheckCollisionPointCircle(GetMousePosition(), points[i], 8.0))
+            focusedPoint = -1;
+            for i: 0..pointCount - 1
             {
-                focusedPoint = i;
-                if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) selectedPoint = i; 
-                break;
+                if (CheckCollisionPointCircle(GetMousePosition(), points[i], 8.0))
+                {
+                    focusedPoint = i;
+                    break;
+                }
+                else focusedPoint = -1;
             }
-            else focusedPoint = -1;
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) selectedPoint = focusedPoint;
         }
         
         // Spline point movement logic
@@ -100,21 +108,23 @@ main :: () {
         if ((splineTypeActive == cast(s32) SplineType.SPLINE_BEZIER) && (focusedPoint == -1))
         {
             // Spline control point focus and selection logic
-            for i: 0..pointCount - 2
+            if (selectedControlPoint == null)
             {
-                if (CheckCollisionPointCircle(GetMousePosition(), control[i].start, 6.0))
+                focusedControlPoint = null;
+                for i: 0..pointCount - 2
                 {
-                    focusedControlPoint = *control[i].start;
-                    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) selectedControlPoint = *control[i].start; 
-                    break;
+                    if (CheckCollisionPointCircle(GetMousePosition(), control[i].start, 6.0))
+                    {
+                        focusedControlPoint = *control[i].start;
+                        break;
+                    }
+                    else if (CheckCollisionPointCircle(GetMousePosition(), control[i].end, 6.0))
+                    {
+                        focusedControlPoint = *control[i].end;
+                        break;
+                    }
                 }
-                else if (CheckCollisionPointCircle(GetMousePosition(), control[i].end, 6.0))
-                {
-                    focusedControlPoint = *control[i].end;
-                    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) selectedControlPoint = *control[i].end; 
-                    break;
-                }
-                else focusedControlPoint = null;
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) selectedControlPoint = focusedControlPoint;
             }
             
             // Spline control point movement logic
@@ -130,6 +140,9 @@ main :: () {
         else if (IsKeyPressed(.KEY_TWO)) splineTypeActive = cast(s32) SplineType.SPLINE_BASIS;
         else if (IsKeyPressed(.KEY_THREE)) splineTypeActive = cast(s32) SplineType.SPLINE_CATMULLROM;
         else if (IsKeyPressed(.KEY_FOUR)) splineTypeActive = cast(s32) SplineType.SPLINE_BEZIER;
+
+        // Clear selection when changing to a spline without control points
+        if (IsKeyPressed(.KEY_ONE) || IsKeyPressed(.KEY_TWO) || IsKeyPressed(.KEY_THREE)) selectedControlPoint = null;
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -226,15 +239,15 @@ main :: () {
             }
 
             // Check all possible UI states that require controls lock
-            if (splineTypeEditMode) GuiLock();
-            
+            if (splineTypeEditMode || (selectedPoint != -1) || (selectedControlPoint != null)) GuiLock();
+
             // Draw spline config
             GuiLabel(Rectangle.{ 12, 62, 140, 24 }, TextFormat("Spline thickness: %i", cast(s32)splineThickness));
             GuiSliderBar(Rectangle.{ 12, 60 + 24, 140, 16 }, null, null, *splineThickness, 1.0, 40.0);
 
             GuiCheckBox(Rectangle.{ 12, 110, 20, 20 }, "Show point helpers", *splineHelpersActive);
 
-            GuiUnlock();
+            if (splineTypeEditMode) GuiUnlock();
 
             GuiLabel(Rectangle.{ 12, 10, 140, 24 }, "Spline type:");
             if (GuiDropdownBox(Rectangle.{ 12, 8 + 24, 140, 28 }, "LINEAR;BSPLINE;CATMULLROM;BEZIER", *splineTypeActive, splineTypeEditMode)) splineTypeEditMode = !splineTypeEditMode;
