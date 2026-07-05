@@ -1416,7 +1416,7 @@ LoadFontEx :: (fileName: *u8, fontSize: s32, codepoints: *s32, codepointCount: s
 LoadFontFromImage :: (image: Image, key: Color, firstChar: s32) -> Font #foreign raylib_native;
 LoadFontFromMemory :: (fileType: *u8, fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32) -> Font #foreign raylib_native;
 IsFontValid :: (font: Font) -> bool #foreign raylib_native;
-LoadFontData :: (fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType) -> *GlyphInfo #foreign raylib_native;
+LoadFontData :: (fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType, glyphCount: *s32) -> *GlyphInfo #foreign raylib_native;
 GenImageFontAtlas :: (glyphs: *GlyphInfo, glyphRecs: **Rectangle, glyphCount: s32, fontSize: s32, padding: s32, packMethod: s32) -> Image #foreign raylib_native;
 UnloadFontData :: (glyphs: *GlyphInfo, glyphCount: s32) #foreign raylib_native;
 UnloadFont :: (font: Font) #foreign raylib_native;

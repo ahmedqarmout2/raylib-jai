@@ -364,7 +364,7 @@ populate_improved_function_definitions_table :: () {
 
     Hash_Table.table_add(*g_improved_function_definitions, "GetCharPressed", "() -> u8");
 
-    Hash_Table.table_add(*g_improved_function_definitions, "LoadFontData", "(fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType) -> *GlyphInfo");
+    Hash_Table.table_add(*g_improved_function_definitions, "LoadFontData", "(fileData: *u8, dataSize: s32, fontSize: s32, codepoints: *s32, codepointCount: s32, type: FontType, glyphCount: *s32) -> *GlyphInfo");
 
     Hash_Table.table_add(*g_improved_function_definitions, "SetMouseCursor", "(cursor: MouseCursor)");
 
