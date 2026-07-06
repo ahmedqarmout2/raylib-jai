@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,8 +14,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - extract channel from image");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image kernel");
 
     image: Image = LoadImage("resources/cat.png");     // Loaded in CPU memory (RAM)
 
@@ -41,7 +44,8 @@ main :: () {
     ImageKernelConvolution(*catSobel, sobelkernel.data, 9);
 
     catGaussian: Image = ImageCopy(image);
-    for 0..5 {
+    for 0..5
+    {
         ImageKernelConvolution(*catGaussian, gaussiankernel.data, 9);
     }
 
@@ -52,16 +56,9 @@ main :: () {
     
     // Images converted to texture, GPU memory (VRAM)
     texture            : Texture2D = LoadTextureFromImage(image);
-    defer UnloadTexture(texture);
-
     catSharpendTexture : Texture2D = LoadTextureFromImage(catSharpend);
-    defer UnloadTexture(catSharpendTexture);
-
     catSobelTexture    : Texture2D = LoadTextureFromImage(catSobel);
-    defer UnloadTexture(catSobelTexture);
-
     catGaussianTexture : Texture2D = LoadTextureFromImage(catGaussian);
-    defer UnloadTexture(catGaussianTexture);
     
     // Once images have been converted to texture and uploaded to VRAM, 
     // they can be unloaded from RAM
@@ -73,32 +70,47 @@ main :: () {
     SetTargetFPS(60);     // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
-        // Nothing to do
+        // TODO: Update your variables here
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawTexture(catSharpendTexture, 0  , 0, WHITE);
-        DrawTexture(catSobelTexture   , 200, 0, WHITE);
-        DrawTexture(catGaussianTexture, 400, 0, WHITE);
-        DrawTexture(texture           , 600, 0, WHITE);
+            DrawTexture(catSharpendTexture, 0  , 0, WHITE);
+            DrawTexture(catSobelTexture   , 200, 0, WHITE);
+            DrawTexture(catGaussianTexture, 400, 0, WHITE);
+            DrawTexture(texture           , 600, 0, WHITE);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(texture);
+    UnloadTexture(catGaussianTexture);
+    UnloadTexture(catSobelTexture);
+    UnloadTexture(catSharpendTexture);
+
+    CloseWindow();                // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
-NormalizeKernel :: (kernel: *float, size: s32) {
+NormalizeKernel :: (kernel: *float, size: s32)
+{
     sum: float = 0.0;
     for 0..size-1 sum += kernel[it];
 
-    if (sum != 0.0) {
+    if (sum != 0.0)
+    {
         for 0..size-1 kernel[it] /= sum;
     }
 }

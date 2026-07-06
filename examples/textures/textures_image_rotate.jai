@@ -3,7 +3,11 @@
 
 NUM_TEXTURES: s32 : 3;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -11,8 +15,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture rotation");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image rotate");
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     image45    : Image = LoadImage("resources/raylib_logo.png");
@@ -32,10 +35,13 @@ main :: () {
     currentTexture: s32 = 0;
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
-        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT) || IsKeyPressed(.KEY_RIGHT)) {
+        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT) || IsKeyPressed(.KEY_RIGHT))
+        {
             currentTexture = (currentTexture + 1)%NUM_TEXTURES; // Cycle between the textures
         }
         //----------------------------------------------------------------------------------
@@ -43,18 +49,21 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawTexture(textures[currentTexture], screenWidth/2 - textures[currentTexture].width/2, screenHeight/2 - textures[currentTexture].height/2, WHITE);
+            DrawTexture(textures[currentTexture], screenWidth/2 - textures[currentTexture].width/2, screenHeight/2 - textures[currentTexture].height/2, WHITE);
 
-        DrawText("Press LEFT MOUSE BUTTON to rotate the image clockwise", 250, 420, 10, DARKGRAY);
+            DrawText("Press LEFT MOUSE BUTTON to rotate the image clockwise", 250, 420, 10, DARKGRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    for textures UnloadTexture(it);
+    for i: 0..NUM_TEXTURES-1 UnloadTexture(textures[i]);
+
+    CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

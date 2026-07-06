@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,13 +14,11 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] examples - texture source and destination rectangles");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - srcrec dstrec");
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
     scarfy: Texture2D = LoadTexture("resources/scarfy.png");        // Texture loading
-    defer UnloadTexture(scarfy);        // Texture unloading
 
     frameWidth  : s32 = scarfy.width/6;
     frameHeight : s32 = scarfy.height;
@@ -35,7 +37,9 @@ main :: () {
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         rotation += 1;
@@ -44,21 +48,29 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        // NOTE: Using DrawTexturePro() we can easily rotate and scale the part of the texture we draw
-        // sourceRec defines the part of the texture we use for drawing
-        // destRec defines the rectangle where our texture part will fit (scaling it to fit)
-        // origin defines the point of the texture used as reference for rotation and scaling
-        // rotation defines the texture rotation (using origin as rotation point)
-        DrawTexturePro(scarfy, sourceRec, destRec, origin, cast(float)rotation, WHITE);
+            // NOTE: Using DrawTexturePro() we can easily rotate and scale the part of the texture we draw
+            // sourceRec defines the part of the texture we use for drawing
+            // destRec defines the rectangle where our texture part will fit (scaling it to fit)
+            // origin defines the point of the texture used as reference for rotation and scaling
+            // rotation defines the texture rotation (using origin as rotation point)
+            DrawTexturePro(scarfy, sourceRec, destRec, origin, cast(float)rotation, WHITE);
 
-        DrawLine(cast(s32)destRec.x, 0, cast(s32)destRec.x, screenHeight, GRAY);
-        DrawLine(0, cast(s32)destRec.y, screenWidth, cast(s32)destRec.y, GRAY);
+            DrawLine(cast(s32)destRec.x, 0, cast(s32)destRec.x, screenHeight, GRAY);
+            DrawLine(0, cast(s32)destRec.y, screenWidth, cast(s32)destRec.y, GRAY);
 
-        DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
+            DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(scarfy);        // Texture unloading
+
+    CloseWindow();                // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

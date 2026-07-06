@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -11,18 +15,12 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - background scrolling");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // NOTE: Be careful, background width must be equal or bigger than screen width
     // if not, texture should be draw more than two times for scrolling effect
     background: Texture2D = LoadTexture("resources/cyberpunk_street_background.png");
-    defer UnloadTexture(background);  // Unload background texture
-
     midground : Texture2D = LoadTexture("resources/cyberpunk_street_midground.png");
-    defer UnloadTexture(midground);   // Unload midground texture
-
     foreground: Texture2D = LoadTexture("resources/cyberpunk_street_foreground.png");
-    defer UnloadTexture(foreground);  // Unload foreground texture
 
     scrollingBack: float = 0.0;
     scrollingMid : float = 0.0;
@@ -31,7 +29,9 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         scrollingBack -= 0.1;
@@ -46,9 +46,7 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginDrawing();
-            defer EndDrawing();
+        BeginDrawing();
 
             ClearBackground(GetColor(0x052c46ff));
 
@@ -67,7 +65,17 @@ main :: () {
 
             DrawText("BACKGROUND SCROLLING & PARALLAX", 10, 10, 20, RED);
             DrawText("(c) Cyberpunk Street Environment by Luis Zuno (@ansimuz)", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
-        }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(background);  // Unload background texture
+    UnloadTexture(midground);   // Unload midground texture
+    UnloadTexture(foreground);  // Unload foreground texture
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

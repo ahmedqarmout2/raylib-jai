@@ -4,7 +4,11 @@
 
 NUM_FRAMES: s32 : 3;       // Number of frames (rectangles) for the button sprite texture
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -13,16 +17,11 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - sprite button");
-    defer CloseWindow(); // Close window and OpenGL context
 
     InitAudioDevice();      // Initialize audio device
-    defer CloseAudioDevice();     // Close audio device
 
     fxButton : Sound     = LoadSound("resources/buttonfx.wav");   // Load button sound
-    defer UnloadSound(fxButton);  // Unload sound
-
     button   : Texture2D = LoadTexture("resources/button.png"); // Load button texture
-    defer UnloadTexture(button);  // Unload button texture
 
     // Define frame rectangle for drawing
     frameHeight: float = cast(float)button.height/NUM_FRAMES;
@@ -39,21 +38,26 @@ main :: () {
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         mousePoint = GetMousePosition();
         btnAction = false;
 
         // Check button state
-        if (CheckCollisionPointRec(mousePoint, btnBounds)) {
+        if (CheckCollisionPointRec(mousePoint, btnBounds))
+        {
             if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT)) btnState = 2;
             else btnState = 1;
 
             if (IsMouseButtonReleased(.MOUSE_BUTTON_LEFT)) btnAction = true;
-        } else btnState = 0;
+        }
+        else btnState = 0;
 
-        if (btnAction) {
+        if (btnAction)
+        {
             PlaySound(fxButton);
         }
 
@@ -64,11 +68,22 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawTextureRec(button, sourceRec, Vector2.{ btnBounds.x, btnBounds.y }, WHITE); // Draw button frame
+            DrawTextureRec(button, sourceRec, Vector2.{ btnBounds.x, btnBounds.y }, WHITE); // Draw button frame
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(button);  // Unload button texture
+    UnloadSound(fxButton);  // Unload sound
+
+    CloseAudioDevice();     // Close audio device
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

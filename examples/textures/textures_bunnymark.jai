@@ -2,7 +2,7 @@
 #import "Basic";
 #import "Math";
 
-MAX_BUNNIES: s32 : 50000;    // 50K bunnies limit
+MAX_BUNNIES: s32 : 80000;    // 80K bunnies limit
 
 // This is the maximum amount of elements (quads) per batch
 // NOTE: This value is defined in [rlgl] module and can be changed there
@@ -14,7 +14,11 @@ Bunny :: struct {
     color    : Color;
 };
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -23,31 +27,35 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - bunnymark");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Load bunny texture
-    texBunny: Texture2D = LoadTexture("resources/wabbit_alpha.png");
-    defer UnloadTexture(texBunny);    // Unload bunny texture
+    texBunny: Texture2D = LoadTexture("resources/raybunny.png");
 
     bunnies: [..]Bunny;    // Bunnies array
     array_resize(*bunnies, MAX_BUNNIES);
-    defer array_free(bunnies);        // Unload bunnies data array
 
     bunniesCount: s32 = 0;         // Bunnies counter
+
+    paused: bool = false;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
-        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT))
+        {
             // Create more bunnies
-            for i: 0..99 {
-                if (bunniesCount < MAX_BUNNIES) {
+            for i: 0..99
+            {
+                if (bunniesCount < MAX_BUNNIES)
+                {
                     bunnies[bunniesCount].position = GetMousePosition();
-                    bunnies[bunniesCount].speed.x  = cast(float)GetRandomValue(-250, 250)/60.0;
-                    bunnies[bunniesCount].speed.y  = cast(float)GetRandomValue(-250, 250)/60.0;
+                    bunnies[bunniesCount].speed.x  = cast(float)GetRandomValue(-250, 250);
+                    bunnies[bunniesCount].speed.y  = cast(float)GetRandomValue(-250, 250);
                     bunnies[bunniesCount].color    = Color.{
                         cast(u8)GetRandomValue(50, 240),
                         cast(u8) GetRandomValue(80, 240),
@@ -58,40 +66,57 @@ main :: () {
             }
         }
 
-        // Update bunnies
-        for i: 0..bunniesCount-1 {
-            bunnies[i].position.x += bunnies[i].speed.x;
-            bunnies[i].position.y += bunnies[i].speed.y;
+        if (IsKeyPressed(.KEY_P)) paused = !paused;
 
-            if (((bunnies[i].position.x + texBunny.width/2) > cast(float)GetScreenWidth()) ||
-                ((bunnies[i].position.x + texBunny.width/2) < 0)) bunnies[i].speed.x *= -1;
-            if (((bunnies[i].position.y + texBunny.height/2) > cast(float)GetScreenHeight()) ||
-                ((bunnies[i].position.y + texBunny.height/2 - 40) < 0)) bunnies[i].speed.y *= -1;
+        if (!paused)
+        {
+            // Update bunnies
+            for i: 0..bunniesCount-1
+            {
+                bunnies[i].position.x += bunnies[i].speed.x*GetFrameTime();
+                bunnies[i].position.y += bunnies[i].speed.y*GetFrameTime();
+
+                if (((bunnies[i].position.x + texBunny.width/2) > cast(float)GetScreenWidth()) ||
+                    ((bunnies[i].position.x + texBunny.width/2) < 0)) bunnies[i].speed.x *= -1;
+                if (((bunnies[i].position.y + texBunny.height/2) > cast(float)GetScreenHeight()) ||
+                    ((bunnies[i].position.y + texBunny.height/2 - 40) < 0)) bunnies[i].speed.y *= -1;
+            }
         }
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        for i: 0..bunniesCount-1 {
-            // NOTE: When internal batch buffer limit is reached (MAX_BATCH_ELEMENTS),
-            // a draw call is launched and buffer starts being filled again;
-            // before issuing a draw call, updated vertex data from internal CPU buffer is send to GPU...
-            // Process of sending data is costly and it could happen that GPU data has not been completely
-            // processed for drawing while new data is tried to be sent (updating current in-use buffers)
-            // it could generates a stall and consequently a frame drop, limiting the number of drawn bunnies
-            DrawTexture(texBunny, cast(s32)bunnies[i].position.x, cast(s32)bunnies[i].position.y, bunnies[i].color);
-        }
+            for i: 0..bunniesCount-1
+            {
+                // NOTE: When internal batch buffer limit is reached (MAX_BATCH_ELEMENTS),
+                // a draw call is launched and buffer starts being filled again;
+                // before issuing a draw call, updated vertex data from internal CPU buffer is send to GPU...
+                // Process of sending data is costly and it could happen that GPU data has not been completely
+                // processed for drawing while new data is tried to be sent (updating current in-use buffers)
+                // it could generates a stall and consequently a frame drop, limiting the number of drawn bunnies
+                DrawTexture(texBunny, cast(s32)bunnies[i].position.x, cast(s32)bunnies[i].position.y, bunnies[i].color);
+            }
 
-        DrawRectangle(0, 0, screenWidth, 40, BLACK);
-        DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 10, 20, GREEN);
-        DrawText(TextFormat("batched draw calls: %i", 1 + bunniesCount/MAX_BATCH_ELEMENTS), 320, 10, 20, MAROON);
+            DrawRectangle(0, 0, screenWidth, 40, BLACK);
+            DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 10, 20, GREEN);
+            DrawText(TextFormat("batched draw calls: %i", 1 + bunniesCount/MAX_BATCH_ELEMENTS), 320, 10, 20, MAROON);
 
-        DrawFPS(10, 10);
+            DrawFPS(10, 10);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    array_free(bunnies);           // Unload bunnies data array
+
+    UnloadTexture(texBunny);    // Unload bunny texture
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

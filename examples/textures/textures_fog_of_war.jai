@@ -14,14 +14,17 @@ Map :: struct {
     tileFog : [..]u8;         // Tile fog state (tilesX*tilesY), defines if a tile has fog or half-fog
 };
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - fog of war");
-    defer CloseWindow(); // Close window and OpenGL context
 
     map: Map;
     map.tilesX = 25;
@@ -31,11 +34,7 @@ main :: () {
     // probably we don't need that many values for fog state, it can be optimized
     // to use only 2 bits per fog state (reducing size by 4) but logic will be a bit more complex
     array_resize(*map.tileIds, map.tilesX*map.tilesY);
-    defer array_free(map.tileIds);        // Free allocated map tile ids
-
     array_resize(*map.tileFog, map.tilesX*map.tilesY);
-    defer array_free(map.tileFog);        // Free allocated map tile fog state
-
 
     // Load map tiles (generating 2 random tile ids for testing)
     // NOTE: Map tile ids should be probably loaded from an external map file
@@ -50,14 +49,15 @@ main :: () {
     // NOTE: To get an automatic smooth-fog effect we use a render texture to render fog
     // at a smaller size (one pixel per tile) and scale it on drawing with bilinear filtering
     fogOfWar: RenderTexture2D = LoadRenderTexture(map.tilesX, map.tilesY);
-    defer UnloadRenderTexture(fogOfWar);  // Unload render texture
-
     SetTextureFilter(fogOfWar.texture, .TEXTURE_FILTER_BILINEAR);
+    SetTextureWrap(fogOfWar.texture, .TEXTURE_WRAP_CLAMP);
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         // Move player around
@@ -88,50 +88,59 @@ main :: () {
 
         // Draw
         //----------------------------------------------------------------------------------
-        {
-            BeginTextureMode(fogOfWar);
-            defer EndTextureMode();
-
+        BeginTextureMode(fogOfWar);
             ClearBackground(BLANK);
             for y: 0..map.tilesY-1
                 for x: 0..map.tilesX-1
                     if (map.tileFog[y*map.tilesX + x] == 0) DrawRectangle(x, y, 1, 1, BLACK);
                     else if (map.tileFog[y*map.tilesX + x] == 2) DrawRectangle(x, y, 1, 1, Fade(BLACK, 0.8));
-        }
+        EndTextureMode();
 
         BeginDrawing();
-        defer EndDrawing();
+            ClearBackground(RAYWHITE);
 
-        ClearBackground(RAYWHITE);
-
-        for y: 0..map.tilesY-1 {
-            for x: 0..map.tilesX-1 {
-                // Draw tiles from id (and tile borders)
-                DrawRectangle(
-                    x*MAP_TILE_SIZE,
-                    y*MAP_TILE_SIZE,
-                    MAP_TILE_SIZE,
-                    MAP_TILE_SIZE,
-                    ifx(map.tileIds[y*map.tilesX + x] == 0) then BLUE else Fade(BLUE, 0.9));
-                DrawRectangleLines(x*MAP_TILE_SIZE, y*MAP_TILE_SIZE, MAP_TILE_SIZE, MAP_TILE_SIZE, Fade(DARKBLUE, 0.5));
+            for y: 0..map.tilesY-1
+            {
+                for x: 0..map.tilesX-1
+                {
+                    // Draw tiles from id (and tile borders)
+                    DrawRectangle(
+                        x*MAP_TILE_SIZE,
+                        y*MAP_TILE_SIZE,
+                        MAP_TILE_SIZE,
+                        MAP_TILE_SIZE,
+                        ifx(map.tileIds[y*map.tilesX + x] == 0) then BLUE else Fade(BLUE, 0.9));
+                    DrawRectangleLines(x*MAP_TILE_SIZE, y*MAP_TILE_SIZE, MAP_TILE_SIZE, MAP_TILE_SIZE, Fade(DARKBLUE, 0.5));
+                }
             }
-        }
 
-        // Draw player
-        DrawRectangleV(playerPosition, Vector2.{ cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE }, RED);
+            // Draw player
+            DrawRectangleV(playerPosition, Vector2.{ cast(float)PLAYER_SIZE, cast(float)PLAYER_SIZE }, RED);
 
-        // Draw fog of war (scaled to full map, bilinear filtering)
-        DrawTexturePro(
-            fogOfWar.texture,
-            Rectangle.{ 0, 0, cast(float)fogOfWar.texture.width,   cast(float)-fogOfWar.texture.height },
-            Rectangle.{ 0, 0, cast(float)map.tilesX*MAP_TILE_SIZE, cast(float)map.tilesY*MAP_TILE_SIZE },
-            Vector2.{ 0, 0 },
-            0.0,
-            WHITE);
+            // Draw fog of war (scaled to full map, bilinear filtering)
+            DrawTexturePro(
+                fogOfWar.texture,
+                Rectangle.{ 0, 0, cast(float)fogOfWar.texture.width,   cast(float)-fogOfWar.texture.height },
+                Rectangle.{ 0, 0, cast(float)map.tilesX*MAP_TILE_SIZE, cast(float)map.tilesY*MAP_TILE_SIZE },
+                Vector2.{ 0, 0 },
+                0.0,
+                WHITE);
 
-        // Draw player current tile
-        DrawText(TextFormat("Current tile: [%i,%i]", playerTileX, playerTileY), 10, 10, 20, RAYWHITE);
-        DrawText("ARROW KEYS to move", 10, screenHeight-25, 20, RAYWHITE);
+            // Draw player current tile
+            DrawText(TextFormat("Current tile: [%i,%i]", playerTileX, playerTileY), 10, 10, 20, RAYWHITE);
+            DrawText("ARROW KEYS to move", 10, screenHeight-25, 20, RAYWHITE);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    array_free(map.tileIds);   // Free allocated map tile ids
+    array_free(map.tileFog);   // Free allocated map tile fog state
+
+    UnloadRenderTexture(fogOfWar);  // Unload render texture
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

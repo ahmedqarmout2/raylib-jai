@@ -4,7 +4,11 @@
 
 MAX_POINTS: s32 : 11;      // 10 points and back to the start
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -12,8 +16,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - textured polygon");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - polygon drawing");
 
     // Define texture coordinates to map our texture to poly
     texcoords: [MAX_POINTS]Vector2 = .[
@@ -33,7 +36,8 @@ main :: () {
     // Define the base poly vertices from the UV's
     // NOTE: They can be specified in any other way
     points: [MAX_POINTS]Vector2;
-    for i: 0..MAX_POINTS-1 {
+    for i: 0..MAX_POINTS-1
+    {
         points[i].x = (texcoords[i].x - 0.5)*256.0;
         points[i].y = (texcoords[i].y - 0.5)*256.0;
     }
@@ -45,14 +49,15 @@ main :: () {
 
     // Load texture to be mapped to poly
     texture: Texture = LoadTexture("resources/cat.png");
-    defer UnloadTexture(texture); // Unload texture
 
     angle: float = 0.0;             // Rotation angle (in degrees)
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         angle += 1;
@@ -62,47 +67,55 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawText("textured polygon", 20, 20, 20, DARKGRAY);
+            DrawText("textured polygon", 20, 20, 20, DARKGRAY);
 
-        DrawTexturePoly(
-            texture,
-            Vector2.{ GetScreenWidth()/2.0, GetScreenHeight()/2.0 },
-            positions,
-            texcoords,
-            MAX_POINTS,
-            WHITE);
+            DrawTexturePoly(
+                texture,
+                Vector2.{ GetScreenWidth()/2.0, GetScreenHeight()/2.0 },
+                positions,
+                texcoords,
+                MAX_POINTS,
+                WHITE);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(texture); // Unload texture
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
 
 // Draw textured polygon, defined by vertex and texture coordinates
 // NOTE: Polygon center must have straight line path to all points
 // without crossing perimeter, points must be in anticlockwise order
-DrawTexturePoly :: (texture: Texture2D, center: Vector2, points: []Vector2, texcoords: []Vector2, pointCount: s32, tint: Color) {
+DrawTexturePoly :: (texture: Texture2D, center: Vector2, points: []Vector2, texcoords: []Vector2, pointCount: s32, tint: Color)
+{
     rlSetTexture(texture.id);
+    rlBegin(RL_TRIANGLES);
 
-    // Texturing is only supported on RL_QUADS
-    rlBegin(RL_QUADS);
+        rlColor4ub(tint.r, tint.g, tint.b, tint.a);
 
-    rlColor4ub(tint.r, tint.g, tint.b, tint.a);
+        for i: 0..pointCount - 2
+        {
+            rlTexCoord2f(0.5, 0.5);
+            rlVertex2f(center.x, center.y);
 
-    for i: 0..pointCount - 2 {
-        rlTexCoord2f(0.5, 0.5);
-        rlVertex2f(center.x, center.y);
+            rlTexCoord2f(texcoords[i].x, texcoords[i].y);
+            rlVertex2f(points[i].x + center.x, points[i].y + center.y);
 
-        rlTexCoord2f(texcoords[i].x, texcoords[i].y);
-        rlVertex2f(points[i].x + center.x, points[i].y + center.y);
+            rlTexCoord2f(texcoords[i + 1].x, texcoords[i + 1].y);
+            rlVertex2f(points[i + 1].x + center.x, points[i + 1].y + center.y);
 
-        rlTexCoord2f(texcoords[i + 1].x, texcoords[i + 1].y);
-        rlVertex2f(points[i + 1].x + center.x, points[i + 1].y + center.y);
-
-        rlTexCoord2f(texcoords[i + 1].x, texcoords[i + 1].y);
-        rlVertex2f(points[i + 1].x + center.x, points[i + 1].y + center.y);
-    }
+            rlTexCoord2f(texcoords[i + 1].x, texcoords[i + 1].y);
+            rlVertex2f(points[i + 1].x + center.x, points[i + 1].y + center.y);
+        }
     rlEnd();
 
     rlSetTexture(0);

@@ -5,7 +5,11 @@
 MAX_FRAME_SPEED: s32 : 15;
 MIN_FRAME_SPEED: s32 : 1;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -13,12 +17,10 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [texture] example - sprite anim");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - sprite animation");
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
     scarfy: Texture2D = LoadTexture("resources/scarfy.png");        // Texture loading
-    defer UnloadTexture(scarfy);       // Texture unloading
 
     position: Vector2   = .{ 350.0, 280.0 };
     frameRec: Rectangle = .{ 0.0, 0.0, cast(float)scarfy.width/6, cast(float)scarfy.height };
@@ -30,12 +32,15 @@ main :: () {
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         framesCounter += 1;
 
-        if (framesCounter >= (60/framesSpeed)) {
+        if (framesCounter >= (60/framesSpeed))
+        {
             framesCounter = 0;
             currentFrame += 1;
 
@@ -55,26 +60,35 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawTexture(scarfy, 15, 40, WHITE);
-        DrawRectangleLines(15, 40, scarfy.width, scarfy.height, LIME);
-        DrawRectangleLines(15 + cast(s32)frameRec.x, 40 + cast(s32)frameRec.y, cast(s32)frameRec.width, cast(s32)frameRec.height, RED);
+            DrawTexture(scarfy, 15, 40, WHITE);
+            DrawRectangleLines(15, 40, scarfy.width, scarfy.height, LIME);
+            DrawRectangleLines(15 + cast(s32)frameRec.x, 40 + cast(s32)frameRec.y, cast(s32)frameRec.width, cast(s32)frameRec.height, RED);
 
-        DrawText("FRAME SPEED: ", 165, 210, 10, DARKGRAY);
-        DrawText(TextFormat("%02i FPS", framesSpeed), 575, 210, 10, DARKGRAY);
-        DrawText("PRESS RIGHT/LEFT KEYS to CHANGE SPEED!", 290, 240, 10, DARKGRAY);
+            DrawText("FRAME SPEED: ", 165, 210, 10, DARKGRAY);
+            DrawText(TextFormat("%02i FPS", framesSpeed), 575, 210, 10, DARKGRAY);
+            DrawText("PRESS RIGHT/LEFT KEYS to CHANGE SPEED!", 290, 240, 10, DARKGRAY);
 
-        for i: 0..MAX_FRAME_SPEED-1 {
-            if (i < framesSpeed) DrawRectangle(250 + 21*i, 205, 20, 20, RED);
-            DrawRectangleLines(250 + 21*i, 205, 20, 20, MAROON);
-        }
+            for i: 0..MAX_FRAME_SPEED-1
+            {
+                if (i < framesSpeed) DrawRectangle(250 + 21*i, 205, 20, 20, RED);
+                DrawRectangleLines(250 + 21*i, 205, 20, 20, MAROON);
+            }
 
-        DrawTextureRec(scarfy, frameRec, position, WHITE);  // Draw part of the texture
+            DrawTextureRec(scarfy, frameRec, position, WHITE);  // Draw part of the texture
 
-        DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
+            DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(scarfy);       // Texture unloading
+
+    CloseWindow();                // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

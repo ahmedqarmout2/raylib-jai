@@ -4,7 +4,11 @@
 
 MAX_COLORS_COUNT: s32 : 23;          // Number of colors available
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -13,7 +17,6 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - mouse painting");
-    defer CloseWindow(); // Close window and OpenGL context
 
     // Colors to choose from
     colors: [MAX_COLORS_COUNT]Color = .[
@@ -44,7 +47,8 @@ main :: () {
     // Define colorsRecs data (for every rectangle)
     colorsRecs: [MAX_COLORS_COUNT]Rectangle;
 
-    for i: 0..MAX_COLORS_COUNT-1 {
+    for i: 0..MAX_COLORS_COUNT-1
+    {
         colorsRecs[i].x      = 10 + 30.0*i + 2*i;
         colorsRecs[i].y      = 10;
         colorsRecs[i].width  = 30;
@@ -64,7 +68,6 @@ main :: () {
 
     // Create a RenderTexture2D to use as a canvas
     target: RenderTexture2D = LoadRenderTexture(screenWidth, screenHeight);
-    defer UnloadRenderTexture(target);    // Unload render texture
 
     // Clear render texture before entering the game loop
     BeginTextureMode(target);
@@ -74,7 +77,9 @@ main :: () {
     SetTargetFPS(120);              // Set our game to run at 120 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
         mousePos: Vector2 = GetMousePosition();
@@ -87,15 +92,18 @@ main :: () {
         else if (colorSelected < 0) colorSelected = 0;
 
         // Choose color with mouse
-        for i: 0..MAX_COLORS_COUNT-1 {
-            if (CheckCollisionPointRec(mousePos, colorsRecs[i])) {
+        for i: 0..MAX_COLORS_COUNT-1
+        {
+            if (CheckCollisionPointRec(mousePos, colorsRecs[i]))
+            {
                 colorMouseHover = i;
                 break;
             }
             else colorMouseHover = -1;
         }
 
-        if ((colorMouseHover >= 0) && IsMouseButtonPressed(.MOUSE_BUTTON_LEFT)) {
+        if ((colorMouseHover >= 0) && IsMouseButtonPressed(.MOUSE_BUTTON_LEFT))
+        {
             colorSelected = colorMouseHover;
             colorSelectedPrev = colorSelected;
         }
@@ -105,14 +113,16 @@ main :: () {
         if (brushSize < 2) brushSize = 2;
         if (brushSize > 50) brushSize = 50;
 
-        if (IsKeyPressed(.KEY_C)) {
+        if (IsKeyPressed(.KEY_C))
+        {
             // Clear render texture to clear color
             BeginTextureMode(target);
             ClearBackground(colors[0]);
             EndTextureMode();
         }
 
-        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT) || (GetGestureDetected() == .GESTURE_DRAG)) {
+        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT) || (GetGestureDetected() == .GESTURE_DRAG))
+        {
             // Paint circle into render texture
             // NOTE: To avoid discontinuous circles, we could store
             // previous-next mouse points and just draw a line using brush size
@@ -121,8 +131,10 @@ main :: () {
             EndTextureMode();
         }
 
-        if (IsMouseButtonDown(.MOUSE_BUTTON_RIGHT)) {
-            if (!mouseWasPressed) {
+        if (IsMouseButtonDown(.MOUSE_BUTTON_RIGHT))
+        {
+            if (!mouseWasPressed)
+            {
                 colorSelectedPrev = colorSelected;
                 colorSelected = 0;
             }
@@ -133,7 +145,9 @@ main :: () {
             BeginTextureMode(target);
             if (mousePos.y > 50) DrawCircle(cast(s32)mousePos.x, cast(s32)mousePos.y, brushSize, colors[0]);
             EndTextureMode();
-        } else if (IsMouseButtonReleased(.MOUSE_BUTTON_RIGHT) && mouseWasPressed) {
+        }
+        else if (IsMouseButtonReleased(.MOUSE_BUTTON_RIGHT) && mouseWasPressed)
+        {
             colorSelected = colorSelectedPrev;
             mouseWasPressed = false;
         }
@@ -144,7 +158,8 @@ main :: () {
 
         // Image saving logic
         // NOTE: Saving painted texture to a default named image
-        if ((btnSaveMouseHover && IsMouseButtonReleased(.MOUSE_BUTTON_LEFT)) || IsKeyPressed(.KEY_S)) {
+        if ((btnSaveMouseHover && IsMouseButtonReleased(.MOUSE_BUTTON_LEFT)) || IsKeyPressed(.KEY_S))
+        {
             image: Image = LoadImageFromTexture(target.texture);
             ImageFlipVertical(*image);
             ExportImage(image, "my_amazing_texture_painting.png");
@@ -152,10 +167,12 @@ main :: () {
             showSaveMessage = true;
         }
 
-        if (showSaveMessage) {
+        if (showSaveMessage)
+        {
             // On saving, show a full screen message for 2 seconds
             saveMessageCounter += 1;
-            if (saveMessageCounter > 240) {
+            if (saveMessageCounter > 240)
+            {
                 showSaveMessage = false;
                 saveMessageCounter = 0;
             }
@@ -165,48 +182,57 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-        DrawTextureRec(target.texture, Rectangle.{ 0, 0, cast(float)target.texture.width, cast(float)-target.texture.height }, Vector2.{ 0, 0 }, WHITE);
+            // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+            DrawTextureRec(target.texture, Rectangle.{ 0, 0, cast(float)target.texture.width, cast(float)-target.texture.height }, Vector2.{ 0, 0 }, WHITE);
 
-        // Draw drawing circle for reference
-        if (mousePos.y > 50) {
-            if (IsMouseButtonDown(.MOUSE_BUTTON_RIGHT)) DrawCircleLines(cast(s32)mousePos.x, cast(s32)mousePos.y, brushSize, GRAY);
-            else DrawCircle(GetMouseX(), GetMouseY(), brushSize, colors[colorSelected]);
-        }
+            // Draw drawing circle for reference
+            if (mousePos.y > 50)
+            {
+                if (IsMouseButtonDown(.MOUSE_BUTTON_RIGHT)) DrawCircleLines(cast(s32)mousePos.x, cast(s32)mousePos.y, brushSize, GRAY);
+                else DrawCircle(GetMouseX(), GetMouseY(), brushSize, colors[colorSelected]);
+            }
 
-        // Draw top panel
-        DrawRectangle(0, 0, GetScreenWidth(), 50, RAYWHITE);
-        DrawLine(0, 50, GetScreenWidth(), 50, LIGHTGRAY);
+            // Draw top panel
+            DrawRectangle(0, 0, GetScreenWidth(), 50, RAYWHITE);
+            DrawLine(0, 50, GetScreenWidth(), 50, LIGHTGRAY);
 
-        // Draw color selection rectangles
-        for i: 0..MAX_COLORS_COUNT-1 DrawRectangleRec(colorsRecs[i], colors[i]);
-        DrawRectangleLines(10, 10, 30, 30, LIGHTGRAY);
+            // Draw color selection rectangles
+            for i: 0..MAX_COLORS_COUNT-1 DrawRectangleRec(colorsRecs[i], colors[i]);
+            DrawRectangleLines(10, 10, 30, 30, LIGHTGRAY);
 
-        if (colorMouseHover >= 0) DrawRectangleRec(colorsRecs[colorMouseHover], Fade(WHITE, 0.6));
+            if (colorMouseHover >= 0) DrawRectangleRec(colorsRecs[colorMouseHover], Fade(WHITE, 0.6));
+            DrawRectangleLinesEx(
+                Rectangle.{
+                    colorsRecs[colorSelected].x - 2,
+                    colorsRecs[colorSelected].y - 2,
+                    colorsRecs[colorSelected].width + 4,
+                    colorsRecs[colorSelected].height + 4 },
+                2,
+                BLACK);
 
-        DrawRectangleLinesEx(
-            Rectangle.{
-                colorsRecs[colorSelected].x - 2,
-                colorsRecs[colorSelected].y - 2,
-                colorsRecs[colorSelected].width + 4,
-                colorsRecs[colorSelected].height + 4 },
-            2,
-            BLACK);
+            // Draw save image button
+            DrawRectangleLinesEx(btnSaveRec, 2, ifx btnSaveMouseHover then RED else BLACK);
+            DrawText("SAVE!", 755, 20, 10, ifx btnSaveMouseHover then RED else BLACK);
 
-        // Draw save image button
-        DrawRectangleLinesEx(btnSaveRec, 2, ifx btnSaveMouseHover then RED else BLACK);
-        DrawText("SAVE!", 755, 20, 10, ifx btnSaveMouseHover then RED else BLACK);
+            // Draw save image message
+            if (showSaveMessage)
+            {
+                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8));
+                DrawRectangle(0, 150, GetScreenWidth(), 80, BLACK);
+                DrawText("IMAGE SAVED!", 150, 180, 20, RAYWHITE);
+            }
 
-        // Draw save image message
-        if (showSaveMessage) {
-            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8));
-            DrawRectangle(0, 150, GetScreenWidth(), 80, BLACK);
-            DrawText("IMAGE SAVED:  my_amazing_texture_painting.png", 150, 180, 20, RAYWHITE);
-        }
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadRenderTexture(target);    // Unload render texture
+
+    CloseWindow();                  // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

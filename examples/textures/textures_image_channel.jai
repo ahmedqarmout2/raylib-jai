@@ -2,7 +2,11 @@
 #import "Basic";
 #import "Math";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,8 +14,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - extract channel from image");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image channel");
 
     fudesumiImage: Image = LoadImage("resources/fudesumi.png");
 
@@ -30,22 +33,11 @@ main :: () {
     backgroundImage: Image = GenImageChecked(screenWidth, screenHeight, screenWidth/20, screenHeight/20, ORANGE, YELLOW);
 
     fudesumiTexture   : Texture2D = LoadTextureFromImage(fudesumiImage);
-    defer UnloadTexture(fudesumiTexture);
-
     textureAlpha      : Texture2D = LoadTextureFromImage(imageAlpha);
-    defer UnloadTexture(textureAlpha);
-
     textureRed        : Texture2D = LoadTextureFromImage(imageRed);
-    defer UnloadTexture(textureRed);
-
     textureGreen      : Texture2D = LoadTextureFromImage(imageGreen);
-    defer UnloadTexture(textureGreen);
-
     textureBlue       : Texture2D = LoadTextureFromImage(imageBlue);
-    defer UnloadTexture(textureBlue);
-
     backgroundTexture : Texture2D = LoadTextureFromImage(backgroundImage);
-    defer UnloadTexture(backgroundTexture);
 
     UnloadImage(fudesumiImage);
     UnloadImage(imageAlpha);
@@ -54,8 +46,6 @@ main :: () {
     UnloadImage(imageBlue);
     UnloadImage(backgroundImage);
 
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-
     fudesumiRec: Rectangle = .{0, 0, fudesumiImage.width*1.0, fudesumiImage.height*1.0};
 
     fudesumiPos : Rectangle = .{50, 10, fudesumiImage.width*0.8, fudesumiImage.height*0.8};
@@ -63,26 +53,43 @@ main :: () {
     greenPos    : Rectangle = .{600, 10, fudesumiPos.width / 2, fudesumiPos.height / 2};
     bluePos     : Rectangle = .{410, 230, fudesumiPos.width / 2, fudesumiPos.height / 2};
     alphaPos    : Rectangle = .{600, 230, fudesumiPos.width / 2, fudesumiPos.height / 2};
+
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
-        // Nothing to do
+        // TODO: Update your variables here
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        DrawTexture(backgroundTexture, 0, 0, WHITE);
-        DrawTexturePro(fudesumiTexture, fudesumiRec, fudesumiPos, Vector2.{0, 0}, 0, WHITE);
+            DrawTexture(backgroundTexture, 0, 0, WHITE);
+            DrawTexturePro(fudesumiTexture, fudesumiRec, fudesumiPos, Vector2.{0, 0}, 0, WHITE);
 
-        DrawTexturePro(textureRed, fudesumiRec, redPos, Vector2.{0, 0}, 0, RED);
-        DrawTexturePro(textureGreen, fudesumiRec, greenPos, Vector2.{0, 0}, 0, GREEN);
-        DrawTexturePro(textureBlue, fudesumiRec, bluePos, Vector2.{0, 0}, 0, BLUE);
-        DrawTexturePro(textureAlpha, fudesumiRec, alphaPos, Vector2.{0, 0}, 0, WHITE);
+            DrawTexturePro(textureRed, fudesumiRec, redPos, Vector2.{0, 0}, 0, RED);
+            DrawTexturePro(textureGreen, fudesumiRec, greenPos, Vector2.{0, 0}, 0, GREEN);
+            DrawTexturePro(textureBlue, fudesumiRec, bluePos, Vector2.{0, 0}, 0, BLUE);
+            DrawTexturePro(textureAlpha, fudesumiRec, alphaPos, Vector2.{0, 0}, 0, WHITE);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(backgroundTexture);
+    UnloadTexture(fudesumiTexture);
+    UnloadTexture(textureRed);
+    UnloadTexture(textureGreen);
+    UnloadTexture(textureBlue);
+    UnloadTexture(textureAlpha);
+
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }

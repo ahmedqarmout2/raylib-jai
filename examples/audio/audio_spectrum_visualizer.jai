@@ -2,8 +2,6 @@
 #import "Basic";
 #import "Math";
 
-GLSL_VERSION :: 330;
-
 MONO                          :: 1;
 SAMPLE_RATE                   :: 44100;
 SAMPLE_RATE_F                 :: 44100.0;
@@ -38,6 +36,8 @@ FFTData :: struct {
     lastFftTime: float64;
     tapbackPos: float;
 };
+
+GLSL_VERSION :: 330;
 
 //------------------------------------------------------------------------------------
 // Program main entry point

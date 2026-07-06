@@ -3,7 +3,11 @@
 
 NUM_TEXTURES: s32 : 9;      // Currently we have 8 generation algorithms but some are have multiple purposes (Linear and Square Gradients)
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -11,8 +15,7 @@ main :: () {
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - procedural images generation");
-    defer CloseWindow(); // Close window and OpenGL context
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image generation");
 
     verticalGradient   : Image = GenImageGradientLinear(screenWidth, screenHeight, 0, RED, BLUE);
     horizontalGradient : Image = GenImageGradientLinear(screenWidth, screenHeight, 90, RED, BLUE);
@@ -52,10 +55,13 @@ main :: () {
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())
+    {
         // Update
         //----------------------------------------------------------------------------------
-        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT) || IsKeyPressed(.KEY_RIGHT)) {
+        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT) || IsKeyPressed(.KEY_RIGHT))
+        {
             currentTexture = (currentTexture + 1)%NUM_TEXTURES; // Cycle between the textures
         }
         //----------------------------------------------------------------------------------
@@ -63,33 +69,37 @@ main :: () {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawTexture(textures[currentTexture], 0, 0, WHITE);
+            DrawTexture(textures[currentTexture], 0, 0, WHITE);
 
-        DrawRectangle(30, 400, 325, 30, Fade(SKYBLUE, 0.5));
-        DrawRectangleLines(30, 400, 325, 30, Fade(WHITE, 0.5));
-        DrawText("MOUSE LEFT BUTTON to CYCLE PROCEDURAL TEXTURES", 40, 410, 10, WHITE);
+            DrawRectangle(30, 400, 325, 30, Fade(SKYBLUE, 0.5));
+            DrawRectangleLines(30, 400, 325, 30, Fade(WHITE, 0.5));
+            DrawText("MOUSE LEFT BUTTON to CYCLE PROCEDURAL TEXTURES", 40, 410, 10, WHITE);
 
-        if currentTexture == {
-            case 0; DrawText("VERTICAL GRADIENT", 560, 10, 20, RAYWHITE);
-            case 1; DrawText("HORIZONTAL GRADIENT", 540, 10, 20, RAYWHITE);
-            case 2; DrawText("DIAGONAL GRADIENT", 540, 10, 20, RAYWHITE);
-            case 3; DrawText("RADIAL GRADIENT", 580, 10, 20, LIGHTGRAY);
-            case 4; DrawText("SQUARE GRADIENT", 580, 10, 20, LIGHTGRAY);
-            case 5; DrawText("CHECKED", 680, 10, 20, RAYWHITE);
-            case 6; DrawText("WHITE NOISE", 640, 10, 20, RED);
-            case 7; DrawText("PERLIN NOISE", 640, 10, 20, RED);
-            case 8; DrawText("CELLULAR", 670, 10, 20, RAYWHITE);
-        }
+            if currentTexture == {
+                case 0; DrawText("VERTICAL GRADIENT", 560, 10, 20, RAYWHITE);
+                case 1; DrawText("HORIZONTAL GRADIENT", 540, 10, 20, RAYWHITE);
+                case 2; DrawText("DIAGONAL GRADIENT", 540, 10, 20, RAYWHITE);
+                case 3; DrawText("RADIAL GRADIENT", 580, 10, 20, LIGHTGRAY);
+                case 4; DrawText("SQUARE GRADIENT", 580, 10, 20, LIGHTGRAY);
+                case 5; DrawText("CHECKED", 680, 10, 20, RAYWHITE);
+                case 6; DrawText("WHITE NOISE", 640, 10, 20, RED);
+                case 7; DrawText("PERLIN NOISE", 640, 10, 20, RED);
+                case 8; DrawText("CELLULAR", 670, 10, 20, RAYWHITE);
+            }
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+
     // Unload textures data (GPU VRAM)
-    for textures UnloadTexture(it);
+    for i: 0..NUM_TEXTURES-1 UnloadTexture(textures[i]);
+
+    CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

@@ -1,7 +1,11 @@
 #import "raylib";
 #import "Basic";
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization
@@ -10,8 +14,6 @@ main :: () {
     screenHeight : s32 : 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture to image");
-    defer CloseWindow(); // Close window and OpenGL context
-
 
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
@@ -23,27 +25,37 @@ main :: () {
     UnloadTexture(texture);                                 // Unload texture from GPU memory (VRAM)
 
     texture = LoadTextureFromImage(image);                  // Recreate texture from retrieved image data (RAM -> VRAM)
-    defer UnloadTexture(texture);       // Texture unloading
-
     UnloadImage(image);                                     // Unload retrieved image data from CPU memory (RAM)
-    //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) { // Detect window close button or ESC key
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //---------------------------------------------------------------------------------------
+
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
         // Update
         //----------------------------------------------------------------------------------
-        // Nothing to do
+        // TODO: Update your variables here
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        defer EndDrawing();
 
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
 
-        DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
+            DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
 
-        DrawText("this IS a texture loaded from an image!", 300, 370, 10, GRAY);
+            DrawText("this IS a texture loaded from an image!", 300, 370, 10, GRAY);
+
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(texture);       // Texture unloading
+
+    CloseWindow();                // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 }
