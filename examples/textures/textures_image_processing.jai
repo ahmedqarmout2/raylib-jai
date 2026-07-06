@@ -106,7 +106,7 @@ main :: ()
             // NOTE: Image processing is a costly CPU process to be done every frame,
             // If image processing is required in a frame-basis, it should be done
             // with a texture and by shaders
-            if get_image_process_value(currentProcess) == {
+            if cast(ImageProcess)currentProcess == {
                 case .COLOR_GRAYSCALE;  ImageColorGrayscale(*imCopy);
                 case .COLOR_TINT;       ImageColorTint(*imCopy, GREEN);
                 case .COLOR_INVERT;     ImageColorInvert(*imCopy);
@@ -156,16 +156,4 @@ main :: ()
 
     CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
-}
-
-get_image_process_value :: (i: s32) -> ImageProcess {
-    if i == 1 return .COLOR_GRAYSCALE;
-    if i == 2 return .COLOR_TINT;
-    if i == 3 return .COLOR_INVERT;
-    if i == 4 return .COLOR_CONTRAST;
-    if i == 5 return .COLOR_BRIGHTNESS;
-    if i == 6 return .GAUSSIAN_BLUR;
-    if i == 7 return .FLIP_VERTICAL;
-    if i == 8 return .FLIP_HORIZONTAL;
-    return .NONE;
 }
