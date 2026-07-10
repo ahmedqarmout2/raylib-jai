@@ -1,22 +1,45 @@
-Basic      :: #import "Basic";
-BuildCpp   :: #import "BuildCpp";
-Compiler   :: #import "Compiler";
-File       :: #import "File";
-Hash_Table :: #import "Hash_Table";
-String     :: #import "String";
+Basic       :: #import "Basic";
+BuildCpp    :: #import "BuildCpp";
+Compiler    :: #import "Compiler";
+File        :: #import "File";
+Hash_Table  :: #import "Hash_Table";
+Print_Color :: #import "Print_Color";
+Process     :: #import "Process";
+String      :: #import "String";
+System      :: #import "System";
 
 String_Builder   :: Basic.String_Builder;
 Table            :: Hash_Table.Table;
 print            :: Basic.print;
 print_to_builder :: Basic.print_to_builder;
 
+Command_Options :: struct {
+    is_verbose                : bool = false;
+    print_help                : bool = false;
+    build_raygui              : bool = false;
+    compile_audio_examples    : bool = false;
+    compile_core_examples     : bool = false;
+    compile_models_examples   : bool = false;
+    compile_shaders_examples  : bool = false;
+    compile_shapes_examples   : bool = false;
+    compile_text_examples     : bool = false;
+    compile_textures_examples : bool = false;
+    output_unrecognized_code  : bool = false;
+}
+
+Binder :: struct {
+    name          : string = "";
+    input_file    : string = "";
+    header        : string = "";
+    footer        : string = "";
+    line_counter  : int = -1;
+    lines_count   : int = 0;
+    is_successful : bool = false;
+};
+
 g_improved_function_definitions : Table(string, string);
 g_improved_struct_elements      : Table(string, string);
 g_improved_definitions          : Table(string, string);
-
-g_line_counter : int;
-g_lines_count  : int;
-g_generate_raygui_lib := false;
 
 // Even values are the C types
 // Odd values are the jai types
@@ -30,30 +53,41 @@ TYPE_MAP :: string.[
     "int",            "s32",
     "Matrix",         "Matrix4"
 ];
-
 JAI_STRUCTS             :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
-REMOVED_CASTS           :: string.["(float)"];
 KNOWN_FUNC_RETURNS      :: string.["void", "Color"];
 INCLUDED_IF_DEFINITIONS :: string.["RL_FLOAT3_TYPE", "RL_FLOAT16_TYPE"];
+AUDIO_EXAMPLES          :: string.[
+    "audio_amp_envelope"
+];
+// Even values are names
+// Odd values are entry points
+GAMES :: string.[
+    "cat_vs_roomba",  "games/cat_vs_roomba/src/cat_vs_roomba.jai",
+    "snake",          "games/classics/src/snake.jai",
+    "space_invaders", "games/classics/src/space_invaders.jai"
+];
 
-DOUBLE_POINTER   :: "**";
-SINGLE_POINTER   :: "*";
-STRUCT_PREFIX    :: "typedef struct";
-RLAPI_PREFIX     :: "RLAPI";
-RMAPI_PREFIX     :: "RMAPI";
-RAYGUIAPI_PREFIX :: "RAYGUIAPI";
-CONST_PREFIX     :: "const";
-ENUM_PREFIX      :: "typedef enum";
-DEFINE_PREFIX    :: "#define";
-RAYLIB_COLOR     :: "CLITERAL(Color)";
-TYPEDEF_PREFIX   :: "typedef";
-IF_BEGIN_PREFIX  :: "#if ";
-IF_END_PREFIX    :: "#endif";
-SWITCH_PREFIX    :: "switch";
-CASE_PREFIX      :: "case";
-NUMBERS          :: "0123456789";
-RLGL_END         :: "#endif // RLGL_H";
-RCAMERA_END      :: "#endif // RCAMERA_H";
+DOTTED_LINE_LENGTH :: 80;
+OK                 :: "[   OK   ]";
+NOT_OK             :: "[ NOT OK ]";
+DOUBLE_POINTER     :: "**";
+SINGLE_POINTER     :: "*";
+STRUCT_PREFIX      :: "typedef struct";
+RLAPI_PREFIX       :: "RLAPI";
+RMAPI_PREFIX       :: "RMAPI";
+RAYGUIAPI_PREFIX   :: "RAYGUIAPI";
+CONST_PREFIX       :: "const";
+ENUM_PREFIX        :: "typedef enum";
+DEFINE_PREFIX      :: "#define";
+RAYLIB_COLOR       :: "CLITERAL(Color)";
+TYPEDEF_PREFIX     :: "typedef";
+IF_BEGIN_PREFIX    :: "#if ";
+IF_END_PREFIX      :: "#endif";
+SWITCH_PREFIX      :: "switch";
+CASE_PREFIX        :: "case";
+NUMBERS            :: "0123456789";
+RLGL_END           :: "#endif // RLGL_H";
+RCAMERA_END        :: "#endif // RCAMERA_H";
 
 GENERAL_HEADER :: #string DONE
 //
@@ -63,12 +97,160 @@ GENERAL_HEADER :: #string DONE
 //
 DONE
 
-RAYLIB_HEADER :: #string DONE
+#run generate();
+
+main :: () {
+    // generate();
+}
+
+generate :: () {
+    Compiler.set_build_options_dc(.{ do_output = false });
+
+    command_options := read_command_line_options();
+
+    if (command_options.print_help) {
+        print_help_text();
+        return;
+    }
+
+    populate_improved_function_definitions_table();
+    defer Hash_Table.deinit(*g_improved_function_definitions);
+
+    populate_improved_struct_elements_table();
+    defer Hash_Table.deinit(*g_improved_struct_elements);
+
+    populate_improved_definitions();
+    defer Hash_Table.deinit(*g_improved_definitions);
+
+    // Generate Bindings
+    generate_bindings(command_options);
+
+    // Build extra libs
+    if (command_options.build_raygui) {
+        build_extra_libs();
+    }
+
+    // Compile examples
+    compile_examples := command_options.compile_audio_examples ||
+        command_options.compile_core_examples ||
+        command_options.compile_models_examples ||
+        command_options.compile_shaders_examples ||
+        command_options.compile_shapes_examples ||
+        command_options.compile_text_examples ||
+        command_options.compile_textures_examples;
+    if (compile_examples) {
+        print_dotted_line("", "", "-");
+        print("Compiling Examples\n");
+        print_dotted_line("", "", "-");
+        if (command_options.compile_audio_examples) for AUDIO_EXAMPLES compile_file(command_options, "[AUDIO]", "examples/audio", it);
+    }
+}
+
+read_command_line_options :: () -> Command_Options {
+    options := Compiler.get_build_options();
+    args    := options.compile_time_command_line;
+
+    command_options: Command_Options;
+    for arg: args {
+        if (arg == "-h" || arg == "--help") {
+            command_options.print_help = true;
+            break;
+        }
+
+        if (arg == "-v" || arg == "--verbose") {
+            command_options.is_verbose = true;
+            continue;
+        }
+
+        if (arg == "--build_raygui") {
+            command_options.build_raygui = true;
+            continue;
+        }
+
+        if (arg == "--compile_all_examples") {
+            command_options.compile_audio_examples = true;
+            command_options.compile_core_examples = true;
+            command_options.compile_models_examples = true;
+            command_options.compile_shaders_examples = true;
+            command_options.compile_shapes_examples = true;
+            command_options.compile_text_examples = true;
+            command_options.compile_textures_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_audio_examples") {
+            command_options.compile_audio_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_core_examples") {
+            command_options.compile_core_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_models_examples") {
+            command_options.compile_models_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_shaders_examples") {
+            command_options.compile_shaders_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_shapes_examples") {
+            command_options.compile_shapes_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_text_examples") {
+            command_options.compile_text_examples = true;
+            continue;
+        }
+
+        if (arg == "--compile_textures_examples") {
+            command_options.compile_textures_examples = true;
+            continue;
+        }
+
+        command_options.print_help = true;
+        print("Unknown argument '%'.\n", arg);
+    }
+    return command_options;
+}
+
+print_help_text :: () {
+    print("Usage: jai generate.jai [- <options>]\n");
+    print("Options:\n");
+    print("    -h, --help                         Print this text\n");
+    print("    -v, --verbose                      Display all log messages and compilation output\n");
+    print("        --build_raygui                 Build raygui's C files into static lib files\n");
+    print("        --compile_all_examples         Compile all examples\n");
+    print("        --compile_audio_examples       Compile audio examples\n");
+    print("        --compile_core_examples        Compile core examples\n");
+    print("        --compile_models_examples      Compile models examples\n");
+    print("        --compile_shaders_examples     Compile shaders examples\n");
+    print("        --compile_shapes_examples      Compile shapes examples\n");
+    print("        --compile_text_examples        Compile text examples\n");
+    print("        --compile_textures_examples    Compile textures examples\n");
+}
+
+generate_bindings :: (command_options: Command_Options) {
+// Generate bindings
+    print_dotted_line("", "", "-");
+    print("Generating Bindings\n");
+    print_dotted_line("", "", "-");
+
+    // Generate bindings for raylib
+    {
+        binder: Binder;
+        binder.name = "raylib";
+        binder.input_file = "src/raylib.h";
+        binder.header = #string DONE
 #import "Basic";
 #import "Math";
 DONE
-
-RAYLIB_FOOTER :: #string DONE
+        binder.footer = #string DONE
 TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
 LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
 SaveFileDataCallback :: #type (fileName: *u8, data: *void, bytesToWrite: u32) -> bool #c_call;
@@ -102,109 +284,71 @@ AudioCallback        :: #type (bufferData: *void, frames: u32) #c_call;
     raygui_native :: #library,no_dll "lib/macos/raygui";
 }
 DONE
+        generate_binding(command_options, *binder);
+    }
 
-RAYMATH_HEADER :: #string DONE
+    // Generate bindings for raymath
+    {
+        binder: Binder;
+        binder.name = "raymath";
+        binder.input_file = "src/raymath.h";
+        binder.header = #string DONE
 EPSILON :: 0.000001;
 DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
-
-#run generate();
-
-main :: () {
-    // generate();
-}
-
-generate :: () {
-    Compiler.set_build_options_dc(.{ do_output = false });
-
-    print_help := read_build_options();
-
-    if (print_help) {
-        print_help_text();
-        return;
+        generate_binding(command_options, *binder);
     }
 
-    if (g_generate_raygui_lib) {
-        build_raygui_libs();
+    // Generate bindings for rlgl
+    {
+        binder: Binder;
+        binder.name = "rlgl";
+        binder.input_file = "src/rlgl.h";
+        generate_binding(command_options, *binder);
     }
 
-    populate_improved_function_definitions_table();
-    defer Hash_Table.deinit(*g_improved_function_definitions);
+    // Generate bindings for rcamera
+    {
+        binder: Binder;
+        binder.name = "rcamera";
+        binder.input_file = "src/rcamera.h";
+        generate_binding(command_options, *binder);
+    }
 
-    populate_improved_struct_elements_table();
-    defer Hash_Table.deinit(*g_improved_struct_elements);
-
-    populate_improved_definitions();
-    defer Hash_Table.deinit(*g_improved_definitions);
-
-    generate_bindings("raylib" , RAYLIB_HEADER , RAYLIB_FOOTER, false);
-    generate_bindings("raymath", RAYMATH_HEADER, ""           , false);
-    generate_bindings("rlgl"   , ""            , ""           , false);
-    generate_bindings("rcamera", ""            , ""           , false);
-    generate_bindings("raygui" , ""            , ""           , false);
+    // Generate bindings for raygui
+    {
+        binder: Binder;
+        binder.name = "raygui";
+        binder.input_file = "src/raygui.h";
+        generate_binding(command_options, *binder);
+    }
 }
 
-read_build_options :: () -> bool {
-    options := Compiler.get_build_options();
-    args    := options.compile_time_command_line;
+build_extra_libs :: () {
+    print_dotted_line("", "", "-");
+    print("Building Extra Libraries\n");
+    print_dotted_line("", "", "-");
 
-    print_help := false;
-
-    for i: 0..args.count-1 {
-        arg := args[i];
-
-        if (arg == "-h" || arg == "--help") {
-             return true;
+    // Build raygui libs
+    {
+        is_successful := false;
+        if OS == .WINDOWS {
+            // Not working: BuildCpp.build_cpp_dynamic_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["-I./src", "-L./src", "-shared", "-DRAYGUI_IMPLEMENTATION", "-DBUILD_LIBTYPE_SHARED", "-static-libgcc", "-lopengl32", "-lgdi32", "-lwinmm", "-lraylib"]);
+            is_successful = BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll"]);
+        } else if OS == .LINUX {
+            is_successful = BuildCpp.build_cpp_static_lib("raylib/lib/linux/raygui", files="src/raygui.c", extra=.["-fpic", "-DRAYGUI_IMPLEMENTATION"]);
+        } else if OS == .MACOS {
+            is_successful = BuildCpp.build_cpp_static_lib("raylib/lib/macos/raygui", files="src/raygui.c", extra=.["-DRAYGUI_IMPLEMENTATION", "-I./src"]);
         }
-
-        if (arg == "-g" || arg == "--build_raygui") {
-            g_generate_raygui_lib = true;
-            continue;
-        }
-
-        print_help = true;
-        print("Unknown argument '%'.\n", arg);
+        print_result("raygui", is_successful);
     }
-    return print_help;
 }
 
-print_help_text :: () {
-    print("Usage: jai generate.jai [- <options>]\n");
-    print("Options:\n");
-    print("    -g, --build_raygui     Build raygui's C files into static lib files\n");
-    print("    -h, --help             Print this text\n");
-}
-
-build_raygui_libs :: () {
-    print("------------------------------------\n");
-    print("Generating raygui libs ...\n");
-
-    if OS == .WINDOWS {
-        // Not working: BuildCpp.build_cpp_dynamic_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["-I./src", "-L./src", "-shared", "-DRAYGUI_IMPLEMENTATION", "-DBUILD_LIBTYPE_SHARED", "-static-libgcc", "-lopengl32", "-lgdi32", "-lwinmm", "-lraylib"]);
-        BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll"]);
-    } else if OS == .LINUX {
-        BuildCpp.build_cpp_static_lib("raylib/lib/linux/raygui", files="src/raygui.c", extra=.["-fpic", "-DRAYGUI_IMPLEMENTATION"]);
-    } else if OS == .MACOS {
-        BuildCpp.build_cpp_static_lib("raylib/lib/macos/raygui", files="src/raygui.c", extra=.["-DRAYGUI_IMPLEMENTATION", "-I./src"]);
-    }
-
-    print("Generated raygui libs\n");
-    print("------------------------------------\n");
-}
-
-generate_bindings :: (input_filename: string, file_header: string, file_footer: string, output_unrecognized_code: bool) {
-    g_line_counter = -1;
-    g_lines_count  = 0;
-
-    print("------------------------------------\n");
-    print("Generating bindings for: % ...\n", input_filename);
-
-    input_file := String.join("src/", input_filename, ".h");
-
-    file, success := File.file_open(input_file);
+generate_binding :: (command_options: Command_Options, binder: *Binder) {
+    file, success := File.file_open(binder.input_file);
     if !success {
-        print("Could not open file: %\n", input_file);
+        print("Could not open file: %\n", binder.input_file);
         return;
     }
 
@@ -213,7 +357,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
 
     success = File.file_read(file, buffer, length);
     if !success {
-        print("Could not read file: %\n", input_file);
+        print("Could not read file: %\n", binder.input_file);
         return;
     }
 
@@ -221,62 +365,62 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
     unrecognized_builder : String_Builder;
 
     print_to_builder(*output_builder, "%\n", GENERAL_HEADER);
-    print_to_builder(*output_builder, "%\n", file_header);
+    print_to_builder(*output_builder, "%\n", binder.header);
 
     file_data: string;
     file_data.data  = buffer;
     file_data.count = length;
     file_lines := String.split(file_data, "\n");
-    g_lines_count = file_lines.count;
+    binder.lines_count = file_lines.count;
 
     for file_lines {
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             break;
         }
 
-        if (is_empty_line_or_comments_or_ignored(file_lines, *output_builder, *unrecognized_builder)) {
+        if (is_empty_line_or_comments_or_ignored(binder, file_lines, *output_builder, *unrecognized_builder)) {
             continue;
         }
 
-        line := file_lines[g_line_counter];
+        line := file_lines[binder.line_counter];
 
         if (String.starts_with(line, STRUCT_PREFIX)) {
-            handle_struct(file_lines, *output_builder, *unrecognized_builder);
+            handle_struct(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, ENUM_PREFIX)) {
-            handle_enum(file_lines, *output_builder, *unrecognized_builder);
+            handle_enum(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, DEFINE_PREFIX)) {
-            handle_define(file_lines, *output_builder, *unrecognized_builder);
+            handle_define(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, TYPEDEF_PREFIX)) {
-            handle_typedef(file_lines, *output_builder, *unrecognized_builder);
+            handle_typedef(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, RLAPI_PREFIX)) {
-            handle_rlapi(file_lines, *output_builder, *unrecognized_builder);
+            handle_rlapi(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, RMAPI_PREFIX)) {
-            handle_rmapi(file_lines, *output_builder, *unrecognized_builder);
+            handle_rmapi(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, RAYGUIAPI_PREFIX)) {
-            handle_rayguiapi(file_lines, *output_builder, *unrecognized_builder);
+            handle_rayguiapi(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
         if (String.starts_with(line, IF_BEGIN_PREFIX)) {
-            handle_if_definition(file_lines, *output_builder, *unrecognized_builder);
+            handle_if_definition(binder, file_lines, *output_builder, *unrecognized_builder);
             continue;
         }
 
@@ -284,7 +428,7 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
             break;
         }
 
-        if (is_function(file_lines)) {
+        if (is_function(binder, file_lines)) {
             // handle_full_function(file_lines);
             continue;
         }
@@ -293,21 +437,20 @@ generate_bindings :: (input_filename: string, file_header: string, file_footer: 
         print_to_builder(*unrecognized_builder, "%\n", line);
     }
 
-    print_to_builder(*output_builder, "%\n", file_footer);
+    print_to_builder(*output_builder, "%\n", binder.footer);
 
     Basic.free(buffer);
     File.file_close(*file);
 
-    output_file := String.join("raylib/", input_filename, ".jai");
+    output_file := String.join("raylib/", binder.name, ".jai");
     File.write_entire_file(output_file, *output_builder);
 
-    if (output_unrecognized_code) {
-        remainder_file := String.join("raylib/", input_filename, "_unrecognized.h");
+    if (command_options.output_unrecognized_code) {
+        remainder_file := String.join("raylib/", binder.name, "_unrecognized.h");
         File.write_entire_file(remainder_file, *unrecognized_builder);
     }
 
-    print("Generated bindings for: %\n", input_filename);
-    print("------------------------------------\n");
+    print_result(binder.name, true);
 }
 
 populate_improved_function_definitions_table :: () {
@@ -404,13 +547,13 @@ populate_improved_definitions :: () {
     Hash_Table.table_add(*g_improved_definitions, "RL_SHADER_LOC_MAP_SPECULAR", "RL_SHADER_LOC_MAP_SPECULAR :: rlShaderLocationIndex.RL_SHADER_LOC_MAP_METALNESS");
 }
 
-increment_line_counter :: () -> bool {
-    g_line_counter += 1;
-    return g_line_counter < g_lines_count - 1;
+increment_line_counter :: (binder: *Binder) -> bool {
+    binder.line_counter += 1;
+    return binder.line_counter < binder.lines_count - 1;
 }
 
-is_empty_line_or_comments_or_ignored :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) -> bool {
-    line := file_lines[g_line_counter];
+is_empty_line_or_comments_or_ignored :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) -> bool {
+    line := file_lines[binder.line_counter];
 
     trimmed_line := String.trim(line);
     if (trimmed_line.count == 0) {
@@ -420,7 +563,7 @@ is_empty_line_or_comments_or_ignored :: (file_lines: []string, output_builder: *
 
     prefix := "/*";
     if (String.starts_with(trimmed_line, prefix)) {
-        handle_comment_block(file_lines, output_builder);
+        handle_comment_block(binder, file_lines, output_builder);
         return true;
     }
 
@@ -433,8 +576,8 @@ is_empty_line_or_comments_or_ignored :: (file_lines: []string, output_builder: *
     return false;
 }
 
-handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) {
-    line := String.trim(file_lines[g_line_counter]);
+handle_comment_block :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder) {
+    line := String.trim(file_lines[binder.line_counter]);
 
     print_to_builder(output_builder, "%\n", "/*");
 
@@ -443,12 +586,12 @@ handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) 
 
     suffix :: "*/";
     while (true) {
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             print("EOF while looking for the end of a comment block\n");
             return;
         }
 
-        line = String.trim(file_lines[g_line_counter]);
+        line = String.trim(file_lines[binder.line_counter]);
         if (String.ends_with(line, suffix)) {
             line = String.replace(line, "*/", "**");
             print_to_builder(output_builder, "%\n", line);
@@ -459,8 +602,8 @@ handle_comment_block :: (file_lines: []string, output_builder: *String_Builder) 
     }
 }
 
-handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_struct :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     if (String.contains(line, ";")) {
         definition_parts := String.split(line, " ");
@@ -503,19 +646,19 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecog
     }
 
     while (true) {
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             print("EOF while looking for the end of a struct: %\n", struct_name);
             return;
         }
 
-        line := file_lines[g_line_counter];
+        line := file_lines[binder.line_counter];
 
-        if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
+        if (is_empty_line_or_comments_or_ignored(binder, file_lines, output_builder, unrecognized_builder)) {
             continue;
         }
 
         if (String.starts_with(line, IF_BEGIN_PREFIX)) {
-            handle_if_definition(file_lines, output_builder, unrecognized_builder);
+            handle_if_definition(binder, file_lines, output_builder, unrecognized_builder);
             continue;
         }
 
@@ -552,10 +695,10 @@ handle_struct :: (file_lines: []string, output_builder: *String_Builder, unrecog
     }
 }
 
-handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+handle_enum :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
     // Handle one line enum
     {
-        line := String.trim(file_lines[g_line_counter]);
+        line := String.trim(file_lines[binder.line_counter]);
         if (String.contains(line, "}") && String.contains(line, ";")) {
             line = String.replace(line, ENUM_PREFIX, "");
 
@@ -584,14 +727,14 @@ handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecogni
     enum_name := "";
 
     // Look ahead for enum name
-    _g_line_counter := g_line_counter;
+    _g_line_counter := binder.line_counter;
     while (true) {
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             print("EOF while looking for the end of an enum.\n");
             return;
         }
 
-        line := String.trim(file_lines[g_line_counter]);
+        line := String.trim(file_lines[binder.line_counter]);
 
         if (!String.starts_with(line, "}") || !String.ends_with(line, ";")) {
             continue;
@@ -610,20 +753,20 @@ handle_enum :: (file_lines: []string, output_builder: *String_Builder, unrecogni
     }
 
     // Reset the line counter and process all enum files
-    g_line_counter = _g_line_counter;
+    binder.line_counter = _g_line_counter;
 
     print_to_builder(output_builder, "% :: enum s32 {\n", enum_name);
     while (true) {
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             print("EOF while looking for the end of an enum.\n");
             return;
         }
 
-        if (is_empty_line_or_comments_or_ignored(file_lines, output_builder, unrecognized_builder)) {
+        if (is_empty_line_or_comments_or_ignored(binder, file_lines, output_builder, unrecognized_builder)) {
             continue;
         }
 
-        line := String.trim(file_lines[g_line_counter]);
+        line := String.trim(file_lines[binder.line_counter]);
 
         if (String.starts_with(line, "}") && String.ends_with(line, ";")) {
             print_to_builder(output_builder, "}\n");
@@ -703,8 +846,8 @@ convert_enum_element :: (line: string) -> string {
     return String.join(enum_element_name, enum_element_value, ";", enum_element_remainder);
 }
 
-handle_define :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_define :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     // Remove define prefix
     line = String.slice(line, DEFINE_PREFIX.count + 1, line.count - DEFINE_PREFIX.count);
@@ -763,8 +906,8 @@ handle_define :: (file_lines: []string, output_builder: *String_Builder, unrecog
     print_to_builder(output_builder, "%\n", new_line);
 }
 
-handle_typedef :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_typedef :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     // Remove typedef prefix
     line = String.slice(line, TYPEDEF_PREFIX.count + 1, line.count - TYPEDEF_PREFIX.count);
@@ -802,8 +945,8 @@ handle_typedef :: (file_lines: []string, output_builder: *String_Builder, unreco
     }
 }
 
-handle_if_definition :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_if_definition :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     for INCLUDED_IF_DEFINITIONS {
         if (String.contains(line, it)) {
@@ -813,7 +956,7 @@ handle_if_definition :: (file_lines: []string, output_builder: *String_Builder, 
 
     open_ifs := 0;
     while (true) {
-        line := String.trim(file_lines[g_line_counter]);
+        line := String.trim(file_lines[binder.line_counter]);
 
         if (String.starts_with(line, IF_BEGIN_PREFIX)) {
             open_ifs += 1;
@@ -829,15 +972,15 @@ handle_if_definition :: (file_lines: []string, output_builder: *String_Builder, 
             }
         }
 
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             print("EOF while looking for the end of an ignored block\n");
             return;
         }
     }
 }
 
-handle_rlapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_rlapi :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     // Remove RLAPI prefix
     line = String.slice(line, RLAPI_PREFIX.count + 1, line.count - RLAPI_PREFIX.count);
@@ -855,8 +998,8 @@ handle_rlapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
     print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
 }
 
-handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_rmapi :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     // Remove RMAPI prefix
     line = String.slice(line, RMAPI_PREFIX.count + 1, line.count - RMAPI_PREFIX.count);
@@ -866,12 +1009,12 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
     print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
 
     while (true) {
-        if (!increment_line_counter()) {
+        if (!increment_line_counter(binder)) {
             print("EOF while looking for the end of a function.\n");
             return;
         }
 
-        line := String.trim(file_lines[g_line_counter]);
+        line := String.trim(file_lines[binder.line_counter]);
 
         // Skip to the end of function
         if (String.starts_with(line, "}")) {
@@ -880,8 +1023,8 @@ handle_rmapi :: (file_lines: []string, output_builder: *String_Builder, unrecogn
     }
 }
 
-handle_rayguiapi :: (file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
-    line := file_lines[g_line_counter];
+handle_rayguiapi :: (binder: *Binder, file_lines: []string, output_builder: *String_Builder, unrecognized_builder: *String_Builder) {
+    line := file_lines[binder.line_counter];
 
     // Remove RAYGUIAPI_PREFIX prefix
     line = String.slice(line, RAYGUIAPI_PREFIX.count + 1, line.count - RAYGUIAPI_PREFIX.count);
@@ -920,8 +1063,8 @@ remove_f_from_floats :: (line: string) {
     }
 }
 
-is_function :: (file_lines: []string) -> bool {
-    line := file_lines[g_line_counter];
+is_function :: (binder: *Binder, file_lines: []string) -> bool {
+    line := file_lines[binder.line_counter];
     line = String.replace(line, "static", "");
     line = String.trim(line);
 
@@ -935,7 +1078,7 @@ is_function :: (file_lines: []string) -> bool {
                     return true;
                 }
 
-                next_line := file_lines[g_line_counter+1];
+                next_line := file_lines[binder.line_counter+1];
                 if (String.starts_with(next_line, "{")) {
                     return true;
                 }
@@ -947,8 +1090,8 @@ is_function :: (file_lines: []string) -> bool {
 }
 
 // THIS IS NOT COMPLETE YET, but I dont have a good reason to complete it. IT IS A PAIN
-handle_full_function :: (file_lines: []string) {
-    line := file_lines[g_line_counter];
+handle_full_function :: (binder: *Binder, file_lines: []string) {
+    line := file_lines[binder.line_counter];
     line = String.replace(line, "static", "");
     line = String.trim(line);
 
@@ -1166,4 +1309,38 @@ convert_assignment :: (line: string, with_type: bool) -> string {
     }
 
     return String.join(new_line, " = ", remainder);
+}
+
+compile_file :: (command_options: Command_Options, output_prefix: string, file_path: string, file_name: string) {
+    jai_exec_path := System.get_path_of_running_executable();
+
+    result, output, error := Process.run_command(jai_exec_path, String.join(file_path, "/", file_name, ".jai"), "-import_dir", #filepath, capture_and_return_output = true);
+
+    print_result(String.join(output_prefix, " ", file_name), result.exit_code == 0);
+    if (command_options.is_verbose) {
+        print("%", error);
+        print("%", output);
+    }
+}
+
+print_dotted_line :: (prefix: string, suffix: string, repeated_char := ".") {
+    dots_count := DOTTED_LINE_LENGTH - prefix.count - suffix.count;
+    line := prefix;
+    for 0..dots_count-1 {
+        line = String.join(line, repeated_char);
+    }
+    line = String.join(line, suffix);
+    print("%\n", line);
+}
+
+print_result :: (prefix: string, result: bool) {
+    dots_count := DOTTED_LINE_LENGTH - prefix.count - 2 - OK.count; // [prefix][space][dots][space][result]
+    line := String.join(prefix, " ");
+    for 0..dots_count-1 {
+        line = String.join(line, ".");
+    }
+    line = String.join(line, " ");
+    print("%", line);
+
+    Print_Color.print_color("%\n", ifx result then OK else NOT_OK, color=ifx result then .GREEN else .RED);
 }
