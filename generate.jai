@@ -8,9 +8,16 @@ Process     :: #import "Process";
 String      :: #import "String";
 System      :: #import "System";
 
+#if OS == .WINDOWS {
+    Windows_Resources :: #import "Windows_Resources";
+    #import "Windows";
+} else {
+    #import "POSIX";
+}
+
 #load "src/binding_generator.jai";
 #load "src/example_compiler.jai";
-#load "src/libs_builder.jai";
+#load "src/lib_builder.jai";
 
 String_Builder   :: Basic.String_Builder;
 Table            :: Hash_Table.Table;
@@ -29,6 +36,7 @@ Command_Options :: struct {
     compile_text_examples     : bool = false;
     compile_textures_examples : bool = false;
     output_unrecognized_code  : bool = false;
+    use_custom_lib_builder    : bool = false;
 }
 
 DOTTED_LINE_LENGTH :: 80;
@@ -42,6 +50,8 @@ main :: () {
 }
 
 generate :: () {
+    Basic.set_working_directory(#filepath);
+
     Compiler.set_build_options_dc(.{ do_output = false });
 
     command_options := read_command_line_options();
@@ -51,15 +61,8 @@ generate :: () {
         return;
     }
 
-    // Generate Bindings
     generate_bindings(command_options);
-
-    // Build extra libs
-    if (command_options.build_raygui) {
-        build_extra_libs(command_options);
-    }
-
-    // Compile examples
+    build_libs(command_options);
     compile_examples(command_options);
 }
 
@@ -127,6 +130,11 @@ read_command_line_options :: () -> Command_Options {
 
         if (arg == "--compile_textures_examples") {
             command_options.compile_textures_examples = true;
+            continue;
+        }
+
+        if (arg == "--use_custom_lib_builder") {
+            command_options.use_custom_lib_builder = true;
             continue;
         }
 

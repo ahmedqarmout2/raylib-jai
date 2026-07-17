@@ -32,6 +32,7 @@ compile_examples :: (command_options: Command_Options) {
     print_dotted_line("", "", "-");
     print("Compiling Examples\n");
     print_dotted_line("", "", "-");
+
     compile_examples := command_options.compile_audio_examples ||
         command_options.compile_core_examples ||
         command_options.compile_models_examples ||
