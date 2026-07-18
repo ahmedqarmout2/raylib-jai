@@ -27,7 +27,11 @@ print_to_builder :: Basic.print_to_builder;
 Command_Options :: struct {
     is_verbose                : bool = false;
     print_help                : bool = false;
+    output_unrecognized_code  : bool = false;
+
     build_raygui              : bool = false;
+    use_custom_lib_builder    : bool = false;
+
     compile_audio_examples    : bool = false;
     compile_core_examples     : bool = false;
     compile_models_examples   : bool = false;
@@ -35,9 +39,10 @@ Command_Options :: struct {
     compile_shapes_examples   : bool = false;
     compile_text_examples     : bool = false;
     compile_textures_examples : bool = false;
+    compile_specific_examples : []string = .[];
+
     compile_all_games         : bool = false;
-    output_unrecognized_code  : bool = false;
-    use_custom_lib_builder    : bool = false;
+    compile_specific_games    : []string = .[];
 }
 
 DOTTED_LINE_LENGTH :: 80;
@@ -86,6 +91,11 @@ read_command_line_options :: () -> Command_Options {
 
         if (arg == "--build_raygui") {
             command_options.build_raygui = true;
+            continue;
+        }
+
+        if (arg == "--use_custom_lib_builder") {
+            command_options.use_custom_lib_builder = true;
             continue;
         }
 
@@ -147,13 +157,26 @@ read_command_line_options :: () -> Command_Options {
             continue;
         }
 
+        if (String.starts_with(arg, "--compile_specific_examples")) {
+            pieces := String.split(arg, "=");
+            if (pieces.count != 2) {
+                print("something is wrong with --compile_specific_examples\n");
+            }
+            command_options.compile_specific_examples = String.split(pieces[1], ",");
+            continue;
+        }
+
         if (arg == "--compile_all_games") {
             command_options.compile_all_games = true;
             continue;
         }
 
-        if (arg == "--use_custom_lib_builder") {
-            command_options.use_custom_lib_builder = true;
+        if (String.starts_with(arg, "--compile_specific_games")) {
+            pieces := String.split(arg, "=");
+            if (pieces.count != 2) {
+                print("something is wrong with --compile_specific_games\n");
+            }
+            command_options.compile_specific_games = String.split(pieces[1], ",");
             continue;
         }
 
@@ -178,7 +201,9 @@ print_help_text :: () {
     print("        --compile_shapes_examples           Compile shapes examples\n");
     print("        --compile_text_examples             Compile text examples\n");
     print("        --compile_textures_examples         Compile textures examples\n");
+    print("        --compile_specific_examples         Compile a list of comma-separated examples. For example: core_basic_window,text_3d_drawing\n");
     print("        --compile_all_games                 Compile all games\n");
+    print("        --compile_specific_games            Compile a list of comma-separated games. For example: snake,space_invaders\n");
 }
 
 print_dotted_line :: (prefix: string, suffix: string, repeated_char := ".") {

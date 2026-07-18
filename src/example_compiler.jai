@@ -167,9 +167,13 @@ compile_examples :: (command_options: Command_Options) {
         command_options.compile_shaders_examples ||
         command_options.compile_shapes_examples ||
         command_options.compile_text_examples ||
-        command_options.compile_textures_examples;
+        command_options.compile_textures_examples ||
+        command_options.compile_specific_examples.count > 0;
 
-    if (!compile_examples && command_options.compile_all_games) {
+    compile_games := command_options.compile_all_games ||
+        command_options.compile_specific_games.count > 0;
+
+    if (!compile_examples && !compile_games) {
         return;
     }
 
@@ -186,6 +190,19 @@ compile_examples :: (command_options: Command_Options) {
         return;
     }
 
+    if (command_options.compile_specific_examples.count > 0) {
+        for specific_example: command_options.compile_specific_examples {
+            for e: AUDIO_EXAMPLES    if specific_example == e compile_file(command_options, "[AUDIO]",    "examples/audio",    e);
+            for e: CORE_EXAMPLES     if specific_example == e compile_file(command_options, "[CORE]",     "examples/core",     e);
+            for e: MODELS_EXAMPLES   if specific_example == e compile_file(command_options, "[MODELS]",   "examples/models",   e);
+            for e: SHADERS_EXAMPLES  if specific_example == e compile_file(command_options, "[SHADERS]",  "examples/shaders",  e);
+            for e: SHAPES_EXAMPLES   if specific_example == e compile_file(command_options, "[SHAPES]",   "examples/shapes",   e);
+            for e: TEXT_EXAMPLES     if specific_example == e compile_file(command_options, "[TEXT]",     "examples/text",     e);
+            for e: TEXTURES_EXAMPLES if specific_example == e compile_file(command_options, "[TEXTURES]", "examples/textures", e);
+        }
+        return;
+    }
+
     if (command_options.compile_audio_examples)    for AUDIO_EXAMPLES    compile_file(command_options, "[AUDIO]",    "examples/audio",    it);
     if (command_options.compile_core_examples)     for CORE_EXAMPLES     compile_file(command_options, "[CORE]",     "examples/core",     it);
     if (command_options.compile_models_examples)   for MODELS_EXAMPLES   compile_file(command_options, "[MODELS]",   "examples/models",   it);
@@ -196,13 +213,26 @@ compile_examples :: (command_options: Command_Options) {
 }
 
 compile_games :: (command_options: Command_Options) {
-    if (!command_options.compile_all_games) {
+    compile_games := command_options.compile_all_games ||
+        command_options.compile_specific_games.count > 0;
+    if (!compile_games) {
         return;
     }
 
     print_dotted_line("", "", "-");
     print("Compiling Games\n");
     print_dotted_line("", "", "-");
+
+    if (command_options.compile_specific_games.count > 0) {
+        for specific_example: command_options.compile_specific_games {
+            for i: 0..GAMES.count-1 {
+                defer i += 1;
+
+                if specific_example == GAMES[i] compile_file(command_options, "", GAMES[i + 1], GAMES[i]);
+            }
+        }
+        return;
+    }
 
     for GAMES {
         defer it_index += 1;
