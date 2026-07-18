@@ -35,6 +35,7 @@ Command_Options :: struct {
     compile_shapes_examples   : bool = false;
     compile_text_examples     : bool = false;
     compile_textures_examples : bool = false;
+    compile_all_games         : bool = false;
     output_unrecognized_code  : bool = false;
     use_custom_lib_builder    : bool = false;
 }
@@ -64,6 +65,7 @@ generate :: () {
     generate_bindings(command_options);
     build_libs(command_options);
     compile_examples(command_options);
+    compile_games(command_options);
 }
 
 read_command_line_options :: () -> Command_Options {
@@ -84,6 +86,18 @@ read_command_line_options :: () -> Command_Options {
 
         if (arg == "--build_raygui") {
             command_options.build_raygui = true;
+            continue;
+        }
+
+        if (arg == "--compile_all_examples_and_games") {
+            command_options.compile_audio_examples = true;
+            command_options.compile_core_examples = true;
+            command_options.compile_models_examples = true;
+            command_options.compile_shaders_examples = true;
+            command_options.compile_shapes_examples = true;
+            command_options.compile_text_examples = true;
+            command_options.compile_textures_examples = true;
+            command_options.compile_all_games = true;
             continue;
         }
 
@@ -133,6 +147,11 @@ read_command_line_options :: () -> Command_Options {
             continue;
         }
 
+        if (arg == "--compile_all_games") {
+            command_options.compile_all_games = true;
+            continue;
+        }
+
         if (arg == "--use_custom_lib_builder") {
             command_options.use_custom_lib_builder = true;
             continue;
@@ -147,17 +166,19 @@ read_command_line_options :: () -> Command_Options {
 print_help_text :: () {
     print("Usage: jai generate.jai [- <options>]\n");
     print("Options:\n");
-    print("    -h, --help                         Print this text\n");
-    print("    -v, --verbose                      Display all log messages and compilation output\n");
-    print("        --build_raygui                 Build raygui's C files into static lib files\n");
-    print("        --compile_all_examples         Compile all examples\n");
-    print("        --compile_audio_examples       Compile audio examples\n");
-    print("        --compile_core_examples        Compile core examples\n");
-    print("        --compile_models_examples      Compile models examples\n");
-    print("        --compile_shaders_examples     Compile shaders examples\n");
-    print("        --compile_shapes_examples      Compile shapes examples\n");
-    print("        --compile_text_examples        Compile text examples\n");
-    print("        --compile_textures_examples    Compile textures examples\n");
+    print("    -h, --help                              Print this text\n");
+    print("    -v, --verbose                           Display all log messages and compilation output\n");
+    print("        --build_raygui                      Build raygui's C files into static lib files\n");
+    print("        --compile_all_examples_and_games    Compile all examples and games\n");
+    print("        --compile_all_examples              Compile all examples\n");
+    print("        --compile_audio_examples            Compile audio examples\n");
+    print("        --compile_core_examples             Compile core examples\n");
+    print("        --compile_models_examples           Compile models examples\n");
+    print("        --compile_shaders_examples          Compile shaders examples\n");
+    print("        --compile_shapes_examples           Compile shapes examples\n");
+    print("        --compile_text_examples             Compile text examples\n");
+    print("        --compile_textures_examples         Compile textures examples\n");
+    print("        --compile_all_games                 Compile all games\n");
 }
 
 print_dotted_line :: (prefix: string, suffix: string, repeated_char := ".") {
