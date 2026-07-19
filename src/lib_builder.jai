@@ -38,7 +38,7 @@ build_libs :: (command_options: Command_Options) {
             extra_library_files = .["raylib/lib/linux/raylib.a"];
         } else if OS == .MACOS {
             extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
-            extra_library_files = .["raylib/lib/macos/raylib.a"];
+            extra_library_files = .["raylib/lib/macos/raylib.dylib"];
         }
 
         // Build static raygui lib
