@@ -35,7 +35,7 @@ build_libs :: (command_options: Command_Options) {
             extra_library_files = .["raylib/lib/windows/raylibdll.lib"];
         } else if OS == .LINUX {
             extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-fpic"];
-            extra_library_files = .["raylib/lib/linux/raylib.a"];
+            extra_library_files = .["raylib/lib/linux/raylib.so"];
         } else if OS == .MACOS {
             extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
             extra_library_files = .["raylib/lib/macos/raylib.dylib"];
