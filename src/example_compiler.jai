@@ -168,14 +168,8 @@ compile_examples :: (command_options: Command_Options) {
         command_options.compile_shapes_examples ||
         command_options.compile_text_examples ||
         command_options.compile_textures_examples ||
+        command_options.compile_games_examples ||
         command_options.compile_specific_examples.count > 0;
-
-    compile_games := command_options.compile_all_games ||
-        command_options.compile_specific_games.count > 0;
-
-    if (!compile_examples && compile_games) {
-        return;
-    }
 
     print_dotted_line("", "", "-");
     print("Compiling Examples\n");
@@ -199,6 +193,12 @@ compile_examples :: (command_options: Command_Options) {
             for e: SHAPES_EXAMPLES   if specific_example == e compile_file(command_options, "[SHAPES]",   "examples/shapes",   e);
             for e: TEXT_EXAMPLES     if specific_example == e compile_file(command_options, "[TEXT]",     "examples/text",     e);
             for e: TEXTURES_EXAMPLES if specific_example == e compile_file(command_options, "[TEXTURES]", "examples/textures", e);
+
+            for i: 0..GAMES.count-1 {
+                defer i += 1;
+
+                if specific_example == GAMES[i] compile_file(command_options, "[GAMES]", GAMES[i + 1], GAMES[i]);
+            }
         }
         return;
     }
@@ -210,34 +210,13 @@ compile_examples :: (command_options: Command_Options) {
     if (command_options.compile_shapes_examples)   for SHAPES_EXAMPLES   compile_file(command_options, "[SHAPES]",   "examples/shapes",   it);
     if (command_options.compile_text_examples)     for TEXT_EXAMPLES     compile_file(command_options, "[TEXT]",     "examples/text",     it);
     if (command_options.compile_textures_examples) for TEXTURES_EXAMPLES compile_file(command_options, "[TEXTURES]", "examples/textures", it);
-}
 
-compile_games :: (command_options: Command_Options) {
-    compile_games := command_options.compile_all_games ||
-        command_options.compile_specific_games.count > 0;
-    if (!compile_games) {
-        return;
-    }
+    if (command_options.compile_games_examples) {
+        for GAMES {
+            defer it_index += 1;
 
-    print_dotted_line("", "", "-");
-    print("Compiling Games\n");
-    print_dotted_line("", "", "-");
-
-    if (command_options.compile_specific_games.count > 0) {
-        for specific_example: command_options.compile_specific_games {
-            for i: 0..GAMES.count-1 {
-                defer i += 1;
-
-                if specific_example == GAMES[i] compile_file(command_options, "", GAMES[i + 1], GAMES[i]);
-            }
+            compile_file(command_options, "[GAMES]", GAMES[it_index + 1], GAMES[it_index]);
         }
-        return;
-    }
-
-    for GAMES {
-        defer it_index += 1;
-
-        compile_file(command_options, "", GAMES[it_index + 1], GAMES[it_index]);
     }
 }
 

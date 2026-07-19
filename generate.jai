@@ -39,10 +39,8 @@ Command_Options :: struct {
     compile_shapes_examples   : bool = false;
     compile_text_examples     : bool = false;
     compile_textures_examples : bool = false;
+    compile_games_examples    : bool = false;
     compile_specific_examples : []string = .[];
-
-    compile_all_games         : bool = false;
-    compile_specific_games    : []string = .[];
 }
 
 DOTTED_LINE_LENGTH :: 80;
@@ -70,7 +68,6 @@ generate :: () {
     generate_bindings(command_options);
     build_libs(command_options);
     compile_examples(command_options);
-    compile_games(command_options);
 }
 
 read_command_line_options :: () -> Command_Options {
@@ -99,18 +96,6 @@ read_command_line_options :: () -> Command_Options {
             continue;
         }
 
-        if (arg == "--compile_all_examples_and_games") {
-            command_options.compile_audio_examples = true;
-            command_options.compile_core_examples = true;
-            command_options.compile_models_examples = true;
-            command_options.compile_shaders_examples = true;
-            command_options.compile_shapes_examples = true;
-            command_options.compile_text_examples = true;
-            command_options.compile_textures_examples = true;
-            command_options.compile_all_games = true;
-            continue;
-        }
-
         if (arg == "--compile_all_examples") {
             command_options.compile_audio_examples = true;
             command_options.compile_core_examples = true;
@@ -119,6 +104,7 @@ read_command_line_options :: () -> Command_Options {
             command_options.compile_shapes_examples = true;
             command_options.compile_text_examples = true;
             command_options.compile_textures_examples = true;
+            command_options.compile_games_examples = true;
             continue;
         }
 
@@ -157,26 +143,17 @@ read_command_line_options :: () -> Command_Options {
             continue;
         }
 
+        if (arg == "--compile_games_examples") {
+            command_options.compile_games_examples = true;
+            continue;
+        }
+
         if (String.starts_with(arg, "--compile_specific_examples")) {
             pieces := String.split(arg, "=");
             if (pieces.count != 2) {
                 print("something is wrong with --compile_specific_examples\n");
             }
             command_options.compile_specific_examples = String.split(pieces[1], ",");
-            continue;
-        }
-
-        if (arg == "--compile_all_games") {
-            command_options.compile_all_games = true;
-            continue;
-        }
-
-        if (String.starts_with(arg, "--compile_specific_games")) {
-            pieces := String.split(arg, "=");
-            if (pieces.count != 2) {
-                print("something is wrong with --compile_specific_games\n");
-            }
-            command_options.compile_specific_games = String.split(pieces[1], ",");
             continue;
         }
 
@@ -192,7 +169,6 @@ print_help_text :: () {
     print("    -h, --help                              Print this text\n");
     print("    -v, --verbose                           Display all log messages and compilation output\n");
     print("        --build_raygui                      Build raygui's C files into static lib files\n");
-    print("        --compile_all_examples_and_games    Compile all examples and games\n");
     print("        --compile_all_examples              Compile all examples\n");
     print("        --compile_audio_examples            Compile audio examples\n");
     print("        --compile_core_examples             Compile core examples\n");
@@ -201,9 +177,8 @@ print_help_text :: () {
     print("        --compile_shapes_examples           Compile shapes examples\n");
     print("        --compile_text_examples             Compile text examples\n");
     print("        --compile_textures_examples         Compile textures examples\n");
-    print("        --compile_specific_examples         Compile a list of comma-separated examples. For example: core_basic_window,text_3d_drawing\n");
-    print("        --compile_all_games                 Compile all games\n");
-    print("        --compile_specific_games            Compile a list of comma-separated games. For example: snake,space_invaders\n");
+    print("        --compile_games_examples            Compile games examples\n");
+    print("        --compile_specific_examples         Compile a list of comma-separated examples. For example: snake,core_basic_window,text_3d_drawing\n");
 }
 
 print_dotted_line :: (prefix: string, suffix: string, repeated_char := ".") {

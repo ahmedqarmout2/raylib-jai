@@ -35,10 +35,10 @@ Direct Jai ports for the following:
 <a href="examples/shapes/shapes_draw_ring.jai"><img src="doc/screenshots/shapes_draw_ring.png" style="max-width: 400px;"></a>
 <a href="examples/shapes/shapes_splines_drawing.jai"><img src="doc/screenshots/shapes_splines_drawing.png" style="max-width: 400px;"></a>
 <a href="examples/textures_bunnymark.jai"><img src="doc/screenshots/textures_bunnymark.png" style="max-width: 400px;"></a>
-<a href="games/cat_vs_roomba/src/cat_vs_roomba.jai"><img src="doc/screenshots/cat_vs_roomba.png" style="max-width: 400px;"></a>
-<a href="games/classics/src/snake.jai"><img src="doc/screenshots/classic_snake.png" style="max-width: 400px;"></a>
+<a href="examples/games/cat_vs_roomba/src/cat_vs_roomba.jai"><img src="doc/screenshots/cat_vs_roomba.png" style="max-width: 400px;"></a>
+<a href="examples/games/classics/src/snake.jai"><img src="doc/screenshots/classic_snake.png" style="max-width: 400px;"></a>
 
-There are more than shown here ported in the [examples/](examples) and  [games/](games) folders.
+There are more than shown here ported in the [examples](examples) and [games](examples/games) folders.
 
 
 ## Minimal example
@@ -76,7 +76,7 @@ main :: () {
 
 ## Compile the examples
 
-> jai generate.jai - --compile_all_examples_and_games
+> jai generate.jai - --compile_all_examples
 
 
 ## Regenerating the bindings

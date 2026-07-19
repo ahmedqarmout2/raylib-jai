@@ -86,17 +86,21 @@ build_lib :: (builder: Builder) -> bool {
 
     output_filename: string;
     if builder.target == .WINDOWS {
+        vc_path     : string;
+        linker_path : string;
+        kit_root    : string;
+
         #if OS != .WINDOWS {
             // compiler_report("Unable to find Visual Studio; can't compile.\n", loc);
             return false; // Visual studio is not available in non-windows OS.
-        }
+        } else {
+            vc_path, linker_path = Windows_Resources.find_visual_studio_in_a_ridiculous_garbage_way();
 
-        vc_path, linker_path := Windows_Resources.find_visual_studio_in_a_ridiculous_garbage_way();
-
-        kit_root := Windows_Resources.find_windows_kit_root();
-        if !kit_root {
-            //compiler_report("Unable to find Windows Kit root; can't compile.\n", loc);
-            return false;
+            kit_root = Windows_Resources.find_windows_kit_root();
+            if !kit_root {
+                //compiler_report("Unable to find Windows Kit root; can't compile.\n", loc);
+                return false;
+            }
         }
 
         if #complete builder.type == {
