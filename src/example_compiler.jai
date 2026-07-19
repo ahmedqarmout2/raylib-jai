@@ -155,9 +155,9 @@ TEXTURES_EXAMPLES :: string.[
 // Even values are names
 // Odd values are entry points
 GAMES :: string.[
-    "cat_vs_roomba",  "games/cat_vs_roomba/src",
-    "snake",          "games/classics/src",
-    "space_invaders", "games/classics/src"
+    "cat_vs_roomba",  "examples/games/cat_vs_roomba/src",
+    "snake",          "examples/games/classics/src",
+    "space_invaders", "examples/games/classics/src"
 ];
 
 compile_examples :: (command_options: Command_Options) {
