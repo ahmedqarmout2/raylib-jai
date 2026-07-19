@@ -173,7 +173,7 @@ compile_examples :: (command_options: Command_Options) {
     compile_games := command_options.compile_all_games ||
         command_options.compile_specific_games.count > 0;
 
-    if (!compile_examples && !compile_games) {
+    if (!compile_examples && compile_games) {
         return;
     }
 

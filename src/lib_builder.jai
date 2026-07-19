@@ -211,6 +211,123 @@ build_lib :: (builder: Builder) -> bool {
             }
             return true;
         }
+    } else {
+        if #complete builder.type == {
+            case .STATIC_LIBRARY;
+                output_filename = String.tprint("%/%.a", builder.output_directory, builder.name);
+            case .OBJ_FILE;
+                output_filename = String.tprint("%/%.o", builder.output_directory, builder.name);
+            case .DYNAMIC_LIBRARY;
+                if builder.target == {
+                    case .IOS;     #through;
+                    case .MACOS;   output_filename = String.tprint("%/%.dylib", builder.output_directory, builder.name);
+
+                    case .LINUX;   #through;
+                    case .ANDROID; output_filename = String.tprint("%/%.so", builder.output_directory, builder.name);
+
+                    case; //assert(false);
+                }
+            case .EXECUTABLE;
+                output_filename = String.copy_temporary_string(String.tprint("%/%", builder.output_directory, builder.name));
+        }
+
+        #if OS == .WINDOWS {
+            String.path_overwrite_separators(output_filename, #char "\\");
+        }
+
+
+        is_cpp_project := false;
+        for builder.src_files {
+            if String.ends_with(it, ".cpp") {
+                is_cpp_project = true; // Use c++ compiler, so we link the required c++ runtime libraries by default.
+                break;
+            }
+        }
+
+        compiler := "";
+        ar       := "ar";
+        if is_cpp_project {
+            // @Cleanup: Could be simplified to the following, but that currently triggers a compiler bug. -rluba, 2024-01-23
+            // compiler = ifx to_string(getenv("CXX")) else "clang++";
+            compiler = to_string(get_env("CXX"));
+            if !compiler compiler ="clang++";
+        } else {
+            compiler = to_string(get_env("CC"));
+            if !compiler compiler ="clang";
+        }
+
+        Basic.array_add(*arguments, compiler);
+        Basic.array_add(*arguments, "-O3");
+        Basic.array_add(*arguments, .. builder.extra_arguments);
+
+        if builder.type == .STATIC_LIBRARY || builder.type == .OBJ_FILE {
+            Basic.array_add(*arguments, "-c");
+        } else {
+            if builder.type == .DYNAMIC_LIBRARY {
+                Basic.array_add(*arguments, "-shared", "-fpic");
+            }
+
+            if builder.target == .MACOS {
+                if builder.type == {
+                    case .DYNAMIC_LIBRARY;
+                        Basic.array_add(*arguments, "-install_name", String.tprint("@rpath/%", output_filename));
+                    case .EXECUTABLE;
+                        Basic.array_add(*arguments, "-rpath", "@loader_path");
+                }
+            }
+
+            Basic.array_add(*arguments, "-o", output_filename);
+        }
+
+        // Add files:
+        objs: [..] string;
+        for builder.src_files {
+            src := String.copy_temporary_string(it);
+            String.path_overwrite_separators(src);
+            Basic.array_add(*arguments, src);
+
+            Basic.array_add(*objs, String.tprint("%.o", String.path_basename(it)));
+        }
+
+        // Make sure to cleanup the resulting obj files.
+        defer {
+            if builder.type != .OBJ_FILE {
+                for objs File.file_delete(it);
+            }
+        }
+
+        Basic.array_add(*arguments, .. builder.extra_library_files);
+
+        //log("%", get_quoted_command_string(arguments));
+        result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = true, working_directory = builder.working_directory);
+
+        if result.exit_code {
+            //compiler_report(tprint("Compiler failed with exit code '%'.\n", result.exit_code), loc);
+            return false;
+        }
+
+        if builder.type == .STATIC_LIBRARY {
+            File.file_delete(output_filename); // ar only adds/updates the archive, but does not delete files from it.
+
+            // Create library:
+            Basic.array_reset(*arguments);
+            Basic.array_add(*arguments,
+                ar,
+                ifx builder.target == .WASM then "-rcs" else "-rc",   // replace or insert files into the archive, do not warn if archive needs to be created. (+s for WASM to create an archive index)
+                output_filename,
+            );
+
+            Basic.array_add(*arguments, ..objs);
+
+            // Run archiver command:
+            //log("%", get_quoted_command_string(arguments));
+            result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = true, working_directory = builder.working_directory);
+
+            if result.exit_code {
+                //compiler_report(tprint("Archive command failed with exit code '%'.\n", result.exit_code), loc);
+                return false;
+            }
+        }
     }
 
     return true;
@@ -226,4 +343,12 @@ get_os_as_string :: (target_os: Operating_System_Tag) -> string {
             return "macos";
     }
     return "unknown";
+}
+
+get_env :: (e: *u8) -> *u8 {
+    #if OS == .WINDOWS {
+        return Windows.getenv(e);
+    } else {
+        return POSIX.getenv(e);
+    }
 }

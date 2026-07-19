@@ -10,9 +10,9 @@ System      :: #import "System";
 
 #if OS == .WINDOWS {
     Windows_Resources :: #import "Windows_Resources";
-    #import "Windows";
+    Windows           :: #import "Windows";
 } else {
-    #import "POSIX";
+    POSIX :: #import "POSIX";
 }
 
 #load "src/binding_generator.jai";
