@@ -74,9 +74,9 @@ main :: () {
 > Compile using (on Windows): jai -import_dir .\libs .\main.jai
 
 
-## Building the examples
+## Compile the examples
 
-> jai compile_examples_and_games.jai
+> jai generate.jai - --compile_all_examples_and_games
 
 
 ## Regenerating the bindings
@@ -85,7 +85,7 @@ main :: () {
 
 (Optional) Regenerate raygui lib files
 
-> jai generate.jai - -g
+> jai generate.jai - --build_raygui
 
 For more information
 
