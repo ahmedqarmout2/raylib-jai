@@ -7,6 +7,7 @@ Binder :: struct {
     line_counter  : int = -1;
     lines_count   : int = 0;
     is_successful : bool = false;
+    logs          : [..] Log;
 };
 
 g_improved_function_definitions : Table(string, string);
@@ -1090,4 +1091,8 @@ convert_assignment :: (line: string, with_type: bool) -> string {
     }
 
     return String.join(new_line, " = ", remainder);
+}
+
+log :: (binder: *Binder, type: Log_Type, message: string) {
+    Basic.array_add(*binder.logs, Log.{type, message});
 }

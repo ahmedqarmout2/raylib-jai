@@ -6,8 +6,8 @@ Builder :: struct {
     src_files           : []string = .[];
     extra_arguments     : []string = .[];
     extra_library_files : []string = .[];
-    working_directory   : string = "";
-    is_successful       : bool = false;
+    is_successful       : bool = true;
+    logs                : [..] Log;
 }
 
 Build_Type :: enum {
@@ -31,7 +31,7 @@ build_libs :: (command_options: Command_Options) {
         extra_arguments    : []string = .[];
         extra_library_files: []string = .[];
         if OS == .WINDOWS {
-            extra_arguments     = .["/DRAYGUI_IMPLEMENTATION", "/I./src/", "/D_USRDLL", "/D_WINDLL", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll"];
+            extra_arguments     = .["/DRAYGUI_IMPLEMENTATION"];
             extra_library_files = .["raylib/lib/windows/raylibdll.lib"];
         } else if OS == .LINUX {
             extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-fpic"];
@@ -49,8 +49,9 @@ build_libs :: (command_options: Command_Options) {
             builder.src_files = .["src/raygui.c"];
             builder.type = .STATIC_LIBRARY;
             builder.extra_arguments = extra_arguments;
-            builder.is_successful = build_lib(builder);
+            build_lib(*builder);
             print_result("raygui (static)", builder.is_successful);
+            if (command_options.is_verbose) print_logs(builder.logs);
         }
 
         // Build dynamic raygui lib
@@ -62,8 +63,9 @@ build_libs :: (command_options: Command_Options) {
             builder.type = .DYNAMIC_LIBRARY;
             builder.extra_arguments = extra_arguments;
             builder.extra_library_files = extra_library_files;
-            builder.is_successful = build_lib(builder);
+            build_lib(*builder);
             print_result("raygui (dynamic)", builder.is_successful);
+            if (command_options.is_verbose) print_logs(builder.logs);
         }
     } else {
         is_successful := false;
@@ -81,7 +83,10 @@ build_libs :: (command_options: Command_Options) {
 
 
 // A simplified version of BuildCpp.build_cpp
-build_lib :: (builder: Builder) -> bool {
+build_lib :: (builder: *Builder) {
+    log(builder, .INFO, String.tprint("Library type: %\n", builder.type));
+    log(builder, .INFO, String.tprint("Target OS: %\n", builder.target));
+
     arguments: [..] string;
 
     output_filename: string;
@@ -91,15 +96,18 @@ build_lib :: (builder: Builder) -> bool {
         kit_root    : string;
 
         #if OS != .WINDOWS {
-            // compiler_report("Unable to find Visual Studio; can't compile.\n", loc);
-            return false; // Visual studio is not available in non-windows OS.
+            // Visual studio is not available in non-windows OS.
+            // Unable to find Visual Studio; can't compile.
+            log(builder, .ERROR, "Visual studio is not available in non-windows OS.\n");
+            return;
+        // Must have an else here otherwise this wont run on non-windows machines
         } else {
             vc_path, linker_path = Windows_Resources.find_visual_studio_in_a_ridiculous_garbage_way();
 
             kit_root = Windows_Resources.find_windows_kit_root();
             if !kit_root {
-                //compiler_report("Unable to find Windows Kit root; can't compile.\n", loc);
-                return false;
+                log(builder, .ERROR, "Unable to find Windows Kit root.\n");
+                return;
             }
         }
 
@@ -188,12 +196,14 @@ build_lib :: (builder: Builder) -> bool {
 
         Basic.array_add(*arguments, .. builder.extra_library_files);
 
-        //log("%", get_quoted_command_string(arguments));
-        result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = true, working_directory = builder.working_directory);
+        log(builder, .INFO, String.tprint("%\n", Process.get_quoted_command_string(arguments)));
+        result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = false);
 
+        if output_string log(builder, .INFO, output_string);
         if result.exit_code {
-            //compiler_report(tprint("Compiler failed with exit code '%'.\n", result.exit_code), loc);
-            return false;
+            log(builder, .ERROR, String.tprint("Failed with exit code '%'.\n", result.exit_code));
+            if error_string log(builder, .ERROR, error_string);
+            return;
         }
 
         if builder.type == .STATIC_LIBRARY {
@@ -206,14 +216,16 @@ build_lib :: (builder: Builder) -> bool {
             Basic.array_add(*arguments, ..objs);
             Basic.array_add(*arguments, String.tprint("/OUT:%", output_filename));
 
-            //log("%", get_quoted_command_string(arguments));
-            result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = true, working_directory = builder.working_directory);
+            log(builder, .INFO, String.tprint("%\n", Process.get_quoted_command_string(arguments)));
+            result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = false);
 
+            if output_string log(builder, .INFO, output_string);
             if result.exit_code {
-                //compiler_report(tprint("Librarian failed with exit code '%'.\n", result.exit_code), loc);
-                return false;
+                log(builder, .ERROR, String.tprint("Failed with exit code '%'.\n", result.exit_code));
+                if error_string log(builder, .ERROR, error_string);
+                return;
             }
-            return true;
+            return;
         }
     } else {
         if #complete builder.type == {
@@ -302,12 +314,14 @@ build_lib :: (builder: Builder) -> bool {
 
         Basic.array_add(*arguments, .. builder.extra_library_files);
 
-        //log("%", get_quoted_command_string(arguments));
-        result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = true, working_directory = builder.working_directory);
+        log(builder, .INFO, String.tprint("%\n", Process.get_quoted_command_string(arguments)));
+        result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = false);
 
+        if output_string log(builder, .INFO, output_string);
         if result.exit_code {
-            //compiler_report(tprint("Compiler failed with exit code '%'.\n", result.exit_code), loc);
-            return false;
+            log(builder, .ERROR, String.tprint("Failed with exit code '%'.\n", result.exit_code));
+            if error_string log(builder, .ERROR, error_string);
+            return;
         }
 
         if builder.type == .STATIC_LIBRARY {
@@ -324,17 +338,17 @@ build_lib :: (builder: Builder) -> bool {
             Basic.array_add(*arguments, ..objs);
 
             // Run archiver command:
-            //log("%", get_quoted_command_string(arguments));
-            result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = true, working_directory = builder.working_directory);
+            log(builder, .INFO, String.tprint("%\n", Process.get_quoted_command_string(arguments)));
+            result, output_string, error_string := Process.run_command(..arguments, capture_and_return_output = true, print_captured_output = false);
 
+            if output_string log(builder, .INFO, output_string);
             if result.exit_code {
-                //compiler_report(tprint("Archive command failed with exit code '%'.\n", result.exit_code), loc);
-                return false;
+                log(builder, .ERROR, String.tprint("Failed with exit code '%'.\n", result.exit_code));
+                if error_string log(builder, .ERROR, error_string);
+                return;
             }
         }
     }
-
-    return true;
 }
 
 get_os_as_string :: (target_os: Operating_System_Tag) -> string {
@@ -355,4 +369,10 @@ get_env :: (e: *u8) -> *u8 {
     } else {
         return POSIX.getenv(e);
     }
+}
+
+log :: (builder: *Builder, type: Log_Type, message: string) {
+    Basic.array_add(*builder.logs, Log.{type, message});
+
+    if type == .ERROR builder.is_successful = false;
 }

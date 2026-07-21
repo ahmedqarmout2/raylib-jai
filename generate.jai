@@ -43,6 +43,17 @@ Command_Options :: struct {
     compile_specific_examples : []string = .[];
 }
 
+Log :: struct {
+    type    : Log_Type = .INFO;
+    message : string = "";
+}
+
+Log_Type :: enum {
+    INFO;
+    WARN;
+    ERROR;
+}
+
 DOTTED_LINE_LENGTH :: 80;
 OK                 :: "[   OK   ]";
 NOT_OK             :: "[ NOT OK ]";
@@ -201,4 +212,15 @@ print_result :: (prefix: string, result: bool) {
     print("%", line);
 
     Print_Color.print_color("%\n", ifx result then OK else NOT_OK, color=ifx result then .GREEN else .RED);
+}
+
+print_logs :: (logs: []Log) {
+    for log: logs {
+        if log.type == {
+            case .INFO;  Print_Color.print_color("[INFO] ", color=.CYAN);
+            case .WARN;  Print_Color.print_color("[WARN] ", color=.YELLOW);
+            case .ERROR; Print_Color.print_color("[ERROR] ", color=.RED);
+        }
+        print("%", log.message);
+    }
 }
