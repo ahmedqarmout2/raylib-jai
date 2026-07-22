@@ -6,7 +6,7 @@ Binder :: struct {
     footer        : string = "";
     line_counter  : int = -1;
     lines_count   : int = 0;
-    is_successful : bool = false;
+    is_successful : bool = true;
     logs          : [..] Log;
 };
 
@@ -131,7 +131,7 @@ DONE
 generate_binding :: (command_options: Command_Options, binder: *Binder) {
     file, success := File.file_open(binder.input_file);
     if !success {
-        print("Could not open file: %\n", binder.input_file);
+        log(binder, .ERROR, String.tprint("Could not open file: %\n", binder.input_file));
         return;
     }
 
@@ -140,7 +140,7 @@ generate_binding :: (command_options: Command_Options, binder: *Binder) {
 
     success = File.file_read(file, buffer, length);
     if !success {
-        print("Could not read file: %\n", binder.input_file);
+        log(binder, .ERROR, String.tprint("Could not read file: %\n", binder.input_file));
         return;
     }
 
@@ -212,7 +212,7 @@ generate_binding :: (command_options: Command_Options, binder: *Binder) {
         }
 
         if (is_function(binder, file_lines)) {
-            // handle_full_function(file_lines);
+            // Ignore full functions
             continue;
         }
 
@@ -233,7 +233,8 @@ generate_binding :: (command_options: Command_Options, binder: *Binder) {
         File.write_entire_file(remainder_file, *unrecognized_builder);
     }
 
-    print_result(binder.name, true);
+    print_result(binder.name, binder.is_successful);
+    if (command_options.is_verbose) print_logs(binder.logs);
 }
 
 populate_improved_function_definitions_table :: () {
@@ -370,7 +371,7 @@ handle_comment_block :: (binder: *Binder, file_lines: []string, output_builder: 
     suffix :: "*/";
     while (true) {
         if (!increment_line_counter(binder)) {
-            print("EOF while looking for the end of a comment block\n");
+            log(binder, .ERROR, "EOF while looking for the end of a comment block\n");
             return;
         }
 
@@ -397,18 +398,18 @@ handle_struct :: (binder: *Binder, file_lines: []string, output_builder: *String
 
     success, definition, comment := String.split_from_left(line, "{");
     if (!success) {
-        print("--Unexpected struct definition--\n");
-        print("%\n", definition);
-        print("--Expected: typedef struct <NAME> { --\n");
+        log(binder, .ERROR, "--Unexpected struct definition--\n");
+        log(binder, .ERROR, String.tprint("%\n", definition));
+        log(binder, .ERROR, "--Expected: typedef struct <NAME> { --\n");
         return;
     }
 
     definition        = String.trim(definition);
     definition_parts := String.split(definition, " ");
     if (definition_parts.count != 3) {
-        print("--Unexpected struct definition--\n");
-        print("%\n", definition);
-        print("--Expected: typedef struct <NAME> { --\n");
+        log(binder, .ERROR, "--Unexpected struct definition--\n");
+        log(binder, .ERROR, String.tprint("%\n", definition));
+        log(binder, .ERROR, "--Expected: typedef struct <NAME> { --\n");
         return;
     }
 
@@ -430,7 +431,7 @@ handle_struct :: (binder: *Binder, file_lines: []string, output_builder: *String
 
     while (true) {
         if (!increment_line_counter(binder)) {
-            print("EOF while looking for the end of a struct: %\n", struct_name);
+            log(binder, .ERROR, String.tprint("EOF while looking for the end of a struct: %\n", struct_name));
             return;
         }
 
@@ -454,9 +455,9 @@ handle_struct :: (binder: *Binder, file_lines: []string, output_builder: *String
 
         success1, struct_element, comment := String.split_from_left(line, ";");
         if (!success1) {
-            print("Unexpected struct element formart\n");
-            print("%\n", struct_name);
-            print("%\n", line);
+            log(binder, .ERROR, "Unexpected struct element formart\n");
+            log(binder, .ERROR, String.tprint("%\n", struct_name));
+            log(binder, .ERROR, String.tprint("%\n", line));
             return;
         }
 
@@ -464,9 +465,9 @@ handle_struct :: (binder: *Binder, file_lines: []string, output_builder: *String
 
         success2, c_type, jai_type, remainder := map_type(struct_element);
         if (!success2) {
-            print("Unexpected struct element type\n");
-            print("%\n", struct_name);
-            print("%\n", struct_element);
+            log(binder, .ERROR, "Unexpected struct element type\n");
+            log(binder, .ERROR, String.tprint("%\n", struct_name));
+            log(binder, .ERROR, String.tprint("%\n", struct_element));
             return;
         }
 
@@ -487,15 +488,15 @@ handle_enum :: (binder: *Binder, file_lines: []string, output_builder: *String_B
 
             success1, enum_string, comment := String.split_from_left(line, ";");
             if (!success1) {
-                print("--Unexpected enum definition--\n");
-                print("%\n", line);
+                log(binder, .ERROR, "--Unexpected enum definition--\n");
+                log(binder, .ERROR, String.tprint("%\n", line));
                 return;
             }
 
             success2, enum_values, enum_name := String.split_from_left(enum_string, "}");
             if (!success2) {
-                print("--Unexpected enum definition--\n");
-                print("%\n", enum_string);
+                log(binder, .ERROR, "--Unexpected enum definition--\n");
+                log(binder, .ERROR, String.tprint("%\n", enum_string));
                 return;
             }
 
@@ -513,7 +514,7 @@ handle_enum :: (binder: *Binder, file_lines: []string, output_builder: *String_B
     _g_line_counter := binder.line_counter;
     while (true) {
         if (!increment_line_counter(binder)) {
-            print("EOF while looking for the end of an enum.\n");
+            log(binder, .ERROR, "EOF while looking for the end of an enum.\n");
             return;
         }
 
@@ -525,9 +526,9 @@ handle_enum :: (binder: *Binder, file_lines: []string, output_builder: *String_B
 
         success, definition, comment := String.split_from_left(line, ";");
         if (!success) {
-            print("--Unexpected enum definition--\n");
-            print("%\n", definition);
-            print("--Expected: } <NAME>; --\n");
+            log(binder, .ERROR, "--Unexpected enum definition--\n");
+            log(binder, .ERROR, String.tprint("%\n", definition));
+            log(binder, .ERROR, "--Expected: } <NAME>; --\n");
             return;
         }
 
@@ -541,7 +542,7 @@ handle_enum :: (binder: *Binder, file_lines: []string, output_builder: *String_B
     print_to_builder(output_builder, "% :: enum s32 {\n", enum_name);
     while (true) {
         if (!increment_line_counter(binder)) {
-            print("EOF while looking for the end of an enum.\n");
+            log(binder, .ERROR, "EOF while looking for the end of an enum.\n");
             return;
         }
 
@@ -763,7 +764,7 @@ handle_if_definition :: (binder: *Binder, file_lines: []string, output_builder: 
         }
 
         if (!increment_line_counter(binder)) {
-            print("EOF while looking for the end of an ignored block\n");
+            log(binder, .ERROR, "EOF while looking for the end of an ignored block\n");
             return;
         }
     }
@@ -777,13 +778,13 @@ handle_rlapi :: (binder: *Binder, file_lines: []string, output_builder: *String_
 
     success, definition, comment := String.split_from_left(line, ";");
     if (!success) {
-        print("--Unexpected function definition--\n");
-        print("% %\n", RLAPI_PREFIX, definition);
-        print("--Expected: RLAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
+        log(binder, .ERROR, "--Unexpected function definition--\n");
+        log(binder, .ERROR, String.tprint("% %\n", RLAPI_PREFIX, definition));
+        log(binder, .ERROR, "--Expected: RLAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
         return;
     }
 
-    function_definition := convert_function_definition(definition);
+    function_definition := convert_function_definition(binder, definition);
 
     print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
 }
@@ -794,13 +795,13 @@ handle_rmapi :: (binder: *Binder, file_lines: []string, output_builder: *String_
     // Remove RMAPI prefix
     line = String.slice(line, RMAPI_PREFIX.count + 1, line.count - RMAPI_PREFIX.count);
 
-    function_definition := convert_function_definition(line);
+    function_definition := convert_function_definition(binder, line);
 
     print_to_builder(output_builder, "% #foreign raylib_native;\n", function_definition);
 
     while (true) {
         if (!increment_line_counter(binder)) {
-            print("EOF while looking for the end of a function.\n");
+            log(binder, .ERROR, "EOF while looking for the end of a function.\n");
             return;
         }
 
@@ -821,13 +822,13 @@ handle_rayguiapi :: (binder: *Binder, file_lines: []string, output_builder: *Str
 
     success, definition, comment := String.split_from_left(line, ";");
     if (!success) {
-        print("--Unexpected function definition--\n");
-        print("% %\n", RAYGUIAPI_PREFIX, definition);
-        print("--Expected: RAYGUIAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
+        log(binder, .ERROR, "--Unexpected function definition--\n");
+        log(binder, .ERROR, String.tprint("% %\n", RAYGUIAPI_PREFIX, definition));
+        log(binder, .ERROR, "--Expected: RAYGUIAPI <RETURN> <NAME>(<PARAMETERS ...>); --\n");
         return;
     }
 
-    function_definition := convert_function_definition(definition);
+    function_definition := convert_function_definition(binder, definition);
 
     print_to_builder(output_builder, "% #foreign raygui_native;%\n", function_definition, comment);
 }
@@ -879,34 +880,11 @@ is_function :: (binder: *Binder, file_lines: []string) -> bool {
     return false;
 }
 
-// THIS IS NOT COMPLETE YET, but I dont have a good reason to complete it. IT IS A PAIN
-handle_full_function :: (binder: *Binder, file_lines: []string) {
-    line := file_lines[binder.line_counter];
-    line = String.replace(line, "static", "");
-    line = String.trim(line);
-
-    right_bracket_idx := String.find_index_from_right(line, ")");
-
-    c_function_definition   := String.slice(line, 0, right_bracket_idx + 1);
-    jai_function_definition := convert_function_definition(c_function_definition);
-
-    success, old_definition, first_line_remainder := String.split_from_left(line, ")");
-    if (!success) {
-        print("Unexpected function definition\n");
-        print("%\n", line);
-        return;
-    }
-
-    line = String.join(jai_function_definition, first_line_remainder);
-
-    // print("FOUND A FUNCTION: %\n", line);
-}
-
-convert_function_definition :: (line: string) -> string {
+convert_function_definition :: (binder: *Binder, line: string) -> string {
     success, c_type, jai_type, remainder := map_type(line);
     if (!success) {
-        print("Unexpected function type\n");
-        print("%\n", line);
+        log(binder, .ERROR, "Unexpected function type\n");
+        log(binder, .ERROR, String.tprint("%\n", line));
         return "";
     }
 
@@ -933,9 +911,9 @@ convert_function_definition :: (line: string) -> string {
             } else {
                 success2, variable_c_type, variable_jai_type, variable_name := map_type(variable);
                 if (!success2) {
-                    print("Unexpected function variable\n");
-                    print("%\n", function_name);
-                    print("%\n", variable);
+                    log(binder, .ERROR, "Unexpected function variable\n");
+                    log(binder, .ERROR, String.tprint("%\n", function_name));
+                    log(binder, .ERROR, String.tprint("%\n", variable));
                     return "";
                 }
                 new_definition = String.join(new_definition, variable_name, ": ", variable_jai_type);
@@ -1036,71 +1014,8 @@ map_type :: (line: string) -> (success: bool, c_type: string, jai_type: string, 
     return true, c_type, jai_type, remainder;
 }
 
-convert_assignment :: (line: string, with_type: bool) -> string {
-    split_success, declaration, remainder := String.split_from_left(line, "=");
-    if (!split_success) {
-        print("Expected an equal sign\n");
-        print("%\n", line);
-        return "";
-    }
-
-    jai_type := "";
-    new_line := "";
-    if (with_type) {
-        map_success, c_type, _jai_type, variable := map_type(declaration);
-        if (!map_success) {
-            print("Failed to map c values to jai\n");
-            print("%\n", declaration);
-            return "";
-        }
-
-        jai_type = _jai_type;
-        variable = String.trim(variable);
-        new_line = String.join(variable, ": ", jai_type);
-    } else {
-        new_line = declaration;
-    }
-
-    // Handle a multi assign. For example:
-    //   float a00 = matViewProj.m0, a01 = matViewProj.m1, a02 = matViewProj.m2, a03 = matViewProj.m3;
-    multi_assign_parts := String.split(remainder, "=");
-    if (multi_assign_parts.count > 2 && with_type) {
-        remainder = " ";
-        for i: 0..multi_assign_parts.count-1 {
-            t := String.trim(multi_assign_parts[i]);
-            if (i < multi_assign_parts.count - 1) {
-                t = String.replace(t, ",", ";");
-                remainder = String.join(remainder, t, ":", jai_type, " = ");
-            } else {
-                remainder = String.join(remainder, t);
-            }
-        }
-    }
-
-    if (String.contains(remainder, " { 0 }")) {
-        return String.join(new_line, ";");
-    }
-
-    remainder = String.trim(remainder);
-
-    if (String.starts_with(remainder, "{")) {
-        return String.join(new_line, " = ", jai_type, ".", remainder);
-    }
-
-    if (String.contains(remainder, "?")) {
-        question_success, left, right := String.split_from_left(remainder, "?");
-        if (!question_success) {
-            print("Failed to split on question mark\n");
-            print("%\n", remainder);
-            return "";
-        }
-        right = String.replace(right, ":", "else");
-        remainder = String.join("ifx ", left, " then ", right);
-    }
-
-    return String.join(new_line, " = ", remainder);
-}
-
 log :: (binder: *Binder, type: Log_Type, message: string) {
     Basic.array_add(*binder.logs, Log.{type, message});
+
+    if type == .ERROR binder.is_successful = false;
 }

@@ -11,6 +11,7 @@ AUDIO_EXAMPLES :: string.[
     "audio_stream_callback",
     "audio_stream_effects"
 ];
+
 CORE_EXAMPLES :: string.[
     "core_2d_camera",
     "core_2d_camera_mouse_zoom",
@@ -39,6 +40,7 @@ CORE_EXAMPLES :: string.[
     "core_window_should_close",
     "core_world_screen"
 ];
+
 MODELS_EXAMPLES :: string.[
     "models_animation_gpu_skinning",
     "models_billboard_rendering",
@@ -62,6 +64,7 @@ MODELS_EXAMPLES :: string.[
     "models_waving_cubes",
     "models_yaw_pitch_roll"
 ];
+
 SHADERS_EXAMPLES :: string.[
     "shaders_ascii_rendering",
     "shaders_basic_lighting",
@@ -90,6 +93,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_texture_waves",
     "shaders_vertex_displacement"
 ];
+
 SHAPES_EXAMPLES :: string.[
     "shapes_basic_shapes",
     "shapes_bouncing_ball",
@@ -109,6 +113,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_splines_drawing",
     "shapes_top_down_lights"
 ];
+
 TEXT_EXAMPLES :: string.[
     "text_3d_drawing",
     "text_codepoints_loading",
@@ -123,6 +128,7 @@ TEXT_EXAMPLES :: string.[
     "text_unicode_emojis",
     "text_writing_anim"
 ];
+
 TEXTURES_EXAMPLES :: string.[
     "textures_background_scrolling",
     "textures_blend_modes",

@@ -81,7 +81,6 @@ build_libs :: (command_options: Command_Options) {
     }
 }
 
-
 // A simplified version of BuildCpp.build_cpp
 build_lib :: (builder: *Builder) {
     log(builder, .INFO, String.tprint("Library type: %\n", builder.type));
