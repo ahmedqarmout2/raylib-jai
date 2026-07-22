@@ -8,7 +8,7 @@
 /*
 ********************************************************************************************
 *
-*   raygui v5.0-dev - A simple and easy-to-use immediate-mode gui library
+*   raygui v5.0 - A simple and easy-to-use immediate-mode gui library
 *
 *   DESCRIPTION:
 *       raygui is a tools-dev-focused immediate-mode-gui library based on raylib but also
@@ -45,7 +45,7 @@
 *       - Line
 *       - Panel         --> StatusBar
 *       - ScrollPanel   --> StatusBar
-*       - TabBar        --> Button
+*       - TabBar        --> Toggle, Button
 *
 *     # Basic Controls
 *       - Label
@@ -142,6 +142,10 @@
 *           Includes custom ricons.h header defining a set of custom icons,
 *           this file can be generated using rGuiIcons tool
 *
+*       #define RAYGUI_FONT_ICONS_BAKING
+*           On gui font loading from style file, append the icons to font atlas image, so,
+*           icons can be drawn along the text as a texture, instead of using shapes to draw them
+*
 *       #define RAYGUI_DEBUG_RECS_BOUNDS
 *           Draw control bounds rectangles for debug
 *
@@ -149,16 +153,26 @@
 *           Draw text bounds rectangles for debug
 *
 *   VERSIONS HISTORY:
-*       5.0 (xx-Mar-2026) ADDED: Support up to 32 controls (v500)
+*       5.0 (20-Jul-2026) ADDED: NEW control: GuiTabBar()
+*                         ADDED: Support up to 512 icons (v500)
+*                         ADDED: Support icons baking into font atlas image
 *                         ADDED: guiControlExclusiveMode and guiControlExclusiveRec for exclusive modes
-*                         ADDED: GuiValueBoxFloat()
+*                         ADDED: GuiValueBoxFloat(), with floats support
 *                         ADDED: GuiDropdonwBox() properties: DROPDOWN_ARROW_HIDDEN, DROPDOWN_ROLL_UP
 *                         ADDED: GuiListView() property: LIST_ITEMS_BORDER_WIDTH
-*                         ADDED: GuiLoadIconsFromMemory()
-*                         ADDED: Multiple new icons
+*                         ADDED: GuiLoadIconsFromMemory(), used by GuiLoadIcons()
 *                         ADDED: Macros for inputs customization, raylib decoupling
+*                         ADDED: Control result return values: 1-RESULT_PRESSED, 2-RESULT_CHANGED, >2-Control_custom
 *                         REMOVED: GuiSpinner() from controls list, using BUTTON + VALUEBOX properties
 *                         REMOVED: GuiSliderPro(), functionality was redundant
+*                         REMOVED: TextSplit() raylib function requirement on RAYGUI_STANDALONE
+*                         REDESIGNED: WARNING: GuiLoadStyleFromMemory() to support icons baking into font atlas
+*                         REDESIGNED: GuiToggleGroup() to process rows/cols with no need for GuiTextSplit()
+*                         REDESIGNED: GuiColorPanel(), improved HSV <-> RGBA convertion
+*                         REDESIGNED: WARNING: TEXT_LINE_SPACING does not consider text height, only lines spacing
+*                         REDESIGNED: WARNING: GuiMessageBox(), added parameter for btn return, unify result
+*                         REDESIGNED: WARNING: GuiTextInputBox(), added parameter for btn return, unify result
+*                         REVIEWED: GuiLoadIconsFromMemory(), fixed memory issues
 *                         REVIEWED: Controls using text labels to use LABEL properties
 *                         REVIEWED: Replaced sprintf() by snprintf() for more safety
 *                         REVIEWED: GuiTabBar(), close tab with mouse middle button
@@ -173,8 +187,6 @@
 *                         REVIEWED: GuiProgressBar(), improved borders computing
 *                         REVIEWED: GuiTextBox(), multiple improvements: autocursor and more
 *                         REVIEWED: Functions descriptions, removed wrong return value reference
-*                         REDESIGNED: GuiColorPanel(), improved HSV <-> RGBA convertion
-*                         REDESIGNED: WARNING: TEXT_LINE_SPACING does not consider text height, only lines spacing
 *
 *       4.0 (12-Sep-2023) ADDED: GuiToggleSlider()
 *                         ADDED: GuiColorPickerHSV() and GuiColorPanelHSV()
@@ -281,7 +293,7 @@
 *       0.8 (27-Aug-2015) Initial release. Implemented by Kevin Gato, Daniel Nicolás and Ramon Santamaria
 *
 *   DEPENDENCIES:
-*       raylib 5.6-dev  - Inputs reading (keyboard/mouse), shapes drawing, font loading and text drawing
+*       raylib 6.1-dev  - Inputs reading (keyboard/mouse), shapes drawing, font loading and text drawing
 *
 *   STANDALONE MODE:
 *       By default raygui depends on raylib mostly for the inputs and the drawing functionality but that dependency can be disabled
@@ -347,10 +359,10 @@
 */
 
 
-RAYGUI_VERSION_MAJOR :: 4;
-RAYGUI_VERSION_MINOR :: 5;
+RAYGUI_VERSION_MAJOR :: 5;
+RAYGUI_VERSION_MINOR :: 0;
 RAYGUI_VERSION_PATCH :: 0;
-RAYGUI_VERSION ::  "5.0-dev";
+RAYGUI_VERSION ::  "5.0";
 
 
 // Function specifiers in case library is build/used as a shared library (Windows)
@@ -364,9 +376,6 @@ RAYGUI_VERSION ::  "5.0-dev";
 // Simple log system to avoid printf() calls if required
 // NOTE: Avoiding those calls, also avoids const strings memory usage
 
-// Macros to define required UI inputs, including mapping to gamepad controls
-// TODO: Define additionally required macros for missing inputs 
-// TODO: WARNING: GuiTabBar() still requires IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON)
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -379,9 +388,11 @@ RAYGUI_VERSION ::  "5.0-dev";
 
     // Color type, RGBA (32bit)
 
+//#define BLANK  (Color){ 0, 0, 0, 0 } // Blank (Transparent)
+
     // Rectangle type
 
-    // TODO: Texture2D type is very coupled to raylib, required by Font type
+    // NOTE: Texture2D type is very coupled to raylib, required by Font type
     // It should be redesigned to be provided by user
 
     // Texture2D, same as Texture
@@ -390,7 +401,7 @@ RAYGUI_VERSION ::  "5.0-dev";
 
     // GlyphInfo, font characters glyphs info
 
-    // TODO: Font type is very coupled to raylib, mostly required by GuiLoadStyle()
+    // NOTE: Font type is very coupled to raylib, mostly required by GuiLoadStyle()
     // It should be redesigned to be provided by user
 
 // Style property
@@ -415,6 +426,15 @@ int padding;
 } GuiTextStyle;
 **
 */
+
+// Gui control result
+GuiResult :: enum s32 {
+    RESULT_NONE        :: 0;
+    RESULT_PRESSED     :: 1;
+    RESULT_CHANGED     :: 2;
+
+    RESULT_TAB_CLOSE   :: 4;     // GuiTabBar(), tab close request
+}
 
 // Gui control state
 GuiState :: enum s32 {
@@ -448,88 +468,95 @@ GuiTextWrapMode :: enum s32 {
 }
 
 // Gui controls
+// NOTE: Up to 16 controls supported or 32 controls (v500)
 GuiControl :: enum s32 {
     // Default -> populates to all controls when set
-    DEFAULT :: 0;
+    DEFAULT         :: 0;
 
     // Basic controls
-    LABEL;          // Used also for: LABELBUTTON
-    BUTTON;
-    TOGGLE;         // Used also for: TOGGLEGROUP
-    SLIDER;         // Used also for: SLIDERBAR, TOGGLESLIDER
-    PROGRESSBAR;
-    CHECKBOX;
-    COMBOBOX;
-    DROPDOWNBOX;
-    TEXTBOX;        // Used also for: TEXTBOXMULTI
-    VALUEBOX;
-    CONTROL11;
-    LISTVIEW;
-    COLORPICKER;
-    SCROLLBAR;
-    STATUSBAR;
+    LABEL           :: 1;        // Used also for: LABELBUTTON
+    BUTTON          :: 2;
+    TOGGLE          :: 3;        // Used also for: TOGGLEGROUP
+    SLIDER          :: 4;        // Used also for: SLIDERBAR, TOGGLESLIDER
+    PROGRESSBAR     :: 5;
+    CHECKBOX        :: 6;
+    COMBOBOX        :: 7;
+    DROPDOWNBOX     :: 8;
+    TEXTBOX         :: 9;        // Used also for: TEXTBOXMULTI
+    VALUEBOX        :: 10;
+    TABBAR          :: 11;
+    LISTVIEW        :: 12;
+    COLORPICKER     :: 13;
+    SCROLLBAR       :: 14;
+    STATUSBAR       :: 15;
+    // NOTE: More controls can be added if required
 }
 
-// Gui base properties for every control
-// NOTE: RAYGUI_MAX_PROPS_BASE properties (by default 16 properties)
+// Controls BASE properties for every control (RAYGUI_MAX_PROPS_BASE = 16)
+// NOTE: Properties required for all controls, DEFAULT control sets
+// default values for them but they can be overriden per control
 GuiControlProperty :: enum s32 {
-    BORDER_COLOR_NORMAL :: 0;    // Control border color in STATE_NORMAL
-    BASE_COLOR_NORMAL;          // Control base color in STATE_NORMAL
-    TEXT_COLOR_NORMAL;          // Control text color in STATE_NORMAL
-    BORDER_COLOR_FOCUSED;       // Control border color in STATE_FOCUSED
-    BASE_COLOR_FOCUSED;         // Control base color in STATE_FOCUSED
-    TEXT_COLOR_FOCUSED;         // Control text color in STATE_FOCUSED
-    BORDER_COLOR_PRESSED;       // Control border color in STATE_PRESSED
-    BASE_COLOR_PRESSED;         // Control base color in STATE_PRESSED
-    TEXT_COLOR_PRESSED;         // Control text color in STATE_PRESSED
-    BORDER_COLOR_DISABLED;      // Control border color in STATE_DISABLED
-    BASE_COLOR_DISABLED;        // Control base color in STATE_DISABLED
-    TEXT_COLOR_DISABLED;        // Control text color in STATE_DISABLED
-    BORDER_WIDTH :: 12;          // Control border size, 0 for no border
-    //TEXT_SIZE,                  // Control text size (glyphs max height) -> GLOBAL for all controls
-    //TEXT_SPACING,               // Control text spacing between glyphs -> GLOBAL for all controls
-    //TEXT_LINE_SPACING,          // Control text spacing between lines -> GLOBAL for all controls
-    TEXT_PADDING :: 13;          // Control text padding, not considering border
-    TEXT_ALIGNMENT :: 14;        // Control text horizontal alignment inside control text bound (after border and padding)
-    //TEXT_WRAP_MODE              // Control text wrap-mode inside text bounds -> GLOBAL for all controls
+    BORDER_COLOR_NORMAL   :: 0;      // Control border color in STATE_NORMAL
+    BASE_COLOR_NORMAL     :: 1;      // Control base color in STATE_NORMAL
+    TEXT_COLOR_NORMAL     :: 2;      // Control text color in STATE_NORMAL
+    BORDER_COLOR_FOCUSED  :: 3;      // Control border color in STATE_FOCUSED
+    BASE_COLOR_FOCUSED    :: 4;      // Control base color in STATE_FOCUSED
+    TEXT_COLOR_FOCUSED    :: 5;      // Control text color in STATE_FOCUSED
+    BORDER_COLOR_PRESSED  :: 6;      // Control border color in STATE_PRESSED
+    BASE_COLOR_PRESSED    :: 7;      // Control base color in STATE_PRESSED
+    TEXT_COLOR_PRESSED    :: 8;      // Control text color in STATE_PRESSED
+    BORDER_COLOR_DISABLED :: 9;      // Control border color in STATE_DISABLED
+    BASE_COLOR_DISABLED   :: 10;     // Control base color in STATE_DISABLED
+    TEXT_COLOR_DISABLED   :: 11;     // Control text color in STATE_DISABLED
+    BORDER_WIDTH          :: 12;     // Control border size, 0 for no border
+    TEXT_PADDING          :: 13;     // Control text padding, not considering border
+    TEXT_ALIGNMENT        :: 14;     // Control text horizontal alignment inside control text bound (after border and padding): 0-Left, 1-Center, 2-Right
+    BASEPROP16            :: 15;      // Not used yet...
 }
 
-// TODO: Which text styling properties should be global or per-control?
-// At this moment TEXT_PADDING and TEXT_ALIGNMENT is configured and saved per control while
-// TEXT_SIZE, TEXT_SPACING, TEXT_LINE_SPACING, TEXT_ALIGNMENT_VERTICAL, TEXT_WRAP_MODE are global and
-// should be configured by user as needed while defining the UI layout
 
-// Gui extended properties depend on control
-// NOTE: RAYGUI_MAX_PROPS_EXTENDED properties (by default, max 8 properties)
+// WARNING: Some properties have been chosen to be global with DEFAULT - EXTENDED properties:
+//    - TEXT_SIZE,                  // Control text size (glyphs max height)
+//    - TEXT_SPACING,               // Control text spacing between glyphs
+//    - TEXT_LINE_SPACING,          // Control text spacing between lines
+//    - TEXT_WRAP_MODE              // Control text wrap-mode inside text bounds
+//
+// While other properties can be setup per globally (DEFAULT) or per control:
+//    - TEXT_PADDING                // Control text padding, not considering border
+//    - TEXT_ALIGNMENT              // Control text horizontal alignment inside control text bound
+
+
+// Controls EXTENDED properties (RAYGUI_MAX_PROPS_EXTENDED = 8)
+// WARNING: Only 8 slots vailable for those properties per control, including DEFAULT
 //----------------------------------------------------------------------------------
-// DEFAULT extended properties
-// NOTE: Those properties are common to all controls or global
-// WARNING: Only 8 slots vailable for those properties by default
+// DEFAULT control, extended properties
+// NOTE: Those properties are global for all controls, they can not be setup per control
 GuiDefaultProperty :: enum s32 {
-    TEXT_SIZE :: 16;             // Text size (glyphs max height)
-    TEXT_SPACING;               // Text spacing between glyphs
-    LINE_COLOR;                 // Line control color
-    BACKGROUND_COLOR;           // Background color
-    TEXT_LINE_SPACING;          // Text spacing between lines
-    TEXT_ALIGNMENT_VERTICAL;    // Text vertical alignment inside text bounds (after border and padding)
-    TEXT_WRAP_MODE;              // Text wrap-mode inside text bounds
-    //TEXT_DECORATION             // Text decoration: 0-None, 1-Underline, 2-Line-through, 3-Overline
-    //TEXT_DECORATION_THICK       // Text decoration line thickness
+    TEXT_SIZE             :: 16;     // Text size (glyphs max height)
+    TEXT_SPACING          :: 17;     // Text spacing between glyphs
+    LINE_COLOR            :: 18;     // Line control color
+    BACKGROUND_COLOR      :: 19;     // Background color
+    TEXT_LINE_SPACING     :: 20;     // Text spacing between lines
+    TEXT_ALIGNMENT_VERTICAL :: 21;   // Text vertical alignment inside text bounds (after border and padding): 0-Top, 1-Middle, 2-Bottom
+    TEXT_WRAP_MODE        :: 22;     // Text wrap-mode inside text bounds
+    EXTPROP08             :: 23;      // Not used yet...
 }
 
-// Other possible text properties:
-// TEXT_WEIGHT                  // Normal, Italic, Bold -> Requires specific font change
-// TEXT_INDENT                  // Text indentation -> Now using TEXT_PADDING...
+// Other possible text extended properties:
+// TEXT_DECORATION               // Text decoration: 0-None, 1-Underline, 2-Line-through, 3-Overline
+// TEXT_DECORATION_THICK         // Text decoration line thickness
+// TEXT_FONT_WEIGHT              // Text font weight: 0-Normal, 1-Bold, 2-Italic -> Requires specific font change
 
 // Label
 //typedef enum { } GuiLabelProperty;
 
-// Button/Spinner
+// Button
 //typedef enum { } GuiButtonProperty;
 
 // Toggle/ToggleGroup
 GuiToggleProperty :: enum s32 {
     GROUP_PADDING :: 16;         // ToggleGroup separation between toggles
+    GROUP_WIDTH_FULL;            // ToggleGroup bounds width considers all items: 0-Width per item, 1-Full width
 }
 
 // Slider/SliderBar
@@ -541,7 +568,7 @@ GuiSliderProperty :: enum s32 {
 // ProgressBar
 GuiProgressBarProperty :: enum s32 {
     PROGRESS_PADDING :: 16;      // ProgressBar internal padding
-    PROGRESS_SIDE;              // ProgressBar increment side: 0-left->right, 1-right-left
+    PROGRESS_SIDE;              // ProgressBar increment side: 0-Left->Right, 1-Right->Left
 }
 
 // ScrollBar
@@ -570,12 +597,12 @@ GuiDropdownBoxProperty :: enum s32 {
     ARROW_PADDING :: 16;         // DropdownBox arrow separation from border and items
     DROPDOWN_ITEMS_SPACING;     // DropdownBox items separation
     DROPDOWN_ARROW_HIDDEN;      // DropdownBox arrow hidden
-    DROPDOWN_ROLL_UP;            // DropdownBox roll up flag (default rolls down)
+    DROPDOWN_ROLL_UP;            // DropdownBox roll up flag: 0-Roll down, 1-Roll up
 }
 
 // TextBox/TextBoxMulti/ValueBox/Spinner
 GuiTextBoxProperty :: enum s32 {
-    TEXT_READONLY :: 16;         // TextBox in read-only mode: 0-text editable, 1-text no-editable
+    TEXT_READONLY :: 16;         // TextBox in read-only mode: 0-Text editable, 1-Text read-only
 }
 
 // ValueBox/Spinner
@@ -584,30 +611,34 @@ GuiValueBoxProperty :: enum s32 {
     SPINNER_BUTTON_SPACING;     // Spinner buttons separation
 }
 
-// Control11
-//typedef enum { } GuiControl11Property;
+// TabBar
+GuiTabBarProperty :: enum s32 {
+    TAB_ITEMS_WIDTH :: 16;       // TabBar tab items width
+    TAB_CLOSE_BUTTON;           // TabBar tab close button: 0-Not shown, 1-Shown
+    TAB_LINE_SIDE;              // TabBar tabs side: 0-Bottom, 1-Top
+}
 
 // ListView
+SCROLLBAR_LEFT_SIDE ::     0;
+SCROLLBAR_RIGHT_SIDE ::    1;
+
 GuiListViewProperty :: enum s32 {
     LIST_ITEMS_HEIGHT :: 16;     // ListView items height
     LIST_ITEMS_SPACING;         // ListView items separation
     SCROLLBAR_WIDTH;            // ListView scrollbar size (usually width)
-    SCROLLBAR_SIDE;             // ListView scrollbar side (0-SCROLLBAR_LEFT_SIDE, 1-SCROLLBAR_RIGHT_SIDE)
+    SCROLLBAR_SIDE;             // ListView scrollbar side: 0-Left side, 1-Right Side
     LIST_ITEMS_BORDER_NORMAL;   // ListView items border enabled in normal state
     LIST_ITEMS_BORDER_WIDTH;     // ListView items border width
 }
 
 // ColorPicker
 GuiColorPickerProperty :: enum s32 {
-    COLOR_SELECTOR_SIZE :: 16;
+    COLOR_SELECTOR_SIZE :: 16;   // ColorPicker selector square size
     HUEBAR_WIDTH;               // ColorPicker right hue bar width
     HUEBAR_PADDING;             // ColorPicker right hue bar separation from panel
     HUEBAR_SELECTOR_HEIGHT;     // ColorPicker right hue bar selector height
     HUEBAR_SELECTOR_OVERFLOW;    // ColorPicker right hue bar selector overflow
 }
-
-SCROLLBAR_LEFT_SIDE ::     0;
-SCROLLBAR_RIGHT_SIDE ::    1;
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -639,6 +670,7 @@ GuiGetStyle :: (control: s32, property: s32) -> s32 #foreign raygui_native;     
 
 // Styles loading functions
 GuiLoadStyle :: (fileName: *u8) #foreign raygui_native;              // Load style file over global style variable (.rgs)
+GuiLoadStyleFromMemory :: (fileData: *u8, dataSize: s32) #foreign raygui_native; // Load style from memory (binary only)
 GuiLoadStyleDefault :: () #foreign raygui_native;                       // Load style default over global style
 
 // Tooltips management functions
@@ -659,7 +691,6 @@ GuiWindowBox :: (bounds: Rectangle, title: *u8) -> s32 #foreign raygui_native;  
 GuiGroupBox :: (bounds: Rectangle, text: *u8) -> s32 #foreign raygui_native;                                         // Group Box control with text name
 GuiLine :: (bounds: Rectangle, text: *u8) -> s32 #foreign raygui_native;                                             // Line separator control, could contain text
 GuiPanel :: (bounds: Rectangle, text: *u8) -> s32 #foreign raygui_native;                                            // Panel control, useful to group controls
-GuiTabBar :: (bounds: Rectangle, text: **u8, count: s32, active: *s32) -> s32 #foreign raygui_native;                        // Tab Bar control, returns TAB to be closed or -1
 GuiScrollPanel :: (bounds: Rectangle, text: *u8, content: Rectangle, scroll: *Vector2, view: *Rectangle) -> s32 #foreign raygui_native; // Scroll Panel control
 
 // Basic controls set
@@ -687,15 +718,17 @@ GuiGrid :: (bounds: Rectangle, text: *u8, spacing: float, subdivs: s32, mouseCel
 
 // Advance controls set
 GuiListView :: (bounds: Rectangle, text: *u8, scrollIndex: *s32, active: *s32) -> s32 #foreign raygui_native;          // List View control
-GuiListViewEx :: (bounds: Rectangle, text: **u8, count: s32, scrollIndex: *s32, active: *s32, focus: *s32) -> s32 #foreign raygui_native; // List View with extended parameters
-GuiMessageBox :: (bounds: Rectangle, title: *u8, message: *u8, buttons: *u8) -> s32 #foreign raygui_native; // Message Box control, displays a message
-GuiTextInputBox :: (bounds: Rectangle, title: *u8, message: *u8, buttons: *u8, text: *u8, textMaxSize: s32, secretViewActive: *bool) -> s32 #foreign raygui_native; // Text Input Box control, ask for text, supports secret
-GuiColorPicker :: (bounds: Rectangle, text: *u8, color: *Color) -> s32 #foreign raygui_native;                        // Color Picker control (multiple color controls)
+GuiListViewEx :: (bounds: Rectangle, text: **u8, count: s32, scrollIndex: *s32, active: *s32, focus: *s32) -> s32 #foreign raygui_native; // List View control, using text entries list and returning focus entry
+GuiTabBar :: (bounds: Rectangle, text: *u8, hscroll: *s32, active: *s32) -> s32 #foreign raygui_native;                // Tab Bar control
+GuiTabBarEx :: (bounds: Rectangle, text: **u8, count: s32, hscroll: *s32, active: *s32, focus: *s32) -> s32 #foreign raygui_native; // Tab Bar control, using text entries list and returning focus entry
+GuiMessageBox :: (bounds: Rectangle, title: *u8, message: *u8, btnText: *u8, btnActive: *s32) -> s32 #foreign raygui_native; // Message Box control, displays a message
+GuiTextInputBox :: (bounds: Rectangle, title: *u8, message: *u8, text: *u8, textSize: s32, btnText: *u8, btnActive: *s32, secretViewActive: *bool) -> s32 #foreign raygui_native; // Text Input Box control, ask for text, supports secret
+GuiColorPicker :: (bounds: Rectangle, text: *u8, color: *Color) -> s32 #foreign raygui_native;                        // Color Picker control, includes Color bar controls
 GuiColorPanel :: (bounds: Rectangle, text: *u8, color: *Color) -> s32 #foreign raygui_native;                         // Color Panel control
 GuiColorBarAlpha :: (bounds: Rectangle, text: *u8, alpha: *float) -> s32 #foreign raygui_native;                      // Color Bar Alpha control
 GuiColorBarHue :: (bounds: Rectangle, text: *u8, value: *float) -> s32 #foreign raygui_native;                        // Color Bar Hue control
-GuiColorPickerHSV :: (bounds: Rectangle, text: *u8, colorHsv: *Vector3) -> s32 #foreign raygui_native;                // Color Picker control that avoids conversion to RGB on each call (multiple color controls)
-GuiColorPanelHSV :: (bounds: Rectangle, text: *u8, colorHsv: *Vector3) -> s32 #foreign raygui_native;                 // Color Panel control that updates Hue-Saturation-Value color value, used by GuiColorPickerHSV()
+GuiColorPickerHSV :: (bounds: Rectangle, text: *u8, colorHsv: *Vector3) -> s32 #foreign raygui_native;                // Color Picker control, using Hue-Saturation-Value color data, includes Color bar controls
+GuiColorPanelHSV :: (bounds: Rectangle, text: *u8, colorHsv: *Vector3) -> s32 #foreign raygui_native;                 // Color Panel control, using Hue-Saturation-Value color data
 //----------------------------------------------------------------------------------------------------------
 
 
@@ -765,7 +798,6 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
 
 
-
 //----------------------------------------------------------------------------------
 // Gui Setup Functions Definition
 //----------------------------------------------------------------------------------
@@ -790,7 +822,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
 // Set custom gui font
 // NOTE: Font loading/unloading is external to raygui
-        // NOTE: If a font is tried to be set but default style has not been lazily loaded first, 
+        // NOTE: If a font is tried to be set but default style has not been lazily loaded first,
         // it will be overwritten, so default style loading needs to be forced first
 
 
@@ -823,6 +855,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
     // Draw control
     //--------------------------------------------------------------------
+
 
     // Draw window close button
     //--------------------------------------------------------------------
@@ -858,31 +891,6 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
     // Draw control
     //--------------------------------------------------------------------
 
-    //--------------------------------------------------------------------
-
-
-// Tab Bar control
-// NOTE: Using GuiToggle() for the TABS
-
-    //GuiState state = guiState;
-
-
-
-
-
-    // Draw control
-    //--------------------------------------------------------------------
-
-            // Draw tabs as toggle controls
-
-
-            // Close tab with middle mouse button pressed
-
-
-            // Draw tab close button
-            // NOTE: Only draw close button for current tab: if (CheckCollisionPointRec(mousePosition, tabBounds))
-
-    // Draw tab-bar bottom line
     //--------------------------------------------------------------------
 
 
@@ -990,6 +998,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
     //--------------------------------------------------------------------
 
         // Check toggle button state
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1001,11 +1010,22 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 // Toggle Group control
 
 
+    // One toggle group item text
 
 
-    // Get substrings items from text (items pointers)
 
 
+        // Calculate item width considring all horizontal items
+        // NOTE: bounds.height still considers individual items height
+
+    // Text parsing needed to consider potential row and col entries (vertical/horizontal layout)
+    // when '\n' found move vertically next toggle, when ';' found move horizontally
+        // Process text to get items one by one
+        // NOTE: Setting columns and rows index properly
+
+            // When a next item is ready, draw its toggle
+
+            // Calculate next item position
 
 
 
@@ -1013,14 +1033,13 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 // Toggle Slider control extended
 
 
-    //bool toggle = false;    // Required for individual toggles
-
     // Get substrings items from text (items pointers)
 
 
 
     // Update control
     //--------------------------------------------------------------------
+
 
 
 
@@ -1047,6 +1066,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
         // Check checkbox state
 
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1066,6 +1086,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
     // Update control
     //--------------------------------------------------------------------
+
 
 
     //--------------------------------------------------------------------
@@ -1117,7 +1138,7 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
     //--------------------------------------------------------------------
 
 
-    // TODO: Use result to return more internal states: mouse-press out-of-bounds, mouse-press over selected-item...
+
 
 // Text Box control
 // NOTE: Returns true on ENTER pressed (useful for data validation)
@@ -1162,6 +1183,8 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
                         // Paste data in at cursor
 
+
+                        //result = RESULT_CHANGED;
                 // Adding codepoint to text, at current cursor position
 
                 // Move forward data from cursor position
@@ -1170,6 +1193,8 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
 
                 // Make sure text last character is EOL
+
+                //result = RESULT_CHANGED;
 
             // Move cursor to start
 
@@ -1180,17 +1205,21 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
                 // Check characters of the same type to delete (either ASCII punctuation or anything non-whitespace)
                 // Not using isalnum() since it only works on ASCII characters
 
+
                 // Check whitespace to delete (ASCII only)
 
 
                 // Move text after cursor forward (including final null terminator)
 
 
+                //result = RESULT_CHANGED;
                 // Delete single codepoint from text, after current cursor position
 
 
                 // Move text after cursor forward (including final null terminator)
 
+
+                //result = RESULT_CHANGED;
 
             // Delete related codepoints from text, before current cursor position
 
@@ -1204,12 +1233,15 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
                 // Move text after cursor forward (including final null terminator)
 
 
+                //result = RESULT_CHANGED;
                 // Delete single codepoint from text, before current cursor position
 
 
 
                 // Move text after cursor forward (including final null terminator)
 
+
+                //result = RESULT_CHANGED;
 
             // Move cursor position with keys
                 //int accCodepointSize = 0;
@@ -1252,6 +1284,10 @@ RAYGUI_MAX_PROPS_EXTENDED ::        8;     // Maximum number of extended propert
 
             // Finish text editing on ENTER or mouse click outside bounds
 
+                //*editMode = false;
+
+
+                    //*editMode = true;
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1314,11 +1350,14 @@ return pressed;
     // Draw text label if provided
     //--------------------------------------------------------------------
 
+    //if (tempValue != *value) result = RESULT_CHANGED; // WARNING: Stops editing
+
+
 
 // Value Box control, updates input text with numbers
-// NOTE: Requires static variables: frameCounter
 
 
+    //int prevValue = *value;
 
 
     // Update control
@@ -1344,6 +1383,9 @@ return pressed;
 
 
 
+
+
+    //if (prevValue != *value) result = RESULT_CHANGED;
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1358,11 +1400,9 @@ return pressed;
 
 
 // Floating point Value Box control, updates input val_str with numbers
-// NOTE: Requires static variables: frameCounter
 
 
-    //char textValue[RAYGUI_VALUEBOX_MAX_CHARS + 1] = "\0";
-    //snprintf(textValue, sizeof(textValue), "%2.2f", *value);
+    //float prevValue = *value;
 
 
     // Update control
@@ -1382,6 +1422,9 @@ return pressed;
             // Pressed backspace
 
 
+
+
+    //if (prevValue != *value) result = RESULT_CHANGED;
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1401,6 +1444,7 @@ return pressed;
 
 
 
+
     // Update control
     //--------------------------------------------------------------------
 
@@ -1409,9 +1453,8 @@ return pressed;
                     // Get equivalent value and slider position from mousePosition.x
 
 
-    // Control value change check
-
     // Slider bar limits check
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1438,6 +1481,7 @@ return pressed;
     //--------------------------------------------------------------------
 
     // WARNING: Working with floats could lead to rounding issues
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1457,6 +1501,15 @@ return pressed;
 
 // Status Bar control
 
+    // Update control
+    //--------------------------------------------------------------------
+
+        // Check checkbox state
+            //if (GUI_BUTTON_DOWN) state = STATE_PRESSED;
+            //else state = STATE_FOCUSED;
+
+    //--------------------------------------------------------------------
+
     // Draw control
     //--------------------------------------------------------------------
     //--------------------------------------------------------------------
@@ -1468,6 +1521,7 @@ return pressed;
     //--------------------------------------------------------------------
 
         // Check button state
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1480,7 +1534,7 @@ return pressed;
 
 
 
-// List View control with extended parameters
+// List View control using text entries list and returning focus entry
 
 
     // Check if scroll bar is needed
@@ -1526,7 +1580,43 @@ return pressed;
 
 
 
-// Color Panel control - Color (RGBA) variant
+
+// Tab Bar control
+
+
+
+
+// Tab Bar control, using text entries list and returning focus entry
+// NOTE: In case of tab close result, consider focused tab
+// TODO: Reeplace GuiToggle() usage for custom implementation for the TABS
+    //GuiState state = guiState;
+
+
+
+
+
+
+    // Draw control
+    //--------------------------------------------------------------------
+    //if ((state != STATE_DISABLED) && !guiLocked && !guiControlExclusiveMode) // TODO: Support disabled
+
+
+            // Draw tabs as toggle controls
+
+
+            // Close tab with middle mouse button pressed
+
+
+                // Draw tab close button
+                // NOTE: Only draw close button for current tab: if (CheckCollisionPointRec(mousePosition, tabBounds))
+
+    // Draw tab-bar bottom line
+    //--------------------------------------------------------------------
+
+    // NOTE: In case of tab close result, consider focused tab
+
+
+// Color Panel control
 
 
 
@@ -1534,12 +1624,11 @@ return pressed;
     // This is required, because the Color->HSV->Color conversion has precision errors
     // Thus the assignment from HSV to Color should only be made, if the HSV has a new user-entered value
     // Otherwise GuiColorPanel would often modify it's color without user input
-    // TODO: GuiColorPanelHSV could return 1 if the slider was dragged, to simplify this check
 
-        // NOTE: Vector3ToColor() only available on raylib 1.8.1
 
 // Color Bar Alpha control
 // NOTE: Returns alpha value normalized [0..1]
+
 
 
     // Update control
@@ -1548,6 +1637,7 @@ return pressed;
 
 
                 //selector.x = bounds.x + (int)(((alpha - 0)/(100 - 0))*(bounds.width - 2*GuiGetStyle(SLIDER, BORDER_WIDTH))) - selector.width/2;
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1568,6 +1658,7 @@ return pressed;
 //      Color GuiColorBarValue() [BLACK->color], HSV/HSL
 //      float GuiColorBarLuminance() [BLACK->WHITE]
 
+
     // Update control
     //--------------------------------------------------------------------
 
@@ -1587,12 +1678,13 @@ hue += 2.0f;
 if (hue >= 360.0f) hue = 360.0f;
 }**
 */
+
     //--------------------------------------------------------------------
 
     // Draw control
     //--------------------------------------------------------------------
         // Draw hue bar:color bars
-        // TODO: Use directly DrawRectangleGradientEx(bounds, color1, color2, color2, color1);
+        // NOTE: Using DrawRectangleGradientEx(bounds, color1, color2, color2, color1);
 
 
     // Draw hue bar: selector
@@ -1646,8 +1738,8 @@ if (hue >= 360.0f) hue = 360.0f;
 
 
 
-
                 // Calculate color from picker
+
 
 
     //--------------------------------------------------------------------
@@ -1661,6 +1753,7 @@ if (hue >= 360.0f) hue = 360.0f;
 
 
 // Message Box control
+// NOTE: Button pressed is returned through btnActive parameter, 0 for window close button
 
 
 
@@ -1676,11 +1769,12 @@ if (hue >= 360.0f) hue = 360.0f;
     //--------------------------------------------------------------------
 
 
-// Text Input Box control, ask for text
+// Text Input Box control
+// NOTE: Button pressed is returned through btnActive parameter, 0 for window close button
+
 
     // Used to enable text edit mode
     // WARNING: No more than one GuiTextInputBox() should be open at the same time
-
 
 
 
@@ -1691,6 +1785,7 @@ if (hue >= 360.0f) hue = 360.0f;
     //--------------------------------------------------------------------
 
     // Draw message if available
+
 
 
 
@@ -1715,6 +1810,7 @@ if (hue >= 360.0f) hue = 360.0f;
     // Update control
     //--------------------------------------------------------------------
             // NOTE: Cell values must be the upper left of the cell the mouse is in
+
     //--------------------------------------------------------------------
 
     // Draw control
@@ -1723,6 +1819,7 @@ if (hue >= 360.0f) hue = 360.0f;
         // Draw vertical grid lines
 
         // Draw horizontal grid lines
+
 
 
 //----------------------------------------------------------------------------------
@@ -1751,8 +1848,11 @@ if (hue >= 360.0f) hue = 360.0f;
                         // Style property: p <control_id> <property_id> <property_value> <property_name>
 
 
-                        // Style font: f <gen_font_size> <charmap_file> <font_file>
+                        // Style font: f <gen_font_size> <font_file> <charmap_file>
 
+
+
+                        // GLOBAL: Copy font file name into guiFontName
 
 
                             // Load text data from file
@@ -1771,6 +1871,144 @@ if (hue >= 360.0f) hue = 360.0f;
 
 
 
+
+
+
+// Load style from memory
+// WARNING: Binary files only
+    // Style File Structure (.rgs)
+    // ------------------------------------------------------
+    // Offset  | Size    | Type       | Description
+    // ------------------------------------------------------
+    // 0       | 4       | char       | Signature: "rGS "
+    // 4       | 2       | short      | Version: 200, 400, 600
+    // 6       | 2       | short      | reserved
+    // 8       | 4       | int        | Num properties (only changed ones from default style)
+
+    // Properties Data (8 bytes per property)
+    // WARNING: Only properties required that differ from default (light) internal style
+    // foreach (property)
+    // {
+    //   8+8*i  | 2       | short      | ControlId
+    //   8+8*i  | 2       | short      | PropertyId
+    //   8+8*i  | 4       | int        | PropertyValue
+    // }
+
+    // Custom Font Data : Parameters (64 bytes)
+    // ...     | 4       | int        | Font data size (0 - no font, no more fields added!)
+    // ...     | 32      | char       | Font filename (with extension) - VERSION: >=600
+    // ...     | 4       | int        | Font base size
+    // ...     | 4       | int        | Font glyph count [glyphCount]
+    // ...     | 4       | int        | Font type (0-NORMAL, 1-SDF)
+    // ...     | 16      | Rectangle  | Font white rectangle
+
+    // Custom Font Data : Image (20 bytes + imData)
+    // NOTE: Font image atlas is always converted to GRAY+ALPHA
+    // and atlas image data can be compressed (DEFLATE)
+    // ...     | 4       | int        | Image data size (uncompressed)
+    // ...     | 4       | int        | Image data size (compressed)
+    // ...     | 4       | int        | Image width
+    // ...     | 4       | int        | Image height
+    // ...     | 4       | int        | Image format: GRAY+ALPHA (expected)
+    // ...     | imSize  | byte       | Image data (comp or uncomp)
+
+    // Custom Font Data : Recs (32 bytes*glyphCount)
+    // NOTE: Font recs data can be compressed (DEFLATE)
+    // ...     | 4       | int        | Recs data compressed size (0 - not compressed, 1-compressed) - VERSION: >=400
+    //
+    // if (compRecsSize == 0)
+    // {
+    //    NOTE: Uncompressed size can be calculated: (glyphCount*16 byte)
+    //    foreach (glyph)
+    //    {
+    //       ...  | 16      | Rectangle  | Glyph rectangle (in image)
+    //    }
+    // }
+    // else
+    // {
+    //    ...  | compRecsSize | byte  | Rectangles data
+    // }
+    //
+
+    // Custom Font Data : Glyph Info (32 bytes*glyphCount)
+    // NOTE: Font glyphs info data can be compressed (DEFLATE)
+    // ...     | 4       | int        | Glyphs data compressed size (0 - not compressed) - VERSION: >=400
+    //
+    // if (compGlyphsSize == 0)
+    // {
+    //    NOTE: Uncompressed size can be calculated: (glyphCount*16 byte)
+    //    foreach (glyph)
+    //    {
+    //      ...   | 4       | int        | Glyph value
+    //      ...   | 4       | int        | Glyph offset X
+    //      ...   | 4       | int        | Glyph offset Y
+    //      ...   | 4       | int        | Glyph advance X
+    //    }
+    // }
+    // else
+    // {
+    //    ...  | compGlyphsSize | byte | Glyphs data
+    // }
+    // ------------------------------------------------------
+
+
+
+
+
+
+                // If a DEFAULT property is loaded, it is propagated to all controls
+                // NOTE: All DEFAULT properties should be defined first in the file
+
+
+        // Load custom font if available
+        // NOTE: Font texture loading requires raylib
+
+
+            // WARNING: Version 600 adds 32 bytes for the font filename (with extension)
+                // GLOBAL: Copy font file name into guiFontName
+
+
+            // Load font white rectangle
+
+            // Load font image parameters
+
+
+                // Compressed font atlas image data (DEFLATE), it requires DecompressData()
+
+
+                // Security check, dataUncompSize must match the provided fontImageUncompSize
+
+                // Font atlas image data is not compressed
+
+            // Load font recs data (glyphs position and size in the image atlas)
+
+            // WARNING: Version 400 adds the compression size parameter
+                // RGS files version 400 support compressed recs data
+
+                // Recs data is compressed, uncompress it
+
+
+
+                // Security check, data uncompressed size must match the expected original data size
+
+                // Recs data is uncompressed
+
+            // Load font glyphs info data
+
+            // WARNING: Version 400 adds the compression size parameter
+                // RGS files version 400 support compressed glyphs data
+
+            // Allocate required glyphs space to fill with data
+
+                // Glyphs data is compressed, uncompress it
+
+
+
+                // Security check, data uncompressed size must match the expected original data size
+
+
+
+                // Glyphs data is uncompressed
 
 
 
@@ -1799,6 +2037,8 @@ if (hue >= 360.0f) hue = 360.0f;
 
         // NOTE: Setting up a 1px padding on char rectangle to avoid pixel bleeding on MSAA filtering
 
+        // Reset baked icons offset in font
+
 // Get text with icon id prepended
 // NOTE: Useful to add icons by name id (enum) instead of
 // a number that can change between ricon versions
@@ -1807,18 +2047,22 @@ if (hue >= 360.0f) hue = 360.0f;
 //----------------------------------------------------------------------------------
 // Module Internal Functions Definition
 //----------------------------------------------------------------------------------
-// Load style from memory
-// WARNING: Binary files only
+// Get text line width (stops at '\n' or '\0')
+// NOTE: Considers icon marker '#NNN#'
+
+
+        // Icon marker: '#' + 1..3 digits + '#' (matches GetTextIcon())
+
+
+        // Make sure guiFont is set, GuiGetStyle() initializes it lazynessly
+
+        // Custom MeasureText() implementation -- single line only
+            // Get size in bytes of the line, considering end of line and line break
 
 
 
 
 
-                // If a DEFAULT property is loaded, it is propagated to all controls
-                // NOTE: All DEFAULT properties should be defined first in the file
-
-
-        // Font loading is highly dependant on raylib API to load font data and image
 
 
 // Get text bounds considering control bounds
@@ -1826,12 +2070,12 @@ if (hue >= 360.0f) hue = 360.0f;
 
     // Depending on control, TEXT_PADDING and TEXT_ALIGNMENT properties could affect the text-bounds
             // TODO: Special cases (no label): COMBOBOX, DROPDOWNBOX, LISTVIEW
-            // TODO: More special cases (label on side): SLIDER, CHECKBOX, VALUEBOX, SPINNER
-            // TODO: WARNING: TEXT_ALIGNMENT is already considered in GuiDrawText()
+            // TODO: Special cases (label on side): SLIDER, CHECKBOX, VALUEBOX, SPINNER
+            // WARNING: TEXT_ALIGNMENT is already considered in GuiDrawText()
 
 
 // Get text icon if provided and move text cursor
-// NOTE: Up to #999# values supported for iconId
+// NOTE: Up to RAYGUI_ICON_MAX_ICONS supported for iconId
 
 
 // Get text divided into lines (by line-breaks '\n')
@@ -1869,8 +2113,8 @@ if (hue >= 360.0f) hue = 360.0f;
         // Get text position depending on alignment and iconId
         //---------------------------------------------------------------------------------
 
-        // NOTE: Get text size after icon has been processed
-        // WARNING: GuiGetTextWidth() also processes text icon to get width! -> Really needed?
+        // NOTE: Icon was already stripped above by GetTextIcon(); GetLineWidth()
+        // takes no icon path here and returns only the glyph width of this line.
 
         // If text requires an icon, add size to measure
 
@@ -1887,8 +2131,7 @@ if (hue >= 360.0f) hue = 360.0f;
 
         // Draw text (with icon if available)
         //---------------------------------------------------------------------------------
-        // Get size in bytes of text,
-        // considering end of line and line break
+        // Get size in bytes of text, considering end of line and line break
 
 
 
@@ -1908,7 +2151,7 @@ if (hue >= 360.0f) hue = 360.0f;
 
                     // Considering the case the next word is longer than bounds
 
-                // TODO: There are multiple types of spaces in Unicode,
+                // WARNING: There are multiple types of spaces in Unicode,
                 // maybe it's a good idea to add support for more: http://jkorpela.fi/chars/spaces.html
                         // Draw only required text glyphs fitting the textBounds.width
 
@@ -1929,53 +2172,6 @@ if (hue >= 360.0f) hue = 360.0f;
 
 
         // TODO: Probably TEXT_LINE_SPACING should be considered on panel size instead of hardcoding 8.0f
-
-
-// Split controls text into multiple strings
-// Also check for multiple columns (required by GuiToggleGroup())
-    // NOTE: Current implementation returns a copy of the provided string with '\0' (string end delimiter)
-    // inserted between strings defined by "delimiter" parameter. No memory is dynamically allocated,
-    // all used memory is static... it has some limitations:
-    //      1. Maximum number of possible split strings is set by RAYGUI_TEXTSPLIT_MAX_ITEMS
-    //      2. Maximum size of text to split is RAYGUI_TEXTSPLIT_MAX_TEXT_SIZE
-    // NOTE: Those definitions could be externally provided if required
-
-    // TODO: HACK: GuiTextSplit() - Review how textRows are returned to user
-    // textRow is an externally provided array of integers that stores row number for every splitted string
-
-
-
-
-
-    // Count how many substrings text contains and point to every one of them
-
-
-
-
-
-
-// Convert color data from RGB to HSV
-// NOTE: Color data should be passed normalized
-
-
-
-
-
-        // NOTE: If max is 0, this divide would cause a crash
-        // NOTE: If max is 0, then r = g = b = 0, s = 0, h is undefined
-
-    // NOTE: Comparing float values could not work properly
-
-
-
-
-// Convert color data from HSV to RGB
-// NOTE: Color data should be passed normalized
-
-    // NOTE: Comparing float values could not work properly
-
-
-
 
 
 // Scroll bar control (used by GuiScrollPanel())
@@ -2041,8 +2237,77 @@ else if (GUI_KEY_DOWN(KEY_LEFT)) value -= 5;
     //--------------------------------------------------------------------
 
 
+// Update font image atlas to append raygui icons
+
+    // Check max glyph rec y bottom position in the atlas image,
+    // to start drawing icons below that line
+
+
+    // Check if image requires scaling and how much
+
+
+        // Clear imFont bottom-right corner rec
+
+
+        // Set new image white corner and new white rec
+
+
+    // Calculate image offset positions to start drawing
+    // NOTE: For Y, look for a multiple of icon size + 2*padding, for better alignment
+
+
+
+        // Wrap to next line if next icon won't fit
+
+
+
+
+        // Update current icon X position
+
+
+// Split controls text into multiple strings
+// NOTE: Re-used by GuiToggleSlider(), GuiComboBox(), GuiDropdownBox(), GuiListView(), GuiMessageBox(), GuiInputBox()
+    // NOTE: Current implementation returns a copy of the provided string with '\0' (string end delimiter)
+    // inserted between strings defined by "delimiter" parameter. No memory is dynamically allocated,
+    // all used memory is static... it has some limitations:
+    //      1. Maximum number of possible split strings is set by RAYGUI_TEXTSPLIT_MAX_ITEMS
+    //      2. Maximum size of text to split is RAYGUI_TEXTSPLIT_MAX_TEXT_SIZE
+    // NOTE: Those definitions could be externally provided if required
+
+
+
+
+    // Count how many substrings text contains and point to every one of them
+
+
+
+// Convert color data from RGB to HSV
+// NOTE: Color data should be passed normalized
+
+
+
+
+
+        // NOTE: If max is 0, this divide would cause a crash
+        // NOTE: If max is 0, then r = g = b = 0, s = 0, h is undefined
+
+    // NOTE: Comparing float values could not work properly
+
+
+
+
+// Convert color data from HSV to RGB
+// NOTE: Color data should be passed normalized
+
+    // NOTE: Comparing float values could not work properly
+
+
+
+
+
 // Color fade-in or fade-out, alpha goes from 0.0f to 1.0f
-// WARNING: It multiplies current alpha by alpha scale factor
+// WARNING: It multiplies current alpha by alpha scale factor,
+// raylib Fade() multiplies alpha by 255.0f
 
 
 

@@ -6,7 +6,7 @@
 
 > Raylib version: 6.0
 
-> Raygui version: 5.0-dev
+> Raygui version: 5.0
 
 
 ## Features

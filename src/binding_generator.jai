@@ -40,7 +40,8 @@ RAYGUIAPI_PREFIX :: "RAYGUIAPI";
 CONST_PREFIX     :: "const";
 ENUM_PREFIX      :: "typedef enum";
 DEFINE_PREFIX    :: "#define";
-RAYLIB_COLOR     :: "CLITERAL(Color)";
+RAYLIB_COLOR_1   :: "CLITERAL(Color)";
+RAYLIB_COLOR_2   :: "(Color)";
 TYPEDEF_PREFIX   :: "typedef";
 IF_BEGIN_PREFIX  :: "#if ";
 IF_END_PREFIX    :: "#endif";
@@ -597,8 +598,8 @@ convert_enum_element :: (line: string) -> string {
     end_value_on_index       := 0;
     if (equals_index > 0) {
         split_name_on_index      = equals_index;
-        split_remainder_on_index = ifx (comma_index > 0) then comma_index + 1 else first_space_after_value_index;
-        end_value_on_index       = ifx (comma_index > 0) then comma_index - 1 else first_space_after_value_index;
+        split_remainder_on_index = ifx (comma_index > 0) then comma_index + 1 else ifx first_space_after_value_index else line.count;
+        end_value_on_index       = ifx (comma_index > 0) then comma_index - 1 else ifx first_space_after_value_index else line.count;
     } else if (comma_index > 0) {
         split_name_on_index      = comma_index;
         split_remainder_on_index = comma_index + 1;
@@ -634,8 +635,15 @@ handle_define :: (binder: *Binder, file_lines: []string, output_builder: *String
     // Remove define prefix
     line = String.slice(line, DEFINE_PREFIX.count + 1, line.count - DEFINE_PREFIX.count);
 
-    if (String.contains(line, RAYLIB_COLOR)) {
-        jai_color := String.replace(line, RAYLIB_COLOR, ":: Color.");
+    if (String.contains(line, RAYLIB_COLOR_1)) {
+        jai_color := String.replace(line, RAYLIB_COLOR_1, ":: Color.");
+        jai_color  = String.replace(jai_color, "}", "};");
+        print_to_builder(output_builder, "%\n", jai_color);
+        return;
+    }
+
+    if (String.contains(line, RAYLIB_COLOR_2)) {
+        jai_color := String.replace(line, RAYLIB_COLOR_2, ":: Color.");
         jai_color  = String.replace(jai_color, "}", "};");
         print_to_builder(output_builder, "%\n", jai_color);
         return;
