@@ -122,7 +122,7 @@ main :: ()
             DrawText("- R to reset position + zoom", 40, 100, 10, DARKGRAY);
             DrawText("- C to change camera mode", 40, 120, 10, DARKGRAY);
             DrawText("Current camera mode:", 20, 140, 10, BLACK);
-            DrawText(get_c_string(cameraDescriptions[cameraOption]), 40, 160, 10, DARKGRAY);
+            DrawText(temp_c_string(cameraDescriptions[cameraOption]), 40, 160, 10, DARKGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

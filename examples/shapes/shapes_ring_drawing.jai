@@ -67,7 +67,7 @@ main :: ()
             //------------------------------------------------------------------------------
 
             minSegments: s32 = cast(s32)ceil((endAngle - startAngle)/90);
-            DrawText(TextFormat("MODE: %s", get_c_string(ifx (segments >= minSegments * 1.0) then "MANUAL" else "AUTO")), 600, 270, 10, ifx (segments >= minSegments * 1.0) then MAROON else DARKGRAY);
+            DrawText(TextFormat("MODE: %s", temp_c_string(ifx (segments >= minSegments * 1.0) then "MANUAL" else "AUTO")), 600, 270, 10, ifx (segments >= minSegments * 1.0) then MAROON else DARKGRAY);
 
             DrawFPS(10, 10);
 

@@ -97,7 +97,7 @@ main :: ()
 
             ClearBackground(RAYWHITE);
             DrawText(TextFormat("frequency: %i", newWaveFrequency), screenWidth - 220, 10, 20, RED);
-            DrawText(TextFormat("wave type: %s", get_c_string(waveTypesAsString[waveType])), screenWidth - 220, 30, 20, RED);
+            DrawText(TextFormat("wave type: %s", temp_c_string(waveTypesAsString[waveType])), screenWidth - 220, 30, 20, RED);
             DrawText("Up/down to change frequency", 10, 10, 20, DARKGRAY);
             DrawText("Left/right to change wave type", 10, 30, 20, DARKGRAY);
 

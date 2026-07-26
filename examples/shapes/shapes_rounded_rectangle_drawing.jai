@@ -61,7 +61,7 @@ main :: ()
             GuiCheckBox(Rectangle.{ 640, 380, 20, 20}, "DrawRect", *drawRect);
             //------------------------------------------------------------------------------
 
-            DrawText(TextFormat("MODE: %s", get_c_string(ifx (segments >= 4) then "MANUAL" else "AUTO")), 640, 280, 10, ifx (segments >= 4) then MAROON else DARKGRAY);
+            DrawText(TextFormat("MODE: %s", temp_c_string(ifx (segments >= 4) then "MANUAL" else "AUTO")), 640, 280, 10, ifx (segments >= 4) then MAROON else DARKGRAY);
 
             DrawFPS(10, 10);
 

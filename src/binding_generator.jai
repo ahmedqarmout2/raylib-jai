@@ -29,7 +29,7 @@ TYPE_MAP :: string.[
 
 JAI_STRUCTS             :: string.["Vector2", "Vector3", "Vector4", "Matrix", "Quaternion"];
 KNOWN_FUNC_RETURNS      :: string.["void", "Color"];
-INCLUDED_IF_DEFINITIONS :: string.["RL_FLOAT3_TYPE", "RL_FLOAT16_TYPE"];
+INCLUDED_IF_DEFINITIONS :: string.["RL_FLOAT3_TYPE", "RL_FLOAT16_TYPE", "RAYGUI_NO_ICONS"];
 
 DOUBLE_POINTER   :: "**";
 SINGLE_POINTER   :: "*";
@@ -305,6 +305,11 @@ populate_improved_function_definitions_table :: () {
     Hash_Table.table_add(*g_improved_function_definitions, "LoadTextureCubemap", "(image: Image, layout: CubemapLayout) -> TextureCubemap");
 
     Hash_Table.table_add(*g_improved_function_definitions, "rlSetBlendMode", "(mode: BlendMode)");
+
+    Hash_Table.table_add(*g_improved_function_definitions, "GuiSetStyle", "(control: GuiControl, property: s32, value: s32)");
+    Hash_Table.table_add(*g_improved_function_definitions, "GuiGetStyle", "(control: GuiControl, property: s32) -> s32");
+    Hash_Table.table_add(*g_improved_function_definitions, "GuiButton", "(bounds: Rectangle, text: *u8) -> GuiResult");
+    Hash_Table.table_add(*g_improved_function_definitions, "GuiSetState", "(state: GuiState)");
 }
 
 populate_improved_struct_elements_table :: () {

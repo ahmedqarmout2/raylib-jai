@@ -100,11 +100,11 @@ main :: ()
 
             EndShaderMode();
     
-        t := get_c_string(ifx shaderAutoReloading then "AUTO" else "MANUAL");
+        t := temp_c_string(ifx shaderAutoReloading then "AUTO" else "MANUAL");
         DrawText(TextFormat("PRESS [A] to TOGGLE SHADER AUTOLOADING: %s", t), 10, 10, 10, ifx shaderAutoReloading then RED else BLACK);
         if (!shaderAutoReloading) DrawText("MOUSE CLICK to SHADER RE-LOADING", 10, 30, 10, BLACK);
 
-        x := get_c_string(calendar_to_string(to_calendar(fragShaderFileModTime, .LOCAL)));
+        x := temp_c_string(calendar_to_string(to_calendar(fragShaderFileModTime, .LOCAL)));
         DrawText(TextFormat("Shader last modification: %s", x), 10, 430, 10, BLACK);
 
         EndDrawing();

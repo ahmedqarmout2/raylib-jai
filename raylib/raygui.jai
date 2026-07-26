@@ -657,7 +657,7 @@ GuiLock :: () #foreign raygui_native;                                   // Lock 
 GuiUnlock :: () #foreign raygui_native;                                 // Unlock gui controls (global state)
 GuiIsLocked :: () -> bool #foreign raygui_native;                               // Check if gui is locked (global state)
 GuiSetAlpha :: (alpha: float) #foreign raygui_native;                        // Set gui controls alpha (global state), alpha goes from 0.0f to 1.0f
-GuiSetState :: (state: s32) #foreign raygui_native;                          // Set gui state (global state)
+GuiSetState :: (state: GuiState) #foreign raygui_native;                          // Set gui state (global state)
 GuiGetState :: () -> s32 #foreign raygui_native;                                // Get gui state (global state)
 
 // Font set/get functions
@@ -665,8 +665,8 @@ GuiSetFont :: (font: Font) #foreign raygui_native;                           // 
 GuiGetFont :: () -> Font #foreign raygui_native;                                // Get gui custom font (global state)
 
 // Style set/get functions
-GuiSetStyle :: (control: s32, property: s32, value: s32) #foreign raygui_native; // Set one style property
-GuiGetStyle :: (control: s32, property: s32) -> s32 #foreign raygui_native;           // Get one style property
+GuiSetStyle :: (control: GuiControl, property: s32, value: s32) #foreign raygui_native; // Set one style property
+GuiGetStyle :: (control: GuiControl, property: s32) -> s32 #foreign raygui_native;           // Get one style property
 
 // Styles loading functions
 GuiLoadStyle :: (fileName: *u8) #foreign raygui_native;              // Load style file over global style variable (.rgs)
@@ -680,6 +680,11 @@ GuiSetTooltip :: (tooltip: *u8) #foreign raygui_native;              // Set tool
 
 // Icons functionality
 GuiIconText :: (iconId: s32, text: *u8) -> *u8 #foreign raygui_native; // Get text with icon id prepended (if supported)
+GuiSetIconScale :: (scale: s32) #foreign raygui_native;                      // Set default icon drawing size
+GuiGetIcons :: () -> *u32 #foreign raygui_native;                      // Get raygui icons data pointer
+GuiLoadIcons :: (fileName: *u8, loadIconsName: bool) -> **u8 #foreign raygui_native; // Load raygui icons file (.rgi) into internal icons data
+GuiLoadIconsFromMemory :: (fileData: *u8, dataSize: s32, loadIconsName: bool) -> **u8 #foreign raygui_native; // Load raygui icons file (.rgi) from memory into internal icons data
+GuiDrawIcon :: (iconId: s32, posX: s32, posY: s32, pixelSize: s32, color: Color) #foreign raygui_native; // Draw icon using pixel size at specified position
 
 // Utility functions
 GuiGetTextWidth :: (text: *u8) -> s32 #foreign raygui_native;                // Get text width considering gui style and icon size (if required)
@@ -695,7 +700,7 @@ GuiScrollPanel :: (bounds: Rectangle, text: *u8, content: Rectangle, scroll: *Ve
 
 // Basic controls set
 GuiLabel :: (bounds: Rectangle, text: *u8) -> s32 #foreign raygui_native;                                            // Label control
-GuiButton :: (bounds: Rectangle, text: *u8) -> s32 #foreign raygui_native;                                           // Button control, returns true when clicked
+GuiButton :: (bounds: Rectangle, text: *u8) -> GuiResult #foreign raygui_native;                                           // Button control, returns true when clicked
 GuiLabelButton :: (bounds: Rectangle, text: *u8) -> s32 #foreign raygui_native;                                      // Label button control, returns true when clicked
 GuiToggle :: (bounds: Rectangle, text: *u8, active: *bool) -> s32 #foreign raygui_native;                             // Toggle Button control
 GuiToggleGroup :: (bounds: Rectangle, text: *u8, active: *s32) -> s32 #foreign raygui_native;                         // Toggle Group control
@@ -734,6 +739,8 @@ GuiColorPanelHSV :: (bounds: Rectangle, text: *u8, colorHsv: *Vector3) -> s32 #f
 
 
 
+
+
 /*
 ************************************************************************************
 *
@@ -744,6 +751,35 @@ GuiColorPanelHSV :: (bounds: Rectangle, text: *u8, colorHsv: *Vector3) -> s32 #f
 
 
 // Check if two rectangles are equal, used to validate a slider bounds as an id
+
+
+// Embedded icons, no external file provided
+RAYGUI_ICON_SIZE ::                   16;          // Size of icons in pixels (squared)
+RAYGUI_ICON_MAX_ICONS ::             512;          // Maximum number of icons
+RAYGUI_ICON_MAX_FONT_BACKED ::       257;          // Maximum number of icons to back in font atlas
+RAYGUI_ICON_MAX_NAME_LENGTH ::        32;          // Maximum length of icon name id
+RAYGUI_ICON_FONT_ATLAS_PADDING ::      1;          // Padding between backed icons in font atlas
+
+// Icons data is defined by bit array (every bit represents one pixel)
+// Those arrays are stored as unsigned int data arrays, so,
+// every array element defines 32 pixels (bits) of information
+// One icon is defined by 8 int, (8 int*32 bit = 256 bit = 16*16 pixels)
+// NOTE: Number of elemens depend on RAYGUI_ICON_SIZE (by default 16x16 pixels)
+RAYGUI_ICON_DATA_ELEMENTS ::   (RAYGUI_ICON_SIZE*RAYGUI_ICON_SIZE/32);
+
+//----------------------------------------------------------------------------------
+// Icons data for all gui possible icons (allocated on data segment by default)
+//
+// NOTE 1: Every icon is codified in binary form, using 1 bit per pixel, so,
+// every 16x16 icon requires 8 integers (16*16/32) to be stored
+//
+// NOTE 2: A different icon set could be loaded over this array using GuiLoadIcons(),
+// but loaded icons set must be same RAYGUI_ICON_SIZE and no more than RAYGUI_ICON_MAX_ICONS
+//
+// guiIcons size is by default: 512*(16*16/32) = 16384 bytes = 16 KB
+//----------------------------------------------------------------------------------
+
+// NOTE: A pointer to current icons array should be defined
 
 
 
@@ -2044,6 +2080,75 @@ if (hue >= 360.0f) hue = 360.0f;
 // a number that can change between ricon versions
 
 
+
+
+
+// Get full icons data pointer
+
+// Load raygui icons file (.rgi)
+// WARNING: guiIconsName[]][] memory should be manually freed!
+
+
+
+            // WARNING: File can be partially loaded but ignoring it for simplicity
+
+
+
+
+// Load icons from memory
+// GLOBAL: Updates global variable: guiIconsPtr
+    // Icon File Structure (.rgi)
+    // ------------------------------------------------------
+    // Offset  | Size    | Type       | Description
+    // ------------------------------------------------------
+    // 0       | 4       | char       | Signature: "rGI "
+    // 4       | 2       | short      | Version: 100, 500
+    // 6       | 2       | short      | reserved
+
+    // 8       | 2       | short      | Num icons (N)
+    // 10      | 2       | short      | Icons Size (Options: 16, 32, 64)
+
+    // Icons name id (32 bytes per name id)
+    // foreach (icon)
+    // {
+    //   12+32*i  | 32   | char       | Icon NameId
+    // }
+
+    // Icons data: One bit per pixel, stored as unsigned int array (depends on icon size)
+    // Size*Size pixels/32bit per unsigned int = K unsigned int per icon
+    // foreach (icon)
+    // {
+    //   ...   | K       | unsigned int | Icon Data
+    // }
+    // ------------------------------------------------------
+
+
+
+
+            // NOTE: Always allocating RAYGUI_ICON_MAX_ICONS names slots
+            // Skip icon name data if not required
+
+
+
+
+// Draw selected icon using rectangles pixel-by-pixel
+
+
+
+
+
+// Set icon drawing size
+
+// Get text width considering gui style and icon size (if required).
+// For multi-line text (containing '\n'), returns the width of the widest line.
+
+
+
+        // Skip to the next '\n' (or end of string/buffer)
+        // Advance past the '\n' delimiter to the start of the next line
+
+
+
 //----------------------------------------------------------------------------------
 // Module Internal Functions Definition
 //----------------------------------------------------------------------------------
@@ -2076,6 +2181,11 @@ if (hue >= 360.0f) hue = 360.0f;
 
 // Get text icon if provided and move text cursor
 // NOTE: Up to RAYGUI_ICON_MAX_ICONS supported for iconId
+
+
+
+                // Move text pointer after icon
+                // WARNING: If only icon provided, it could point to EOL character: '\0'
 
 
 // Get text divided into lines (by line-breaks '\n')
@@ -2131,6 +2241,7 @@ if (hue >= 360.0f) hue = 360.0f;
 
         // Draw text (with icon if available)
         //---------------------------------------------------------------------------------
+            // NOTE: Considering icon height, probably different than text size
         // Get size in bytes of text, considering end of line and line break
 
 

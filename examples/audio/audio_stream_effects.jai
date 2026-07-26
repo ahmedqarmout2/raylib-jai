@@ -99,8 +99,8 @@ main :: ()
             DrawText("PRESS SPACE TO RESTART MUSIC", 215, 230, 20, LIGHTGRAY);
             DrawText("PRESS P TO PAUSE/RESUME MUSIC", 208, 260, 20, LIGHTGRAY);
 
-            DrawText(TextFormat("PRESS F TO TOGGLE LPF EFFECT: %s", get_c_string(ifx enableEffectLPF then "ON" else "OFF")), 200, 320, 20, GRAY);
-            DrawText(TextFormat("PRESS D TO TOGGLE DELAY EFFECT: %s", get_c_string(ifx enableEffectDelay then "ON" else "OFF")), 180, 350, 20, GRAY);
+            DrawText(TextFormat("PRESS F TO TOGGLE LPF EFFECT: %s", temp_c_string(ifx enableEffectLPF then "ON" else "OFF")), 200, 320, 20, GRAY);
+            DrawText(TextFormat("PRESS D TO TOGGLE DELAY EFFECT: %s", temp_c_string(ifx enableEffectDelay then "ON" else "OFF")), 180, 350, 20, GRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

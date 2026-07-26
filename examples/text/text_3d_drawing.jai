@@ -287,14 +287,14 @@ main :: ()
                             DrawText3D(GetFontDefault(), opt, pos, 0.8, 0.1, 0.0, false, BLUE);
                             pos.z += 1.0 + m.y;
 
-                            opt = cast(*u8) TextFormat("< LBOX: %3s >", get_c_string(ifx slb then "ON" else "OFF"));
+                            opt = cast(*u8) TextFormat("< LBOX: %3s >", temp_c_string(ifx slb then "ON" else "OFF"));
                             quads += cast(s32) TextLength(opt);
                             m = MeasureTextEx(GetFontDefault(), opt, 0.8, 0.1);
                             pos.x = -m.x/2.0;
                             DrawText3D(GetFontDefault(), opt, pos, 0.8, 0.1, 0.0, false, RED);
                             pos.z += 0.5 + m.y;
 
-                            opt = cast(*u8) TextFormat("< TBOX: %3s >", get_c_string(ifx SHOW_TEXT_BOUNDRY then "ON" else "OFF"));
+                            opt = cast(*u8) TextFormat("< TBOX: %3s >", temp_c_string(ifx SHOW_TEXT_BOUNDRY then "ON" else "OFF"));
                             quads += cast(s32) TextLength(opt);
                             m = MeasureTextEx(GetFontDefault(), opt, 0.8, 0.1);
                             pos.x = -m.x/2.0;
@@ -364,7 +364,7 @@ main :: ()
             DrawText("Drag & drop a font file to change the font!\nType something, see what happens!\n\nPress [F3] to toggle the camera", 10, 35, 10, BLACK);
 
             quads += cast(s32) TextLength(text.data)*2*layers;
-            tmp: *u8 = cast(*u8)TextFormat("%2i layer(s) | %s camera | %4i quads (%4i verts)", layers, get_c_string(ifx spin then "ORBITAL" else "FREE"), quads, quads*4);
+            tmp: *u8 = cast(*u8)TextFormat("%2i layer(s) | %s camera | %4i quads (%4i verts)", layers, temp_c_string(ifx spin then "ORBITAL" else "FREE"), quads, quads*4);
             width: s32 = MeasureText(tmp, 10);
             DrawText(tmp, screenWidth - 20 - width, 10, 10, DARKGREEN);
 
