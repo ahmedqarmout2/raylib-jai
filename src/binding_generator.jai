@@ -234,7 +234,7 @@ generate_binding :: (command_options: Command_Options, binder: *Binder) {
     }
 
     print_result(binder.name, binder.is_successful);
-    if (command_options.is_verbose) print_logs(binder.logs);
+    print_logs(command_options, binder.logs);
 }
 
 populate_improved_function_definitions_table :: () {

@@ -244,9 +244,12 @@ compile_file :: (command_options: Command_Options, report: *Examples_Report, out
     result, output, error := Process.run_command(jai_exec_path, String.join(file_path, "/", file_name, ".jai"), "-import_dir", String.join(#filepath, "/.."), capture_and_return_output = true);
 
     print_result(String.join(output_prefix, " ", file_name), result.exit_code == 0);
-    if (command_options.is_verbose) {
-        print("%", error);
-        print("%", output);
+
+    if (command_options.log_level == .ALL && output.count > 0) {
+        print_log(.INFO, output);
+    }
+    if ((command_options.log_level == .ALL || command_options.log_level == .ERROR) && error.count > 0) {
+        print_log(.ERROR, error);
     }
 
     if (result.exit_code == 0) {
@@ -257,8 +260,7 @@ compile_file :: (command_options: Command_Options, report: *Examples_Report, out
 }
 
 print_report :: (report: Examples_Report) {
-    Print_Color.print_color("TOTAL:", color=.CYAN);
-    print("  %\n", report.total);
+    print("TOTAL:  %\n", report.total);
     Print_Color.print_color("PASSED:", color=.GREEN);
     print(" %\n", report.passed);
     Print_Color.print_color("FAILED:", color=.RED);

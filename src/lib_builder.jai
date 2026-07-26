@@ -51,7 +51,7 @@ build_libs :: (command_options: Command_Options) {
             builder.extra_arguments = extra_arguments;
             build_lib(*builder);
             print_result("raygui (static)", builder.is_successful);
-            if (command_options.is_verbose) print_logs(builder.logs);
+            print_logs(command_options, builder.logs);
         }
 
         // Build dynamic raygui lib
@@ -65,7 +65,7 @@ build_libs :: (command_options: Command_Options) {
             builder.extra_library_files = extra_library_files;
             build_lib(*builder);
             print_result("raygui (dynamic)", builder.is_successful);
-            if (command_options.is_verbose) print_logs(builder.logs);
+            print_logs(command_options, builder.logs);
         }
     } else {
         is_successful := false;

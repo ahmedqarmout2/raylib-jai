@@ -97,7 +97,6 @@ main :: ()
             if (IsKeyPressed(.KEY_V))
             {
                 clipboardText = GetClipboardText();
-                print("%\n", clipboardText);
                 if (clipboardText != null) TextCopy(inputBuffer.data, clipboardText);
             }
         }

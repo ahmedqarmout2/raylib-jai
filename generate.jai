@@ -25,9 +25,9 @@ print            :: Basic.print;
 print_to_builder :: Basic.print_to_builder;
 
 Command_Options :: struct {
-    is_verbose                : bool = false;
-    print_help                : bool = false;
-    output_unrecognized_code  : bool = false;
+    print_help                : bool      = false;
+    output_unrecognized_code  : bool      = false;
+    log_level                 : Log_Level = .NONE;
 
     build_raygui              : bool = false;
     use_custom_lib_builder    : bool = false;
@@ -52,6 +52,12 @@ Log_Type :: enum {
     INFO;
     WARN;
     ERROR;
+}
+
+Log_Level :: enum {
+    NONE;
+    ERROR;
+    ALL;
 }
 
 DOTTED_LINE_LENGTH :: 80;
@@ -93,7 +99,7 @@ read_command_line_options :: () -> Command_Options {
         }
 
         if (arg == "-v" || arg == "--verbose") {
-            command_options.is_verbose = true;
+            command_options.log_level = .ALL;
             continue;
         }
 
@@ -168,6 +174,24 @@ read_command_line_options :: () -> Command_Options {
             continue;
         }
 
+        if (String.starts_with(arg, "--log_level")) {
+            pieces := String.split(arg, "=");
+            if (pieces.count != 2) {
+                print("something is wrong with --log_level\n");
+            }
+            command_options.log_level = .NONE;
+            if pieces[1] == {
+                case "none";  command_options.log_level = .NONE;
+                case "error"; command_options.log_level = .ERROR;
+                case "all";   command_options.log_level = .ALL;
+                case; {
+                    command_options.print_help = true;
+                    print("Unknown log_level: '%'.\n", pieces[1]);
+                }
+            }
+            continue;
+        }
+
         command_options.print_help = true;
         print("Unknown argument '%'.\n", arg);
     }
@@ -178,7 +202,8 @@ print_help_text :: () {
     print("Usage: jai generate.jai [- <options>]\n");
     print("Options:\n");
     print("    -h, --help                              Print this text\n");
-    print("    -v, --verbose                           Display all log messages and compilation output\n");
+    print("    -v, --verbose                           Display all log messages and compilation output. Equivalent to --log_level=all\n");
+    print("        --log_level=(none,error,all)        Set logs verbosity\n");
     print("        --build_raygui                      Build raygui's C files into static lib files\n");
     print("        --compile_all_examples              Compile all examples\n");
     print("        --compile_audio_examples            Compile audio examples\n");
@@ -214,13 +239,21 @@ print_result :: (prefix: string, result: bool) {
     Print_Color.print_color("%\n", ifx result then OK else NOT_OK, color=ifx result then .GREEN else .RED);
 }
 
-print_logs :: (logs: []Log) {
+print_logs :: (command_options: Command_Options, logs: []Log) {
+    if (command_options.log_level == .NONE) return;
+
     for log: logs {
-        if log.type == {
-            case .INFO;  Print_Color.print_color("[INFO] ", color=.CYAN);
-            case .WARN;  Print_Color.print_color("[WARN] ", color=.YELLOW);
-            case .ERROR; Print_Color.print_color("[ERROR] ", color=.RED);
-        }
-        print("%", log.message);
+        if ((log.type == .INFO || log.type == .WARN) && command_options.log_level != .ALL) continue;
+
+        print_log(log.type, log.message);
     }
+}
+
+print_log :: (type: Log_Type, message: string) {
+    if type == {
+        case .INFO;  Print_Color.print_color("[INFO] ", color=.CYAN);
+        case .WARN;  Print_Color.print_color("[WARN] ", color=.YELLOW);
+        case .ERROR; Print_Color.print_color("[ERROR] ", color=.RED);
+    }
+    print("%", message);
 }
