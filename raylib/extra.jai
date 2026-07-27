@@ -1,14 +1,6 @@
 // Additional functionality
-copy_string_to_array :: (dst: *u8, src: string) {
-    for src dst[it_index] = it;
-}
-
 copy_string_to_array :: (dst: *[..]u8, src: string) {
     for src array_add(dst, it);
-}
-
-copy_string_to_array :: (dst: *[]u8, src: string) {
-    for src dst[it_index] = it;
 }
 
 strlen :: (s: *u8) -> s64 {

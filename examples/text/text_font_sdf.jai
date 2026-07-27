@@ -21,7 +21,7 @@ main :: ()
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
 
     msg: [50]u8;
-    copy_string_to_array(msg.data, "Signed Distance Fields");
+    for "Signed Distance Fields" msg[it_index] = it;
 
     // Loading file to memory
     fileSize: s32 = 0;

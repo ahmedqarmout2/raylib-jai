@@ -17,7 +17,7 @@ main :: ()
     InitWindow(screenWidth, screenHeight, "raylib [text] example - font filters");
 
     msg: [50]u8;
-    copy_string_to_array(msg.data, "Loaded Font");
+    for "Loaded Font" msg[it_index] = it;
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
 

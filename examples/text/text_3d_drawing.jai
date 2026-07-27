@@ -57,7 +57,7 @@ main :: ()
 
     // Set the text (using markdown!)
     text: [64]u8;
-    copy_string_to_array(text.data, "Hello ~~World~~ in 3D!");
+    for "Hello ~~World~~ in 3D!" text[it_index] = it;
 
     tbox: Vector3;
     layers: s32 = 1;

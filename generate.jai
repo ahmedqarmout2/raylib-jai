@@ -203,7 +203,7 @@ print_help_text :: () {
     print("Options:\n");
     print("    -h, --help                              Print this text\n");
     print("    -v, --verbose                           Display all log messages and compilation output. Equivalent to --log_level=all\n");
-    print("        --log_level=(none,error,all)        Set logs verbosity\n");
+    print("        --log_level=(none,error,all)        Set logs verbosity. Default is none\n");
     print("        --build_raygui                      Build raygui's C files into static lib files\n");
     print("        --compile_all_examples              Compile all examples\n");
     print("        --compile_audio_examples            Compile audio examples\n");

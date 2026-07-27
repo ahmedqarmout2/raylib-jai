@@ -20,13 +20,13 @@ main :: ()
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
     msg1: [50]u8;
-    copy_string_to_array(msg1.data, "THIS IS A custom SPRITE FONT...");
+    for "THIS IS A custom SPRITE FONT..." msg1[it_index] = it;
 
     msg2: [50]u8;
-    copy_string_to_array(msg2.data, "...and this is ANOTHER CUSTOM font...");
+    for "...and this is ANOTHER CUSTOM font..." msg2[it_index] = it;
 
     msg3: [50]u8;
-    copy_string_to_array(msg3.data, "...and a THIRD one! GREAT! :D");
+    for "...and a THIRD one! GREAT! :D" msg3[it_index] = it;
 
     font1: Font = LoadFont("resources/custom_mecha.png");          // Font loading
     font2: Font = LoadFont("resources/custom_alagard.png");        // Font loading

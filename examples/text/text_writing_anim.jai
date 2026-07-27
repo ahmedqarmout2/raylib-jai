@@ -17,7 +17,7 @@ main :: ()
     InitWindow(screenWidth, screenHeight, "raylib [text] example - writing anim");
 
     message: [128]u8;
-    copy_string_to_array(message.data, "This sample illustrates a text writing\nanimation effect! Check it out! ;)");
+    for "This sample illustrates a text writing\nanimation effect! Check it out! ;)" message[it_index] = it;
 
     framesCounter: s32 = 0;
 
@@ -30,7 +30,7 @@ main :: ()
         // Update
         //----------------------------------------------------------------------------------
         if (IsKeyDown(.KEY_SPACE)) framesCounter += 8;
-        else framesCounter +=1 ;
+        else framesCounter += 1;
 
         if (IsKeyPressed(.KEY_ENTER)) framesCounter = 0;
         //----------------------------------------------------------------------------------
