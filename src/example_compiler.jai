@@ -204,29 +204,22 @@ compile_examples :: (command_options: Command_Options) {
         for specific_example: command_options.compile_specific_examples {
             for e: AUDIO_EXAMPLES    if specific_example == e compile_file(command_options, *report, "[AUDIO]",    "examples/audio",    e);
             for e: CORE_EXAMPLES     if specific_example == e compile_file(command_options, *report, "[CORE]",     "examples/core",     e);
-            for e: MODELS_EXAMPLES   if specific_example == e compile_file(command_options, *report, "[MODELS]",   "examples/models",   e);
-            for e: SHADERS_EXAMPLES  if specific_example == e compile_file(command_options, *report, "[SHADERS]",  "examples/shaders",  e);
-            for e: SHAPES_EXAMPLES   if specific_example == e compile_file(command_options, *report, "[SHAPES]",   "examples/shapes",   e);
-            for e: TEXT_EXAMPLES     if specific_example == e compile_file(command_options, *report, "[TEXT]",     "examples/text",     e);
-            for e: TEXTURES_EXAMPLES if specific_example == e compile_file(command_options, *report, "[TEXTURES]", "examples/textures", e);
-
             for i: 0..GAMES.count-1 {
                 defer i += 1;
 
                 if specific_example == GAMES[i] compile_file(command_options, *report, "[GAMES]", GAMES[i + 1], GAMES[i]);
             }
+            for e: MODELS_EXAMPLES   if specific_example == e compile_file(command_options, *report, "[MODELS]",   "examples/models",   e);
+            for e: SHADERS_EXAMPLES  if specific_example == e compile_file(command_options, *report, "[SHADERS]",  "examples/shaders",  e);
+            for e: SHAPES_EXAMPLES   if specific_example == e compile_file(command_options, *report, "[SHAPES]",   "examples/shapes",   e);
+            for e: TEXT_EXAMPLES     if specific_example == e compile_file(command_options, *report, "[TEXT]",     "examples/text",     e);
+            for e: TEXTURES_EXAMPLES if specific_example == e compile_file(command_options, *report, "[TEXTURES]", "examples/textures", e);
         }
         return;
     }
 
     if (command_options.compile_audio_examples)    for AUDIO_EXAMPLES    compile_file(command_options, *report, "[AUDIO]",    "examples/audio",    it);
     if (command_options.compile_core_examples)     for CORE_EXAMPLES     compile_file(command_options, *report, "[CORE]",     "examples/core",     it);
-    if (command_options.compile_models_examples)   for MODELS_EXAMPLES   compile_file(command_options, *report, "[MODELS]",   "examples/models",   it);
-    if (command_options.compile_shaders_examples)  for SHADERS_EXAMPLES  compile_file(command_options, *report, "[SHADERS]",  "examples/shaders",  it);
-    if (command_options.compile_shapes_examples)   for SHAPES_EXAMPLES   compile_file(command_options, *report, "[SHAPES]",   "examples/shapes",   it);
-    if (command_options.compile_text_examples)     for TEXT_EXAMPLES     compile_file(command_options, *report, "[TEXT]",     "examples/text",     it);
-    if (command_options.compile_textures_examples) for TEXTURES_EXAMPLES compile_file(command_options, *report, "[TEXTURES]", "examples/textures", it);
-
     if (command_options.compile_games_examples) {
         for GAMES {
             defer it_index += 1;
@@ -234,6 +227,11 @@ compile_examples :: (command_options: Command_Options) {
             compile_file(command_options, *report, "[GAMES]", GAMES[it_index + 1], GAMES[it_index]);
         }
     }
+    if (command_options.compile_models_examples)   for MODELS_EXAMPLES   compile_file(command_options, *report, "[MODELS]",   "examples/models",   it);
+    if (command_options.compile_shaders_examples)  for SHADERS_EXAMPLES  compile_file(command_options, *report, "[SHADERS]",  "examples/shaders",  it);
+    if (command_options.compile_shapes_examples)   for SHAPES_EXAMPLES   compile_file(command_options, *report, "[SHAPES]",   "examples/shapes",   it);
+    if (command_options.compile_text_examples)     for TEXT_EXAMPLES     compile_file(command_options, *report, "[TEXT]",     "examples/text",     it);
+    if (command_options.compile_textures_examples) for TEXTURES_EXAMPLES compile_file(command_options, *report, "[TEXTURES]", "examples/textures", it);
 }
 
 compile_file :: (command_options: Command_Options, report: *Examples_Report, output_prefix: string, file_path: string, file_name: string) {
@@ -257,6 +255,23 @@ compile_file :: (command_options: Command_Options, report: *Examples_Report, out
     } else {
         report.failed += 1;
     }
+
+    // WIP: DO NOT USE YET
+    /*w := Compiler.compiler_create_workspace();
+        options := Compiler.get_build_options(w);
+        Compiler.copy_commonly_propagated_fields(Compiler.get_build_options(), *options);
+        options.output_executable_name = file_name;
+        modules_path := String.join(#filepath, "/../");
+        modules_paths: [..] string;
+        Basic.array_add(*modules_paths, modules_path);
+        Basic.array_add(*modules_paths, ..options.import_path);
+        options.import_path = modules_paths;
+        options.output_type            = .EXECUTABLE;
+        options.stack_trace            = false;
+        options.additional_linker_arguments = .["/SUBSYSTEM:windows", "/ENTRY:mainCRTStartup"];
+        Compiler.set_build_options(options, w);
+
+        Compiler.add_build_file(String.join("../", file_path, "/", file_name, ".jai"), w);*/
 }
 
 print_report :: (report: Examples_Report) {

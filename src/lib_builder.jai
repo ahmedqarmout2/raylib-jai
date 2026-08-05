@@ -27,25 +27,22 @@ build_libs :: (command_options: Command_Options) {
     print_dotted_line("", "", "-");
 
     // Build raygui libs
+    // WIP: DO NOT USE YET
     if (command_options.use_custom_lib_builder) {
-        extra_arguments    : []string = .[];
-        extra_library_files: []string = .[];
-        if OS == .WINDOWS {
-            extra_arguments     = .["/DRAYGUI_IMPLEMENTATION"];
-            extra_library_files = .["raylib/lib/windows/raylibdll.lib"];
-        } else if OS == .LINUX {
-            extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-fpic"];
-            extra_library_files = .["raylib/lib/linux/raylib.so"];
-        } else if OS == .MACOS {
-            extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
-            extra_library_files = .["raylib/lib/macos/raylib.dylib"];
-        }
-
         // Build static raygui lib
         {
+            extra_arguments: []string = .[];
+            if OS == .WINDOWS {
+                extra_arguments = .["/DRAYGUI_IMPLEMENTATION"];
+            } else if OS == .LINUX {
+                extra_arguments = .["-DRAYGUI_IMPLEMENTATION", "-fpic"];
+            } else if OS == .MACOS {
+                extra_arguments = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
+            }
+
             builder: Builder;
             builder.name = "raygui";
-            builder.output_directory = String.join("raylib/lib/", get_os_as_string(OS));
+            builder.output_directory = String.join("raylib/lib/raygui/", get_os_as_string(OS));
             builder.src_files = .["src/raygui.c"];
             builder.type = .STATIC_LIBRARY;
             builder.extra_arguments = extra_arguments;
@@ -56,9 +53,22 @@ build_libs :: (command_options: Command_Options) {
 
         // Build dynamic raygui lib
         {
+            extra_arguments     : []string = .[];
+            extra_library_files : []string = .[];
+            if OS == .WINDOWS {
+                extra_arguments     = .["/O2", "/I./src", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll", "/subsystem:windows", "/machine:x64", "/DLL"];
+                extra_library_files = .["./raylib/lib/raylib/windows/raylibdll.lib", "msvcrt.lib", "winmm.lib", "gdi32.lib", "user32.lib", "shell32.lib"];
+            } else if OS == .LINUX {
+                extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-fpic"];
+                extra_library_files = .["./raylib/lib/raylib/linux/raylib.so"];
+            } else if OS == .MACOS {
+                extra_arguments     = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
+                extra_library_files = .["./raylib/lib/raylib/macos/raylib.dylib"];
+            }
+
             builder: Builder;
             builder.name = "raygui";
-            builder.output_directory = String.join("raylib/lib/", get_os_as_string(OS));
+            builder.output_directory = String.join("raylib/lib/raygui/", get_os_as_string(OS));
             builder.src_files = .["src/raygui.c"];
             builder.type = .DYNAMIC_LIBRARY;
             builder.extra_arguments = extra_arguments;
@@ -67,18 +77,20 @@ build_libs :: (command_options: Command_Options) {
             print_result("raygui (dynamic)", builder.is_successful);
             print_logs(command_options, builder.logs);
         }
-    } else {
-        is_successful := false;
-        if OS == .WINDOWS {
-            // Not working: BuildCpp.build_cpp_dynamic_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["-I./src", "-L./src", "-shared", "-DRAYGUI_IMPLEMENTATION", "-DBUILD_LIBTYPE_SHARED", "-static-libgcc", "-lopengl32", "-lgdi32", "-lwinmm", "-lraylib"]);
-            is_successful = BuildCpp.build_cpp_static_lib("raylib/lib/windows/raygui", files="src/raygui.c", extra=.["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll"]);
-        } else if OS == .LINUX {
-            is_successful = BuildCpp.build_cpp_static_lib("raylib/lib/linux/raygui", files="src/raygui.c", extra=.["-fpic", "-DRAYGUI_IMPLEMENTATION"]);
-        } else if OS == .MACOS {
-            is_successful = BuildCpp.build_cpp_static_lib("raylib/lib/macos/raygui", files="src/raygui.c", extra=.["-DRAYGUI_IMPLEMENTATION", "-I./src"]);
-        }
-        print_result("raygui", is_successful);
+
+        return;
     }
+
+    extra_arguments : []string = .[];
+    if OS == .WINDOWS {
+        extra_arguments = .["/I./src/", "/D_USRDLL", "/D_WINDLL", "/DRAYGUI_IMPLEMENTATION", "/DBUILD_LIBTYPE_SHARED", "/LD", "/Feraygui.dll"];
+    } else if OS == .LINUX {
+        extra_arguments = .["-fpic", "-DRAYGUI_IMPLEMENTATION"];
+    } else if OS == .MACOS {
+        extra_arguments = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
+    }
+    is_successful := BuildCpp.build_cpp_static_lib(String.join("raylib/lib/raygui/", get_os_as_string(OS), "/raygui"), files="src/raygui.c", extra=extra_arguments);
+    print_result("raygui", is_successful);
 }
 
 // A simplified version of BuildCpp.build_cpp

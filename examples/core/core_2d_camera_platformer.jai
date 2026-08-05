@@ -234,7 +234,8 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
         {
             camera.target.y += evenOutSpeed*delta;
 
-            if (camera.target.y > evenOutTarget) {
+            if (camera.target.y > evenOutTarget)
+            {
                 camera.target.y = evenOutTarget;
                 eveningOut = 0;
             }
@@ -243,7 +244,8 @@ UpdateCameraEvenOutOnLanding :: (camera: *Camera2D, player: *Player, envItems: [
         {
             camera.target.y -= evenOutSpeed*delta;
 
-            if (camera.target.y < evenOutTarget) {
+            if (camera.target.y < evenOutTarget)
+            {
                 camera.target.y = evenOutTarget;
                 eveningOut = 0;
             }
