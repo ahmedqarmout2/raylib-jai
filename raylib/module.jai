@@ -20,7 +20,7 @@
     cocoa :: #library,system,link_always "Cocoa";
     iOKit :: #library,system,link_always "IOKit";
 
-    raylib_native :: #library,no_dll "lib/raylib/macos/raylib";
+    raylib_native :: #library,no_dll "lib/raylib/macos/libraylib";
     raygui_native :: #library,no_dll "lib/raygui/macos/raygui";
 }
 

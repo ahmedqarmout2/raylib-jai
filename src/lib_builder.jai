@@ -87,7 +87,7 @@ build_libs :: (command_options: Command_Options) {
     } else if OS == .LINUX {
         extra_arguments = .["-fpic", "-DRAYGUI_IMPLEMENTATION"];
     } else if OS == .MACOS {
-        extra_arguments = .["-DRAYGUI_IMPLEMENTATION", "-I./src"];
+        extra_arguments = .["-DRAYGUI_IMPLEMENTATION", "-I./src", "-mmacosx-version-min=10.13.0"];
     }
     is_successful := BuildCpp.build_cpp_static_lib(String.join("raylib/lib/raygui/", get_os_as_string(OS), "/raygui"), files="src/raygui.c", extra=extra_arguments);
     print_result("raygui", is_successful);
