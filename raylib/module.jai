@@ -12,7 +12,7 @@
     libm :: #library,system,link_always "libm";
     x11  :: #library,system,link_always "X11";
 
-    raylib_native :: #library,no_dll "lib/raylib/linux/raylib";
+    raylib_native :: #library,no_dll "lib/raylib/linux/libraylib";
     raygui_native :: #library,no_dll "lib/raygui/linux/raygui";
 }
 
