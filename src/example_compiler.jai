@@ -27,6 +27,7 @@ CORE_EXAMPLES :: string.[
     "core_basic_screen_manager",
     "core_basic_window",
     "core_clipboard_text",
+    "core_compute_hash",
     "core_drop_files",
     "core_input_gamepad",
     "core_input_keys",
@@ -257,21 +258,50 @@ compile_file :: (command_options: Command_Options, report: *Examples_Report, out
     }
 
     // WIP: DO NOT USE YET
-    /*w := Compiler.compiler_create_workspace();
-        options := Compiler.get_build_options(w);
-        Compiler.copy_commonly_propagated_fields(Compiler.get_build_options(), *options);
-        options.output_executable_name = file_name;
-        modules_path := String.join(#filepath, "/../");
-        modules_paths: [..] string;
-        Basic.array_add(*modules_paths, modules_path);
-        Basic.array_add(*modules_paths, ..options.import_path);
-        options.import_path = modules_paths;
-        options.output_type            = .EXECUTABLE;
-        options.stack_trace            = false;
-        options.additional_linker_arguments = .["/SUBSYSTEM:windows", "/ENTRY:mainCRTStartup"];
-        Compiler.set_build_options(options, w);
+    // old_wd := Basic.get_working_directory();
+    // defer Basic.set_working_directory(old_wd);
 
-        Compiler.add_build_file(String.join("../", file_path, "/", file_name, ".jai"), w);*/
+    /*Basic.set_working_directory(String.join(#filepath, "/../", file_path));
+
+    w := Compiler.compiler_create_workspace(String.tprint("Compiling % example", file_name));
+    options := Compiler.get_build_options(w);
+    Compiler.copy_commonly_propagated_fields(Compiler.get_build_options(), *options);
+    options.output_executable_name = file_name;
+    modules_path := String.join(#filepath, "/../");
+    modules_paths: [..] string;
+    Basic.array_add(*modules_paths, modules_path);
+    Basic.array_add(*modules_paths, ..options.import_path);
+    options.import_path = modules_paths;
+    options.output_type = .EXECUTABLE;
+    options.stack_trace = true;
+    if (command_options.log_level != .ALL) {
+        options.text_output_flags = 0;
+    }
+    // options.additional_linker_arguments = .["/SUBSYSTEM:windows", "/ENTRY:mainCRTStartup"];
+    Compiler.set_build_options(options, w);
+
+    Compiler.compiler_begin_intercept(w);
+    Compiler.add_build_file(String.join("../", file_path, "/", file_name, ".jai"), w);
+    while true {
+        message := Compiler.compiler_wait_for_message();
+        if message.kind == .COMPLETE {
+            complete := cast(*Compiler.Message_Complete) message;
+            if complete.error_code == .NONE {
+                report.passed += 1;
+                if (command_options.log_level == .ALL) {
+                    print_log(.INFO, String.tprint("Workspace % completed successfully\n", w));
+                }
+            } else {
+                report.failed += 1;
+                if (command_options.log_level == .ALL || command_options.log_level == .ERROR) {
+                    print_log(.ERROR, String.tprint("Workspace % failed. Exiting...\n", w));
+                }
+            }
+            print_result(String.join(output_prefix, " ", file_name), complete.error_code == .NONE);
+            break;
+        }
+    }
+    Compiler.compiler_end_intercept(w);*/
 }
 
 print_report :: (report: Examples_Report) {
