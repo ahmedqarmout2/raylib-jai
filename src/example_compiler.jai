@@ -29,6 +29,7 @@ CORE_EXAMPLES :: string.[
     "core_clipboard_text",
     "core_compute_hash",
     "core_delta_time",
+    "core_directory_files",
     "core_drop_files",
     "core_input_gamepad",
     "core_input_keys",

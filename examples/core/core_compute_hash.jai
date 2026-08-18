@@ -65,7 +65,7 @@ main :: ()
 
             if (GuiTextBox(Rectangle.{ 40, 64, 720, 32 }, textInput.data, 95, textBoxEditMode)) textBoxEditMode = !textBoxEditMode;
 
-            btnComputeHashes = GuiButton(Rectangle.{ 40, 64 + 40, 720, 32 }, "COMPUTE INPUT DATA HASHES") == .RESULT_PRESSED;;
+            btnComputeHashes = GuiButton(Rectangle.{ 40, 64 + 40, 720, 32 }, "COMPUTE INPUT DATA HASHES") == .RESULT_PRESSED;
 
             GuiSetStyle(.DEFAULT, cast(s32)GuiDefaultProperty.TEXT_SIZE, 20);
             GuiSetStyle(.DEFAULT, cast(s32)GuiDefaultProperty.TEXT_SPACING, 2);
