@@ -32,6 +32,7 @@ CORE_EXAMPLES :: string.[
     "core_directory_files",
     "core_drop_files",
     "core_highdpi_demo",
+    "core_highdpi_testbed",
     "core_input_gamepad",
     "core_input_keys",
     "core_input_mouse",
