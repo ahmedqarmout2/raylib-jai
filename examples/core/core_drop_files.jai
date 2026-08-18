@@ -4,8 +4,6 @@
 MAX_FILEPATH_RECORDED : s32 : 4096;
 MAX_FILEPATH_SIZE     : s32 : 2048;
 
-char :: u8;
-
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -19,12 +17,12 @@ main :: ()
     InitWindow(screenWidth, screenHeight, "raylib [core] example - drop files");
 
     filePathCounter: s32 = 0;
-    filePaths: [MAX_FILEPATH_RECORDED]*char; // We will register a maximum of filepaths
+    filePaths: [MAX_FILEPATH_RECORDED]*u8; // We will register a maximum of filepaths
 
     // Allocate space for the required file paths
     for i: 0..MAX_FILEPATH_RECORDED-1
     {
-        filePaths[i] = cast(*char)alloc(MAX_FILEPATH_SIZE*size_of(char));
+        filePaths[i] = cast(*u8)alloc(MAX_FILEPATH_SIZE*size_of(u8));
     }
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second

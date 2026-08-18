@@ -2,12 +2,10 @@
 #import "Basic";
 #import "Math";
 
-char :: u8;
-
 // Text to be displayed, must be UTF-8 (save this code file as UTF-8)
 // NOTE: It can contain all the required text for the game,
 // this text will be scanned to get all the required codepoints
-text: *char = "いろはにほへと　ちりぬるを\nわかよたれそ　つねならむ\nうゐのおくやま　けふこえて\nあさきゆめみし　ゑひもせす";
+text: *u8 = "いろはにほへと　ちりぬるを\nわかよたれそ　つねならむ\nうゐのおくやま　けふこえて\nあさきゆめみし　ゑひもせす";
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -47,7 +45,7 @@ main :: ()
     showFontAtlas: bool = false;
 
     codepointSize: s32 = 0;
-    ptr: *char = text;
+    ptr: *u8 = text;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
