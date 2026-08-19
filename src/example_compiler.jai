@@ -35,6 +35,7 @@ CORE_EXAMPLES :: string.[
     "core_highdpi_testbed",
     "core_input_actions",
     "core_input_gamepad",
+    "core_input_gestures_testbed",
     "core_input_keys",
     "core_input_mouse",
     "core_input_mouse_wheel",
