@@ -40,6 +40,7 @@ CORE_EXAMPLES :: string.[
     "core_input_keys",
     "core_input_mouse",
     "core_input_mouse_wheel",
+    "core_input_multitouch",
     "core_random_sequence",
     "core_random_values",
     "core_scissor_test",
