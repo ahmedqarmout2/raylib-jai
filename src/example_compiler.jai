@@ -43,6 +43,7 @@ CORE_EXAMPLES :: string.[
     "core_input_multitouch",
     "core_random_sequence",
     "core_random_values",
+    "core_render_texture",
     "core_scissor_test",
     "core_smooth_pixelperfect",
     "core_window_flags",
