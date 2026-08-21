@@ -42,6 +42,7 @@ CORE_EXAMPLES :: string.[
     "core_input_mouse_wheel",
     "core_input_multitouch",
     "core_input_virtual_controls",
+    "core_keyboard_testbed",
     "core_random_sequence",
     "core_random_values",
     "core_render_texture",
