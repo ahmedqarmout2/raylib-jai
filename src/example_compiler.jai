@@ -49,6 +49,7 @@ CORE_EXAMPLES :: string.[
     "core_render_texture",
     "core_scissor_test",
     "core_smooth_pixelperfect",
+    "core_storage_values",
     "core_window_flags",
     "core_window_letterbox",
     "core_window_should_close",
