@@ -12,6 +12,30 @@ strlen :: (s: *u8) -> s64 {
     return count;
 }
 
+strstr :: (haystack: *u8, needle: *u8) -> *u8 {
+    if needle == null   return haystack;
+    if haystack == null return null;
+
+    h := haystack;
+    while h[0] != 0 {
+        h_curr := h;
+        n_curr := needle;
+
+        while h_curr[0] != 0 && n_curr[0] != 0 && h_curr[0] == n_curr[0] {
+            h_curr += 1;
+            n_curr += 1;
+        }
+
+        if n_curr[0] == 0 {
+            return h;
+        }
+
+        h += 1;
+    }
+
+    return null;
+}
+
 // Macros for Begin/End pairs where the EndXXX Function is called automatically
 // at the end of the scope.
 PushDrawing :: () #expand {
