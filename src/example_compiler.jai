@@ -62,6 +62,7 @@ CORE_EXAMPLES :: string.[
 
 MODELS_EXAMPLES :: string.[
     "models_animation_blend_custom",
+    "models_animation_blending",
     "models_animation_gpu_skinning",
     "models_billboard_rendering",
     "models_bone_socket",
