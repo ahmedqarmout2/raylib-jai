@@ -70,6 +70,7 @@ MODELS_EXAMPLES :: string.[
     "models_bone_socket",
     "models_box_collisions",
     "models_cubicmap_rendering",
+    "models_directional_billboard",
     "models_first_person_maze",
     "models_geometric_shapes",
     "models_heightmap_rendering",
