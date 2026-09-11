@@ -65,6 +65,7 @@ MODELS_EXAMPLES :: string.[
     "models_animation_blending",
     "models_animation_gpu_skinning",
     "models_animation_timing",
+    "models_basic_voxel",
     "models_billboard_rendering",
     "models_bone_socket",
     "models_box_collisions",
