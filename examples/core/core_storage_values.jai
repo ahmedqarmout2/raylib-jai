@@ -97,7 +97,7 @@ LoadStorageValue :: () -> s32, s32
 
     if (fileData != null)
     {
-        rawData := to_string(fileData, strlen(fileData));
+        rawData := to_string(fileData, array_len(fileData));
         dataParts := split(rawData, ",");
         if dataParts.count != 2 {
             TraceLog(.LOG_ERROR, "FILEIO: [%s] Failed to load storage data.", STORAGE_DATA_FILE);

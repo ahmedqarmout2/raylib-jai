@@ -3,7 +3,9 @@ copy_string_to_array :: (dst: *[..]u8, src: string) {
     for src array_add(dst, it);
 }
 
-strlen :: (s: *u8) -> s64 {
+array_len :: (s: *$T) -> s64 {
+    if !s return 0;
+
     count: s64 = 0;
     while s.* {
         count += 1;

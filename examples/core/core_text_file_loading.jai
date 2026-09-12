@@ -43,7 +43,7 @@ main :: ()
         lastSpace: s32 = 0;          // Keeping track of last valid space to insert '\n'
         lastWrapStart: s32 = 0;      // Keeping track of the start of this wrapped line.
 
-        while (j <= strlen(lines[i]))
+        while (j <= array_len(lines[i]))
         {
             if (lines[i][j] == #char" " || lines[i][j] == #char"\0")
             {
@@ -119,7 +119,7 @@ main :: ()
                 {
                     // Each time we go through and calculate the height of the text to move the cursor appropriately
                     size: Vector2;
-                    if(compare(to_string(lines[i], strlen(lines[i])), "")){
+                    if(compare(to_string(lines[i], array_len(lines[i])), "")){
                         // Fix for empty line in the text file
                         size = MeasureTextEx( GetFontDefault(), lines[i], cast(float)fontSize, 2);
                     }else{

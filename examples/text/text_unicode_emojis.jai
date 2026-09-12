@@ -214,7 +214,7 @@ main :: ()
                 DrawTextBoxed(font.*, messages[message].text, textRect, cast(float)font.baseSize, 1.0, true, WHITE);
 
                 // Draw the info text below the main message
-                size: s32 = cast(s32)strlen(messages[message].text);
+                size: s32 = cast(s32)array_len(messages[message].text);
                 length: s32 = GetCodepointCount(messages[message].text);
                 info: *u8 = TextFormat("%s %u characters %i bytes", messages[message].language, length, size);
                 sz = MeasureTextEx(GetFontDefault(), info, 10, 1.0);

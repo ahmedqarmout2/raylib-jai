@@ -39,7 +39,7 @@ main :: ()
         //----------------------------------------------------------------------------------
         if (btnComputeHashes)
         {
-            textInputLen: s32 = cast(s32)strlen(textInput.data);
+            textInputLen: s32 = cast(s32)array_len(textInput.data);
 
             // Encode data to Base64 string (includes NULL terminator), memory must be MemFree()
             base64Text = EncodeDataBase64(textInput.data, textInputLen, *base64TextSize);
