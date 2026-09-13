@@ -3,7 +3,7 @@
 #import "Math";
 #import "Random";
 
-#load "shared/rlights.jai";
+#load "rlights.jai";
 
 MAX_CUBES :: 30;
 

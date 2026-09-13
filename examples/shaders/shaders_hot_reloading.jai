@@ -3,7 +3,7 @@
 #import "Math";
 #import "File_Utilities";
 
-#load "shared/rlights.jai";
+#load "rlights.jai";
 
 GLSL_VERSION :: 330;
 

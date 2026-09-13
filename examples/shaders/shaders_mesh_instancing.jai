@@ -2,7 +2,7 @@
 #import "Basic";
 #import "Math";
 
-#load "shared/rlights.jai";
+#load "rlights.jai";
 
 MAX_INSTANCES :: 10000;
 
