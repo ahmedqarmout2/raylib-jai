@@ -87,6 +87,7 @@ MODELS_EXAMPLES :: string.[
     "models_rlgl_solar_system",
     "models_rotating_cube",
     "models_skybox_rendering",
+    "models_tesseract_view",
     "models_textured_cube",
     "models_waving_cubes",
     "models_yaw_pitch_roll"
