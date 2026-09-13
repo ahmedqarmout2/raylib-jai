@@ -2,7 +2,7 @@
 #import "Basic";
 #import "Math";
 
-FLT_MAX : float : 3.4028235e+38;     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
+FLT_MAX :: FLOAT32_MAX;     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
 MAX_DECALS :: 256;
 

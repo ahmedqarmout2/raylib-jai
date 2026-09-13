@@ -85,6 +85,7 @@ MODELS_EXAMPLES :: string.[
     "models_orthographic_projection",
     "models_point_rendering",
     "models_rlgl_solar_system",
+    "models_rotating_cube",
     "models_skybox_rendering",
     "models_textured_cube",
     "models_waving_cubes",
