@@ -539,7 +539,7 @@ rlDisableDepthMask :: () #foreign raylib_native;
 rlEnableBackfaceCulling :: () #foreign raylib_native;
 rlDisableBackfaceCulling :: () #foreign raylib_native;
 rlColorMask :: (r: bool, g: bool, b: bool, a: bool) #foreign raylib_native;
-rlSetCullFace :: (mode: s32) #foreign raylib_native;
+rlSetCullFace :: (mode: rlCullMode) #foreign raylib_native;
 rlEnableScissorTest :: () #foreign raylib_native;
 rlDisableScissorTest :: () #foreign raylib_native;
 rlScissor :: (x: s32, y: s32, width: s32, height: s32) #foreign raylib_native;
