@@ -77,6 +77,7 @@ MODELS_EXAMPLES :: string.[
     "models_heightmap_rendering",
     "models_loading",
     "models_loading_gltf",
+    "models_loading_iqm",
     "models_loading_m3d",
     "models_loading_vox",
     "models_mesh_generation",
