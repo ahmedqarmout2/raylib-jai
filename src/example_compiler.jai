@@ -98,6 +98,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_basic_lighting",
     "shaders_basic_pbr",
     "shaders_cel_shading",
+    "shaders_color_correction",
     "shaders_custom_uniform",
     "shaders_deferred_rendering",
     "shaders_eratosthenes_sieve",
