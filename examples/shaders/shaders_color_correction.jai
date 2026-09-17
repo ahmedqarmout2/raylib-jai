@@ -104,7 +104,7 @@ main :: ()
             GuiSliderBar(Rectangle.{ 645, 130, 120, 20 }, "Saturation", TextFormat("%.0f", saturation), *saturation, -100.0, 100.0);
             GuiSliderBar(Rectangle.{ 645, 160, 120, 20 }, "Brightness", TextFormat("%.0f", brightness), *brightness, -100.0, 100.0);
 
-            resetButtonClicked = GuiButton(Rectangle.{ 645, 190, 40, 20 }, "Reset") == GuiResult.RESULT_PRESSED;
+            resetButtonClicked = GuiButton(Rectangle.{ 645, 190, 40, 20 }, "Reset") == .RESULT_PRESSED;
             //------------------------------------------------------------------------------
 
             DrawFPS(710, 10);

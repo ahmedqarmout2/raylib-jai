@@ -116,13 +116,13 @@ main :: ()
         if (GuiTextBox(Rectangle.{ 50, 120, 652, 40 }, inputBuffer.data, 256, textBoxEditMode)) textBoxEditMode = !textBoxEditMode;
 
         // Random text button
-        btnRandomPressed = GuiButton(Rectangle.{ 50 + 652 + 8, 120, 40, 40 }, "#77#") == GuiResult.RESULT_PRESSED;
+        btnRandomPressed = GuiButton(Rectangle.{ 50 + 652 + 8, 120, 40, 40 }, "#77#") == .RESULT_PRESSED;
 
         // Draw buttons
-        btnCutPressed = GuiButton(Rectangle.{ 50, 180, 158, 40 }, "#17#CUT") == GuiResult.RESULT_PRESSED;
-        btnCopyPressed = GuiButton(Rectangle.{ 50 + 165, 180, 158, 40 }, "#16#COPY") == GuiResult.RESULT_PRESSED;
-        btnPastePressed = GuiButton(Rectangle.{ 50 + 165*2, 180, 158, 40 }, "#18#PASTE") == GuiResult.RESULT_PRESSED;
-        btnClearPressed = GuiButton(Rectangle.{ 50 + 165*3, 180, 158, 40 }, "#143#CLEAR") == GuiResult.RESULT_PRESSED;
+        btnCutPressed = GuiButton(Rectangle.{ 50, 180, 158, 40 }, "#17#CUT") == .RESULT_PRESSED;
+        btnCopyPressed = GuiButton(Rectangle.{ 50 + 165, 180, 158, 40 }, "#16#COPY") == .RESULT_PRESSED;
+        btnPastePressed = GuiButton(Rectangle.{ 50 + 165*2, 180, 158, 40 }, "#18#PASTE") == .RESULT_PRESSED;
+        btnClearPressed = GuiButton(Rectangle.{ 50 + 165*3, 180, 158, 40 }, "#143#CLEAR") == .RESULT_PRESSED;
 
         // Draw clipboard status
         GuiSetState(.STATE_DISABLED);

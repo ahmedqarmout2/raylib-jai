@@ -105,6 +105,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_depth_writing",
     "shaders_eratosthenes_sieve",
     "shaders_fog_rendering",
+    "shaders_game_of_life",
     "shaders_hot_reloading",
     "shaders_hybrid_render",
     "shaders_julia_set",
