@@ -102,6 +102,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_custom_uniform",
     "shaders_deferred_rendering",
     "shaders_depth_rendering",
+    "shaders_depth_writing",
     "shaders_eratosthenes_sieve",
     "shaders_fog_rendering",
     "shaders_hot_reloading",
