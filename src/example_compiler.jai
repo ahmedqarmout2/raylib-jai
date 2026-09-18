@@ -114,6 +114,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_mesh_instancing",
     "shaders_model_shader",
     "shaders_multi_sample2d",
+    "shaders_normalmap_rendering",
     "shaders_palette_switch",
     "shaders_postprocessing",
     "shaders_raymarching_rendering",
