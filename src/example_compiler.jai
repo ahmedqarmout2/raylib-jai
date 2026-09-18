@@ -110,6 +110,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_hybrid_render",
     "shaders_julia_set",
     "shaders_lightmap_rendering",
+    "shaders_mandelbrot_set",
     "shaders_mesh_instancing",
     "shaders_model_shader",
     "shaders_multi_sample2d",
