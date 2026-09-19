@@ -119,6 +119,7 @@ SHADERS_EXAMPLES :: string.[
     "shaders_postprocessing",
     "shaders_raymarching_rendering",
     "shaders_rlgl_compute",
+    "shaders_rounded_rectangle",
     "shaders_shadowmap_rendering",
     "shaders_shapes_textures",
     "shaders_simple_mask",
