@@ -135,6 +135,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_ball_physics",
     "shapes_basic_shapes",
     "shapes_bouncing_ball",
+    "shapes_bullet_hell",
     "shapes_circle_sector_drawing",
     "shapes_collision_area",
     "shapes_colors_palette",
