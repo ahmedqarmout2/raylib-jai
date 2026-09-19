@@ -132,6 +132,7 @@ SHADERS_EXAMPLES :: string.[
 ];
 
 SHAPES_EXAMPLES :: string.[
+    "shapes_ball_physics",
     "shapes_basic_shapes",
     "shapes_bouncing_ball",
     "shapes_circle_sector_drawing",
