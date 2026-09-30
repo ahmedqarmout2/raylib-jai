@@ -137,6 +137,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_bouncing_ball",
     "shapes_bullet_hell",
     "shapes_circle_sector_drawing",
+    "shapes_clock_of_clocks",
     "shapes_collision_area",
     "shapes_colors_palette",
     "shapes_easings_ball",
