@@ -2,7 +2,7 @@
 #import "Basic";
 #import "Math";
 
-#load "shared/rlights.jai";
+#load "rlights.jai";
 
 GLSL_VERSION :: 330;
 
@@ -60,9 +60,11 @@ main :: ()
     SetShaderValue(shader, GetShaderLocation(shader, "ambient")     , *ambientIntensity, .SHADER_UNIFORM_FLOAT);
 
     // Get location for shader parameters that can be modified in real time
-    emissiveIntensityLoc : s32 = GetShaderLocation(shader, "emissivePower");
-    emissiveColorLoc     : s32 = GetShaderLocation(shader, "emissiveColor");
-    textureTilingLoc     : s32 = GetShaderLocation(shader, "tiling");
+    metallicValueLoc: s32 = GetShaderLocation(shader, "metallicValue");
+    roughnessValueLoc: s32 = GetShaderLocation(shader, "roughnessValue");
+    emissiveIntensityLoc: s32 = GetShaderLocation(shader, "emissivePower");
+    emissiveColorLoc: s32 = GetShaderLocation(shader, "emissiveColor");
+    textureTilingLoc: s32 = GetShaderLocation(shader, "tiling");
 
     // Load old car model using PBR maps and shader
     // WARNING: We know this model consists of a single model.meshes[0] and
@@ -76,7 +78,7 @@ main :: ()
 
     // Setup materials[0].maps default parameters
     car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ALBEDO].color    = WHITE;
-    car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_METALNESS].value = 0.0;
+    car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_METALNESS].value = 1.0;
     car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ROUGHNESS].value = 0.0;
     car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_OCCLUSION].value = 1.0;
     car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color  = Color.{255, 162, 0, 255};
@@ -100,7 +102,7 @@ main :: ()
     
     floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ALBEDO].color    = WHITE;
     floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_METALNESS].value = 0.0;
-    floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ROUGHNESS].value = 0.0;
+    floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ROUGHNESS].value = 0.1;
     floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_OCCLUSION].value = 1.0;
     floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color  = BLACK;
 
@@ -165,6 +167,10 @@ main :: ()
                 floorEmissiveColor: Vector4 = ColorNormalize(floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_EMISSION].color);
                 SetShaderValue(shader, emissiveColorLoc, *floorEmissiveColor, .SHADER_UNIFORM_VEC4);
 
+                // Set floor metallic and roughness values
+                SetShaderValue(shader, metallicValueLoc, *floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_METALNESS].value, .SHADER_UNIFORM_FLOAT);
+                SetShaderValue(shader, roughnessValueLoc, *floor.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ROUGHNESS].value, .SHADER_UNIFORM_FLOAT);
+
                 DrawModel(floor, Vector3.{0.0, 0.0, 0.0}, 5.0, WHITE);   // Draw floor model
 
                 // Set old car model texture tiling, emissive color and emissive intensity parameters on shader
@@ -173,6 +179,10 @@ main :: ()
                 SetShaderValue(shader, emissiveColorLoc, *carEmissiveColor, .SHADER_UNIFORM_VEC4);
                 emissiveIntensity: float = 0.01;
                 SetShaderValue(shader, emissiveIntensityLoc, *emissiveIntensity, .SHADER_UNIFORM_FLOAT);
+
+                // Set old car metallic and roughness values
+                SetShaderValue(shader, metallicValueLoc, *car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_METALNESS].value, .SHADER_UNIFORM_FLOAT);
+                SetShaderValue(shader, roughnessValueLoc, *car.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_ROUGHNESS].value, .SHADER_UNIFORM_FLOAT);
 
                 DrawModel(car, Vector3.{0.0, 0.0, 0.0}, 0.25, WHITE);   // Draw car model
 
@@ -201,14 +211,12 @@ main :: ()
     //--------------------------------------------------------------------------------------
     // Unbind (disconnect) shader from car.material[0]
     // to avoid UnloadMaterial() trying to unload it automatically
-    s1: Shader = ---;
-    car.materials[0].shader = s1;
+    car.materials[0].shader = Shader.{};
     UnloadMaterial(car.materials[0]);
     car.materials[0].maps = null;
     UnloadModel(car);
 
-    s2: Shader = ---;
-    floor.materials[0].shader = s2;
+    floor.materials[0].shader = Shader.{};
     UnloadMaterial(floor.materials[0]);
     floor.materials[0].maps = null;
     UnloadModel(floor);

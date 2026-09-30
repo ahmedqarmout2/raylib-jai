@@ -3,7 +3,9 @@
 #import "Math";
 #import "Random";
 
-#load "shared/rlights.jai";
+#load "rlights.jai";
+
+GLSL_VERSION :: 330;
 
 MAX_CUBES :: 30;
 
@@ -23,8 +25,6 @@ DeferredMode :: enum {
    DEFERRED_ALBEDO;
    DEFERRED_SHADING;
 };
-
-GLSL_VERSION :: 330;
 
 //------------------------------------------------------------------------------------
 // Program main entry point
