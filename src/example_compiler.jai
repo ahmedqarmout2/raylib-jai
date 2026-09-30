@@ -279,28 +279,30 @@ compile_file :: (command_options: Command_Options, report: *Examples_Report, out
         report.failed += 1;
     }
 
-    // WIP: DO NOT USE YET
-    // old_wd := Basic.get_working_directory();
-    // defer Basic.set_working_directory(old_wd);
-
-    /*Basic.set_working_directory(String.join(#filepath, "/../", file_path));
-
+    /*
     w := Compiler.compiler_create_workspace(String.tprint("Compiling % example", file_name));
     options := Compiler.get_build_options(w);
     Compiler.copy_commonly_propagated_fields(Compiler.get_build_options(), *options);
     options.output_executable_name = file_name;
+    options.output_path = String.join(#filepath, "/../", file_path);
+    options.output_type = .EXECUTABLE;
     modules_path := String.join(#filepath, "/../");
     modules_paths: [..] string;
     Basic.array_add(*modules_paths, modules_path);
     Basic.array_add(*modules_paths, ..options.import_path);
     options.import_path = modules_paths;
-    options.output_type = .EXECUTABLE;
     options.stack_trace = true;
+    options.emit_debug_info = .NONE;
+    //options.llvm_options.enable_debug_info = false;
+    //options.x64_options.enable_debug_info = false;
     if (command_options.log_level != .ALL) {
         options.text_output_flags = 0;
     }
-    // options.additional_linker_arguments = .["/SUBSYSTEM:windows", "/ENTRY:mainCRTStartup"];
+    options.additional_linker_arguments = .["/NOLOGO", "/NOEXP", "/NOIMPLIB"];
     Compiler.set_build_options(options, w);
+    if (command_options.log_level == .NONE) {
+        //Compiler.set_build_options_dc(.{ do_output = false }, w);
+    }
 
     Compiler.compiler_begin_intercept(w);
     Compiler.add_build_file(String.join("../", file_path, "/", file_name, ".jai"), w);
