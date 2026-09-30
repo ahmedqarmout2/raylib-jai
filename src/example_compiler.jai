@@ -140,6 +140,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_clock_of_clocks",
     "shapes_collision_area",
     "shapes_colors_palette",
+    "shapes_dashed_line",
     "shapes_easings_ball",
     "shapes_easings_box",
     "shapes_easings_rectangles",
