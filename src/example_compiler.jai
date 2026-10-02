@@ -156,6 +156,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_ring_drawing",
     "shapes_rounded_rectangle_drawing",
     "shapes_splines_drawing",
+    "shapes_starfield_effect",
     "shapes_top_down_lights",
     "shapes_triangle_strip",
     "shapes_vector_angle"
