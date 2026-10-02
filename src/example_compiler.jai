@@ -147,6 +147,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_easings_box",
     "shapes_easings_rectangles",
     "shapes_easings_testbed",
+    "shapes_ellipse_collision",
     "shapes_following_eyes",
     "shapes_lines_bezier",
     "shapes_logo_raylib",
