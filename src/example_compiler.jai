@@ -153,6 +153,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_logo_raylib",
     "shapes_logo_raylib_anim",
     "shapes_rectangle_scaling",
+    "shapes_recursive_tree",
     "shapes_ring_drawing",
     "shapes_rlgl_color_wheel",
     "shapes_rlgl_triangle",
