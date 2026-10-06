@@ -154,6 +154,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_logo_raylib_anim",
     "shapes_rectangle_scaling",
     "shapes_ring_drawing",
+    "shapes_rlgl_color_wheel",
     "shapes_rlgl_triangle",
     "shapes_rounded_rectangle_drawing",
     "shapes_simple_particles",
