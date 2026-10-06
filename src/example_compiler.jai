@@ -149,6 +149,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_easings_testbed",
     "shapes_ellipse_collision",
     "shapes_following_eyes",
+    "shapes_hilbert_curve",
     "shapes_lines_bezier",
     "shapes_lines_drawing",
     "shapes_logo_raylib",
