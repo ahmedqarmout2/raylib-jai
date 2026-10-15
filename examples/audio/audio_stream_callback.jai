@@ -102,13 +102,10 @@ main :: ()
             DrawText("Left/right to change wave type", 10, 30, 20, DARKGRAY);
 
             // Draw the last 10 ms of uploaded audio
-            for i: 0..screenWidth-1
+            for i: 0..screenWidth-2
             {
-                startIdx : s32 = cast(s32) Clamp(SAMPLE_RATE - SAMPLE_RATE/100.0 + i*SAMPLE_RATE/100/screenWidth, 0.0, SAMPLE_RATE-1.0);
-                endIdx   : s32 = cast(s32) Clamp(SAMPLE_RATE - SAMPLE_RATE/100.0 + (i + 1)*SAMPLE_RATE/100/screenWidth, 0.0, SAMPLE_RATE-1.0);
-
-                startPos := Vector2.{ i * 1.0, 250 - 50*buffer[startIdx] };
-                endPos   := Vector2.{ i + 1.0, 250 - 50*buffer[endIdx] };
+                startPos := Vector2.{ i * 1.0, 250 - 50*buffer[SAMPLE_RATE - SAMPLE_RATE/100 + i*SAMPLE_RATE/100/screenWidth] };
+                endPos   := Vector2.{ i + 1.0, 250 - 50*buffer[SAMPLE_RATE - SAMPLE_RATE/100 + (i + 1)*SAMPLE_RATE/100/screenWidth] };
                 DrawLineV(startPos, endPos, RED);
             }
 

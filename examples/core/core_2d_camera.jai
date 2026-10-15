@@ -40,7 +40,7 @@ main :: ()
 
     camera: Camera2D;
     camera.target = Vector2.{player.x + 20.0, player.y + 20.0};
-    camera.offset = Vector2.{screenWidth/2.0, screenHeight/2.0};
+    camera.offset = Vector2.{GetRenderWidth()/2.0, GetRenderHeight()/2.0};
     camera.rotation = 0.0;
     camera.zoom = 1.0;
 

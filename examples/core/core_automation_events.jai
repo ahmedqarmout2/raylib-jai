@@ -52,7 +52,7 @@ main :: ()
     // Define camera
     camera: Camera2D;
     camera.target = player.position;
-    camera.offset = Vector2.{ screenWidth/2.0, screenHeight/2.0 };
+    camera.offset = Vector2.{ GetRenderWidth()/2.0, GetRenderHeight()/2.0 };
     camera.rotation = 0.0;
     camera.zoom = 1.0;
 
@@ -100,7 +100,7 @@ main :: ()
                 player.canJump = false;
 
                 camera.target = player.position;
-                camera.offset = Vector2.{ screenWidth/2.0, screenHeight/2.0 };
+                camera.offset = Vector2.{ GetRenderWidth()/2.0, GetRenderHeight()/2.0 };
                 camera.rotation = 0.0;
                 camera.zoom = 1.0;
             }
@@ -151,7 +151,7 @@ main :: ()
             player.canJump = false;
 
             camera.target = player.position;
-            camera.offset = Vector2.{ screenWidth/2.0, screenHeight/2.0 };
+            camera.offset = Vector2.{ GetRenderWidth()/2.0, GetRenderHeight()/2.0 };
             camera.rotation = 0.0;
             camera.zoom = 1.0;
         }
@@ -187,7 +187,7 @@ main :: ()
         // Update camera
         //----------------------------------------------------------------------------------
         camera.target = player.position;
-        camera.offset = Vector2.{ screenWidth/2.0, screenHeight/2.0 };
+        camera.offset = Vector2.{ GetRenderWidth()/2.0, GetRenderHeight()/2.0 };
         minX: float = 1000;
         minY: float = 1000;
         maxX: float = -1000;
@@ -252,7 +252,7 @@ main :: ()
                 player.canJump = false;
 
                 camera.target = player.position;
-                camera.offset = Vector2.{ screenWidth/2.0, screenHeight/2.0 };
+                camera.offset = Vector2.{ GetRenderWidth()/2.0, GetRenderHeight()/2.0 };
                 camera.rotation = 0.0;
                 camera.zoom = 1.0;
             }

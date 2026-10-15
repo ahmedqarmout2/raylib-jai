@@ -62,7 +62,7 @@ main :: ()
         {
             // Cast a ray from the screen center (where crosshair would be)
             screenCenter: Vector2 = .{ GetScreenWidth()/2.0, GetScreenHeight()/2.0 };
-            ray: Ray = GetMouseRay(screenCenter, camera);
+            ray: Ray = GetScreenToWorldRay(screenCenter, camera);
 
             // Check ray collision with all voxels
             closestDistance: float = 99999.0;

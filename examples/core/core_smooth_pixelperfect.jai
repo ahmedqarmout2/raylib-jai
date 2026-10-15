@@ -35,7 +35,7 @@ main :: ()
 
     // The target's height is flipped (in the source Rectangle), due to OpenGL reasons
     sourceRec : Rectangle = .{ 0.0, 0.0, cast(float)target.texture.width, -cast(float)target.texture.height };
-    destRec   : Rectangle = .{ -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+    destRec   : Rectangle = .{ (screenWidth - screenWidth/1.25)/2.0, (screenHeight - screenHeight/1.25)/2.0, screenWidth/1.25, screenHeight/1.25 };
 
     origin : Vector2 = .{ 0.0, 0.0 };
 
@@ -43,6 +43,9 @@ main :: ()
 
     cameraX : float = 0.0;
     cameraY : float = 0.0;
+
+    smoothOn: bool = true;
+    overscan: bool = false;
 
     SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -69,6 +72,18 @@ main :: ()
         worldSpaceCamera.target.y   = screenSpaceCamera.target.y;
         screenSpaceCamera.target.y -= worldSpaceCamera.target.y;
         screenSpaceCamera.target.y *= virtualRatio;
+
+        if (IsKeyPressed(.KEY_S)) smoothOn = !smoothOn;
+        if (IsKeyPressed(.KEY_O)) overscan = !overscan;
+
+        if (overscan)
+        {
+            destRec = Rectangle.{ -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+        }
+        else
+        {
+            destRec = Rectangle.{ (screenWidth - screenWidth/1.25)/2.0, (screenHeight - screenHeight/1.25)/2.0, screenWidth/1.25, screenHeight/1.25 };
+        }
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -84,14 +99,23 @@ main :: ()
         EndTextureMode();
 
         BeginDrawing();
-            ClearBackground(RED);
+            ClearBackground(LIGHTGRAY);
 
-            BeginMode2D(screenSpaceCamera);
+            if (smoothOn)
+            {
+                BeginMode2D(screenSpaceCamera);
+                   DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0, WHITE);
+                EndMode2D();
+            }
+            else
+            {
                 DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0, WHITE);
-            EndMode2D();
+            }
 
             DrawText(TextFormat("Screen resolution: %ix%i", screenWidth, screenHeight), 10, 10, 20, DARKBLUE);
             DrawText(TextFormat("World resolution: %ix%i", virtualScreenWidth, virtualScreenHeight), 10, 40, 20, DARKGREEN);
+            DrawText(TextFormat("Smooth: %s", temp_c_string(ifx smoothOn then "ON" else "OFF")), 10, screenHeight - 60, 20, RED);
+            DrawText(TextFormat("Overscan: %s", temp_c_string(ifx overscan then "ON" else "OFF")), 10, screenHeight - 30, 20, RED);
             DrawFPS(GetScreenWidth() - 95, 10);
         EndDrawing();
         //----------------------------------------------------------------------------------

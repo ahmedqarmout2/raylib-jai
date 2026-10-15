@@ -103,7 +103,7 @@ main :: ()
             DrawText("Left/right to pan", 10, 30, 20, DARKGRAY);
 
             windowStart: s32 = cast(s32)((GetTime() - sineStartTime)*SAMPLE_RATE);
-            windowSize: s32 = cast(s32)(0.1*SAMPLE_RATE);
+            windowSize: s32 = SAMPLE_RATE/10;
             wavelength: s32 = SAMPLE_RATE/sineFrequency;
 
             // Draw a sine wave with the same frequency as the one being sent to the audio stream

@@ -2,6 +2,7 @@
 #import "Basic";
 
 MAX_FILEPATH_SIZE :: 1024;
+FILE_FILTER : *u8 : "DIRS*;.png;.c";
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -22,7 +23,7 @@ main :: ()
     // NOTE: LoadDirectoryFiles() loads files and directories by default,
     // use LoadDirectoryFilesEx() for custom filters and recursive directories loading
     //FilePathList files = LoadDirectoryFiles(directory);
-    files: FilePathList = LoadDirectoryFilesEx(directory.data, ".png;.c", false);
+    files: FilePathList = LoadDirectoryFilesEx(directory.data, FILE_FILTER, false);
 
     btnBackPressed: bool = false;
 
@@ -42,7 +43,22 @@ main :: ()
         {
             TextCopy(directory.data, GetPrevDirectoryPath(directory.data));
             UnloadDirectoryFiles(files);
-            files = LoadDirectoryFiles(directory.data);
+            files = LoadDirectoryFilesEx(directory.data, FILE_FILTER, false);
+
+            listScrollIndex = 0;
+            listItemActive = -1;
+            listItemFocused = -1;
+        }
+
+        if ((listItemActive >= 0) && (listItemActive < cast(s32)files.count) && DirectoryExists(files.paths[listItemActive]))
+        {
+            TextCopy(directory.data, files.paths[listItemActive]);
+            UnloadDirectoryFiles(files);
+            files = LoadDirectoryFilesEx(directory.data, FILE_FILTER, false);
+
+            listScrollIndex = 0;
+            listItemActive = -1;
+            listItemFocused = -1;
         }
         //----------------------------------------------------------------------------------
 

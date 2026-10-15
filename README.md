@@ -4,7 +4,7 @@
 
 > Tested with Jai version: beta 0.2.030
 
-> Raylib version: 6.0
+> Raylib version: 6.2
 
 > Raygui version: 5.0
 

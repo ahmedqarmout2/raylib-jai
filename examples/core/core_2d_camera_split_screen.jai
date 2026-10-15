@@ -23,13 +23,13 @@ main :: ()
 
     camera1: Camera2D;
     camera1.target   = Vector2.{ player1.x, player1.y };
-    camera1.offset   = Vector2.{ 200.0, 200.0 };
+    camera1.offset   = Vector2Multiply(Vector2.{ 200.0, 200.0 }, GetWindowScaleDPI());
     camera1.rotation = 0.0;
     camera1.zoom     = 1.0;
 
     camera2: Camera2D;
     camera2.target   = Vector2.{ player2.x, player2.y };
-    camera2.offset   = Vector2.{ 200.0, 200.0 };
+    camera2.offset   = Vector2Multiply(Vector2.{ 200.0, 200.0 }, GetWindowScaleDPI());
     camera2.rotation = 0.0;
     camera2.zoom     = 1.0;
 

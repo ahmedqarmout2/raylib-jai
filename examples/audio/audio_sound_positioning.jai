@@ -94,14 +94,14 @@ SetSoundPosition :: (listener: Camera, sound: Sound, position: Vector3, maxDist:
     // Calculate normalized vectors for spatial positioning
     normalizedDirection: Vector3 = Vector3Normalize(direction);
     forward: Vector3 = Vector3Normalize(Vector3Subtract(listener.target, listener.position));
-    right: Vector3 = Vector3Normalize(Vector3CrossProduct(listener.up, forward));
+    right: Vector3 = Vector3Normalize(Vector3CrossProduct(forward, listener.up));
 
     // Reduce volume for sounds behind the listener
     dotProduct: float = Vector3DotProduct(forward, normalizedDirection);
     if (dotProduct < 0.0) attenuation *= (1.0 + dotProduct*0.5);
 
     // Set stereo panning based on sound position relative to listener
-    pan: float = 0.5 + 0.5*Vector3DotProduct(normalizedDirection, right);
+    pan: float = Vector3DotProduct(normalizedDirection, right);
 
     // Apply final sound properties
     SetSoundVolume(sound, attenuation);

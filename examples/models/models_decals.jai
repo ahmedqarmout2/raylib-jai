@@ -220,7 +220,7 @@ main :: ()
             DrawText("(c) Character model and texture from kenney.nl", screenWidth - 260, screenHeight - 20, 10, GRAY);
 
             // UI elements
-            if (_GuiButton(Rectangle.{ 10.0, screenHeight - 1000.0, 100.0, 60.0 }, temp_c_string(ifx showModel then "Hide Model" else "Show Model"))) showModel = !showModel;
+            if (_GuiButton(Rectangle.{ 10.0, screenHeight - 100.0, 100.0, 60.0 }, temp_c_string(ifx showModel then "Hide Model" else "Show Model"))) showModel = !showModel;
 
             if (_GuiButton(Rectangle.{ 10.0 + 110, screenHeight - 100.0, 100.0, 60.0 }, "Clear Decals"))
             {
@@ -238,6 +238,7 @@ main :: ()
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadModel(model);
+    UnloadModel(placementCube);
     UnloadTexture(modelTexture);
 
     // Unload decal models
@@ -284,7 +285,7 @@ AddTriangleToMeshBuilder :: (mb: *MeshBuilder, vertices: [3]Vector3)
 FreeMeshBuilder :: (mb: *MeshBuilder)
 {
     MemFree(mb.vertices);
-    if (mb.uvs) MemFree(mb.uvs);
+    if (mb.uvs != null) MemFree(mb.uvs);
 
     (.*)mb = MeshBuilder.{};
 }
@@ -297,7 +298,7 @@ BuildMesh:: (mb: *MeshBuilder) -> Mesh
     outMesh.vertexCount = mb.vertexCount;
     outMesh.triangleCount = mb.vertexCount/3;
     outMesh.vertices = MemAlloc(cast(u32)(outMesh.vertexCount*3*size_of(float)));
-    if (mb.uvs) outMesh.texcoords = MemAlloc(cast(u32)(outMesh.vertexCount*2*size_of(float)));
+    if (mb.uvs != null) outMesh.texcoords = MemAlloc(cast(u32)(outMesh.vertexCount*2*size_of(float)));
 
     for i: 0..mb.vertexCount-1
     {
@@ -305,7 +306,7 @@ BuildMesh:: (mb: *MeshBuilder) -> Mesh
         outMesh.vertices[3*i+1] = mb.vertices[i].y;
         outMesh.vertices[3*i+2] = mb.vertices[i].z;
 
-        if (mb.uvs)
+        if (mb.uvs != null)
         {
             outMesh.texcoords[2*i+0] = mb.uvs[i].x;
             outMesh.texcoords[2*i+1] = mb.uvs[i].y;

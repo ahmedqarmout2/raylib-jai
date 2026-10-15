@@ -53,19 +53,19 @@ main :: ()
     {
         if (TextIsEqual(characterModel.skeleton.bones[i].name.data, "socket_hat"))
         {
-            boneSocketIndex[BONE_SOCKET_HAT] = i;
+            boneSocketIndex[BONE_SOCKET_HAT] = cast(s32)i;
             continue;
         }
         
         if (TextIsEqual(characterModel.skeleton.bones[i].name.data, "socket_hand_R"))
         {
-            boneSocketIndex[BONE_SOCKET_HAND_R] = i;
+            boneSocketIndex[BONE_SOCKET_HAND_R] = cast(s32)i;
             continue;
         }
         
         if (TextIsEqual(characterModel.skeleton.bones[i].name.data, "socket_hand_L"))
         {
-            boneSocketIndex[BONE_SOCKET_HAND_L] = i;
+            boneSocketIndex[BONE_SOCKET_HAND_L] = cast(s32)i;
             continue;
         }
     }

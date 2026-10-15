@@ -83,8 +83,6 @@ main :: ()
     // De-Initialization
     //--------------------------------------------------------------------------------------
 
-    // TODO: Unload all loaded resources at this point
-
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

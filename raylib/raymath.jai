@@ -11,7 +11,7 @@ RAD2DEG :: (180.0/PI);
 /*
 ***********************************************************************************************
 *
-*   raymath v2.0 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
+*   raymath v2.0 - Math functions to work with Vector2, Vector3, Vector4, Matrix and Quaternions
 *
 *   CONVENTIONS:
 *     - Matrix structure is defined as row-major (memory layout) but parameters naming AND all
@@ -588,6 +588,12 @@ QuaternionCubicHermiteSpline :: (q1: Quaternion, outTangent1: Quaternion, q2: Qu
 // Calculate quaternion based on the rotation from one vector to another
 QuaternionFromVector3ToVector3 :: (from: Vector3, to: Vector3) -> Quaternion #foreign raylib_native;
 
+
+    // QuaternionNormalize(q);
+    // NOTE: Normalize to essentially nlerp the original and identity to 0.5
+
+
+
 // Get a quaternion for a given rotation matrix
 QuaternionFromMatrix :: (mat: Matrix4) -> Quaternion #foreign raylib_native;
 
@@ -627,12 +633,11 @@ QuaternionTransform :: (q: Quaternion, mat: Matrix4) -> Quaternion #foreign rayl
 QuaternionEquals :: (p: Quaternion, q: Quaternion) -> s32 #foreign raylib_native;
 
 // Compose a transformation matrix from rotational, translational and scaling components
-// TODO: This function is not following raymath conventions defined in header: NOT self-contained
 MatrixCompose :: (translation: Vector3, rotation: Quaternion, scale: Vector3) -> Matrix4 #foreign raylib_native;
 
 
 // Decompose a transformation matrix into its rotational, translational and scaling components and remove shear
-// TODO: This function is not following raymath conventions defined in header: NOT self-contained
+// TODO: WARNING: Following raymath convention and make the function self-contained
 MatrixDecompose :: (mat: Matrix4, translation: *Vector3, rotation: *Quaternion, scale: *Vector3) #foreign raylib_native;
 
     // X Scale

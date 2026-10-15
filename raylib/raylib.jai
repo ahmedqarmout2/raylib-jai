@@ -8,7 +8,7 @@
 /*
 ***********************************************************************************************
 *
-*   raylib v6.0 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
+*   raylib v6.2 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
 *
 *   FEATURES:
 *       - NO external dependencies, all required libraries included with raylib
@@ -93,9 +93,9 @@
 
 
 RAYLIB_VERSION_MAJOR :: 6;
-RAYLIB_VERSION_MINOR :: 0;
+RAYLIB_VERSION_MINOR :: 2;
 RAYLIB_VERSION_PATCH :: 0;
-RAYLIB_VERSION ::  "6.0";
+RAYLIB_VERSION ::  "6.2";
 
 // Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
@@ -264,7 +264,7 @@ Camera :: Camera3D;
 
 // Camera2D, defines position/orientation in 2d space
 Camera2D :: struct {
-    offset: Vector2;          // Camera offset (screen space offset from window origin)
+    offset: Vector2;          // Camera offset (screen space offset from window origin, unscaled by DPI, real pixel size)
     target: Vector2;          // Camera target (world space target point that is mapped to screen space offset)
     rotation: float;          // Camera rotation in degrees (pivots around target)
     zoom: float;              // Camera zoom (scaling around target), must not be set to 0, set to 1.0f for no scale
@@ -337,7 +337,7 @@ BoneInfo :: struct {
 
 // Skeleton, animation bones hierarchy
 ModelSkeleton :: struct {
-    boneCount: s32;           // Number of bones
+    boneCount: u32;  // Number of bones
     bones: *BoneInfo;         // Bones information (skeleton)
     bindPose: ModelAnimPose;  // Bones base transformation (Transform[])
 }
@@ -364,7 +364,7 @@ Model :: struct {
 ModelAnimation :: struct {
     name: [32]u8;           // Animation name
 
-    boneCount: s32;           // Number of bones (per pose)
+    boneCount: u32;  // Number of bones (per pose)
     keyframeCount: s32;       // Number of animation key frames
     keyframePoses: *ModelAnimPose;  // Animation sequence keyframe poses [keyframe][pose]
 }
@@ -1000,7 +1000,6 @@ SetShaderValueTexture :: (shader: Shader, locIndex: s32, texture: Texture2D) #fo
 UnloadShader :: (shader: Shader) #foreign raylib_native;
 
 // Screen-space-related functions
-GetMouseRay :: GetScreenToWorldRay;    // Compatibility hack for previous raylib versions
 GetScreenToWorldRay :: (position: Vector2, camera: Camera) -> Ray #foreign raylib_native;
 GetScreenToWorldRayEx :: (position: Vector2, camera: Camera, width: s32, height: s32) -> Ray #foreign raylib_native;
 GetWorldToScreen :: (position: Vector3, camera: Camera) -> Vector2 #foreign raylib_native;
@@ -1070,6 +1069,7 @@ FileTextFindIndex :: (fileName: *u8, search: *u8) -> s32 #foreign raylib_native;
 FileExists :: (fileName: *u8) -> bool #foreign raylib_native;
 DirectoryExists :: (dirPath: *u8) -> bool #foreign raylib_native;
 IsFileExtension :: (fileName: *u8, ext: *u8) -> bool #foreign raylib_native;
+IsFileHidden :: (filePath: *u8) -> bool #foreign raylib_native;
 GetFileLength :: (fileName: *u8) -> s32 #foreign raylib_native;
 GetFileModTime :: (fileName: *u8) -> s64 #foreign raylib_native;
 GetFileExtension :: (fileName: *u8) -> *u8 #foreign raylib_native;
@@ -1080,8 +1080,10 @@ GetPrevDirectoryPath :: (dirPath: *u8) -> *u8 #foreign raylib_native;
 GetWorkingDirectory :: () -> *u8 #foreign raylib_native;
 GetApplicationDirectory :: () -> *u8 #foreign raylib_native;
 MakeDirectory :: (dirPath: *u8) -> s32 #foreign raylib_native;
-ChangeDirectory :: (dirPath: *u8) -> bool #foreign raylib_native;
+ChangeDirectory :: (dirPath: *u8) -> s32 #foreign raylib_native;
 IsPathFile :: (path: *u8) -> bool #foreign raylib_native;
+IsPathDirectory :: (path: *u8) -> bool #foreign raylib_native;
+IsPathAbsolute :: (path: *u8) -> bool #foreign raylib_native;
 IsFileNameValid :: (fileName: *u8) -> bool #foreign raylib_native;
 LoadDirectoryFiles :: (dirPath: *u8) -> FilePathList #foreign raylib_native;
 LoadDirectoryFilesEx :: (basePath: *u8, filter: *u8, scanSubdirs: bool) -> FilePathList #foreign raylib_native;
@@ -1187,7 +1189,7 @@ UpdateCameraPro :: (camera: *Camera, movement: Vector3, rotation: Vector3, zoom:
 // Set texture and rectangle to be used on shapes drawing
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
-SetShapesTexture :: (texture: Texture2D, source: Rectangle) #foreign raylib_native;
+SetShapesTexture :: (texture: Texture2D, rec: Rectangle) #foreign raylib_native;
 GetShapesTexture :: () -> Texture2D #foreign raylib_native;
 GetShapesTextureRectangle :: () -> Rectangle #foreign raylib_native;
 
@@ -1200,38 +1202,44 @@ DrawLineEx :: (startPos: Vector2, endPos: Vector2, thick: float, color: Color) #
 DrawLineStrip :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
 DrawLineBezier :: (startPos: Vector2, endPos: Vector2, thick: float, color: Color) #foreign raylib_native;
 DrawLineDashed :: (startPos: Vector2, endPos: Vector2, dashSize: s32, spaceSize: s32, color: Color) #foreign raylib_native;
-DrawCircle :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
-DrawCircleV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
-DrawCircleGradient :: (center: Vector2, radius: float, inner: Color, outer: Color) #foreign raylib_native;
-DrawCircleSector :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
-DrawCircleSectorLines :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
-DrawCircleLines :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
-DrawCircleLinesV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
-DrawEllipse :: (centerX: s32, centerY: s32, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
-DrawEllipseV :: (center: Vector2, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
-DrawEllipseLines :: (centerX: s32, centerY: s32, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
-DrawEllipseLinesV :: (center: Vector2, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
-DrawRing :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
-DrawRingLines :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawTriangle :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+DrawTriangleGradient :: (v1: Vector2, v2: Vector2, v3: Vector2, c1: Color, c2: Color, c3: Color) #foreign raylib_native;
+DrawTriangleLines :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+DrawTriangleLinesEx :: (v1: Vector2, v2: Vector2, v3: Vector2, thick: float, color: Color) #foreign raylib_native;
+DrawTriangleFan :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+DrawTriangleStrip :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
 DrawRectangle :: (posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
 DrawRectangleV :: (position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
 DrawRectangleRec :: (rec: Rectangle, color: Color) #foreign raylib_native;
 DrawRectanglePro :: (rec: Rectangle, origin: Vector2, rotation: float, color: Color) #foreign raylib_native;
 DrawRectangleGradientV :: (posX: s32, posY: s32, width: s32, height: s32, top: Color, bottom: Color) #foreign raylib_native;
 DrawRectangleGradientH :: (posX: s32, posY: s32, width: s32, height: s32, left: Color, right: Color) #foreign raylib_native;
-DrawRectangleGradientEx :: (rec: Rectangle, topLeft: Color, bottomLeft: Color, bottomRight: Color, topRight: Color) #foreign raylib_native;
+DrawRectangleGradientEx :: (rec: Rectangle, col1: Color, col2: Color, col3: Color, col4: Color) #foreign raylib_native;
 DrawRectangleLines :: (posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
-DrawRectangleLinesEx :: (rec: Rectangle, lineThick: float, color: Color) #foreign raylib_native;
+DrawRectangleLinesEx :: (rec: Rectangle, thick: float, color: Color) #foreign raylib_native;
 DrawRectangleRounded :: (rec: Rectangle, roundness: float, segments: s32, color: Color) #foreign raylib_native;
 DrawRectangleRoundedLines :: (rec: Rectangle, roundness: float, segments: s32, color: Color) #foreign raylib_native;
-DrawRectangleRoundedLinesEx :: (rec: Rectangle, roundness: float, segments: s32, lineThick: float, color: Color) #foreign raylib_native;
-DrawTriangle :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
-DrawTriangleLines :: (v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
-DrawTriangleFan :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
-DrawTriangleStrip :: (points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+DrawRectangleRoundedLinesEx :: (rec: Rectangle, roundness: float, segments: s32, thick: float, color: Color) #foreign raylib_native;
 DrawPoly :: (center: Vector2, sides: s32, radius: float, rotation: float, color: Color) #foreign raylib_native;
 DrawPolyLines :: (center: Vector2, sides: s32, radius: float, rotation: float, color: Color) #foreign raylib_native;
-DrawPolyLinesEx :: (center: Vector2, sides: s32, radius: float, rotation: float, lineThick: float, color: Color) #foreign raylib_native;
+DrawPolyLinesEx :: (center: Vector2, sides: s32, radius: float, rotation: float, thick: float, color: Color) #foreign raylib_native;
+DrawCircle :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
+DrawCircleV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
+DrawCircleGradient :: (center: Vector2, radius: float, inner: Color, outer: Color) #foreign raylib_native;
+DrawCircleSector :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawCircleSectorLines :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawCircleSectorLinesEx :: (center: Vector2, radius: float, startAngle: float, endAngle: float, segments: s32, thick: float, color: Color) #foreign raylib_native;
+DrawCircleLines :: (centerX: s32, centerY: s32, radius: float, color: Color) #foreign raylib_native;
+DrawCircleLinesV :: (center: Vector2, radius: float, color: Color) #foreign raylib_native;
+DrawCircleLinesEx :: (center: Vector2, radius: float, thick: float, color: Color) #foreign raylib_native;
+DrawEllipse :: (centerX: s32, centerY: s32, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
+DrawEllipseV :: (center: Vector2, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
+DrawEllipseLines :: (centerX: s32, centerY: s32, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
+DrawEllipseLinesV :: (center: Vector2, radiusH: float, radiusV: float, color: Color) #foreign raylib_native;
+DrawEllipseLinesEx :: (center: Vector2, radiusH: float, radiusV: float, thick: float, color: Color) #foreign raylib_native;
+DrawRing :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawRingLines :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, color: Color) #foreign raylib_native;
+DrawRingLinesEx :: (center: Vector2, innerRadius: float, outerRadius: float, startAngle: float, endAngle: float, segments: s32, thick: float, color: Color) #foreign raylib_native;
 
 // Splines drawing functions
 DrawSplineLinear :: (points: *Vector2, pointCount: s32, thick: float, color: Color) #foreign raylib_native;
@@ -1245,11 +1253,11 @@ DrawSplineSegmentCatmullRom :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vecto
 DrawSplineSegmentBezierQuadratic :: (p1: Vector2, c2: Vector2, p3: Vector2, thick: float, color: Color) #foreign raylib_native;
 DrawSplineSegmentBezierCubic :: (p1: Vector2, c2: Vector2, c3: Vector2, p4: Vector2, thick: float, color: Color) #foreign raylib_native;
 
-// Spline segment point evaluation functions, for a given t [0.0f .. 1.0f]
+// Spline segment point evaluation functions, for a provided t [0.0f .. 1.0f]
 GetSplinePointLinear :: (startPos: Vector2, endPos: Vector2, t: float) -> Vector2 #foreign raylib_native;
 GetSplinePointBasis :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: float) -> Vector2 #foreign raylib_native;
 GetSplinePointCatmullRom :: (p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: float) -> Vector2 #foreign raylib_native;
-GetSplinePointBezierQuad :: (p1: Vector2, c2: Vector2, p3: Vector2, t: float) -> Vector2 #foreign raylib_native;
+GetSplinePointBezierQuadratic :: (p1: Vector2, c2: Vector2, p3: Vector2, t: float) -> Vector2 #foreign raylib_native;
 GetSplinePointBezierCubic :: (p1: Vector2, c2: Vector2, c3: Vector2, p4: Vector2, t: float) -> Vector2 #foreign raylib_native;
 
 // Basic shapes collision detection functions
@@ -1323,7 +1331,7 @@ ImageRotateCCW :: (image: *Image) #foreign raylib_native;
 ImageColorTint :: (image: *Image, color: Color) #foreign raylib_native;
 ImageColorInvert :: (image: *Image) #foreign raylib_native;
 ImageColorGrayscale :: (image: *Image) #foreign raylib_native;
-ImageColorContrast :: (image: *Image, contrast: float) #foreign raylib_native;
+ImageColorContrast :: (image: *Image, contrast: s32) #foreign raylib_native;
 ImageColorBrightness :: (image: *Image, brightness: s32) #foreign raylib_native;
 ImageColorReplace :: (image: *Image, color: Color, replace: Color) #foreign raylib_native;
 LoadImageColors :: (image: Image) -> *Color #foreign raylib_native;
@@ -1341,22 +1349,32 @@ ImageDrawPixelV :: (dst: *Image, position: Vector2, color: Color) #foreign rayli
 ImageDrawLine :: (dst: *Image, startPosX: s32, startPosY: s32, endPosX: s32, endPosY: s32, color: Color) #foreign raylib_native;
 ImageDrawLineV :: (dst: *Image, start: Vector2, end: Vector2, color: Color) #foreign raylib_native;
 ImageDrawLineEx :: (dst: *Image, start: Vector2, end: Vector2, thick: s32, color: Color) #foreign raylib_native;
+ImageDrawLineStrip :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+ImageDrawTriangle :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+ImageDrawTriangleGradient :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, c1: Color, c2: Color, c3: Color) #foreign raylib_native;
+ImageDrawTriangleLines :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
+ImageDrawTriangleFan :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+ImageDrawTriangleStrip :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
+ImageDrawRectangle :: (dst: *Image, posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
+ImageDrawRectangleV :: (dst: *Image, position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
+ImageDrawRectangleRec :: (dst: *Image, rec: Rectangle, color: Color) #foreign raylib_native;
+ImageDrawRectanglePro :: (dst: *Image, rec: Rectangle, origin: Vector2, rotation: float, color: Color) #foreign raylib_native;
+ImageDrawRectangleLines :: (dst: *Image, posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
+ImageDrawRectangleLinesEx :: (dst: *Image, rec: Rectangle, thick: s32, color: Color) #foreign raylib_native;
+ImageDrawRectangleGradientEx :: (dst: *Image, rec: Rectangle, col1: Color, col2: Color, col3: Color, col4: Color) #foreign raylib_native;
 ImageDrawCircle :: (dst: *Image, centerX: s32, centerY: s32, radius: s32, color: Color) #foreign raylib_native;
 ImageDrawCircleV :: (dst: *Image, center: Vector2, radius: s32, color: Color) #foreign raylib_native;
 ImageDrawCircleLines :: (dst: *Image, centerX: s32, centerY: s32, radius: s32, color: Color) #foreign raylib_native;
 ImageDrawCircleLinesV :: (dst: *Image, center: Vector2, radius: s32, color: Color) #foreign raylib_native;
-ImageDrawRectangle :: (dst: *Image, posX: s32, posY: s32, width: s32, height: s32, color: Color) #foreign raylib_native;
-ImageDrawRectangleV :: (dst: *Image, position: Vector2, size: Vector2, color: Color) #foreign raylib_native;
-ImageDrawRectangleRec :: (dst: *Image, rec: Rectangle, color: Color) #foreign raylib_native;
-ImageDrawRectangleLines :: (dst: *Image, rec: Rectangle, thick: s32, color: Color) #foreign raylib_native;
-ImageDrawTriangle :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
-ImageDrawTriangleEx :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, c1: Color, c2: Color, c3: Color) #foreign raylib_native;
-ImageDrawTriangleLines :: (dst: *Image, v1: Vector2, v2: Vector2, v3: Vector2, color: Color) #foreign raylib_native;
-ImageDrawTriangleFan :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
-ImageDrawTriangleStrip :: (dst: *Image, points: *Vector2, pointCount: s32, color: Color) #foreign raylib_native;
-ImageDraw :: (dst: *Image, src: Image, srcRec: Rectangle, dstRec: Rectangle, tint: Color) #foreign raylib_native;
+ImageDrawCircleGradient :: (dst: *Image, center: Vector2, radius: float, inner: Color, outer: Color) #foreign raylib_native;
+
+ImageDrawImage :: (dst: *Image, src: Image, posX: s32, posY: s32, tint: Color) #foreign raylib_native;
+ImageDrawImageEx :: (dst: *Image, src: Image, position: Vector2, rotation: float, scale: float, tint: Color) #foreign raylib_native;
+ImageDrawImageRec :: (dst: *Image, src: Image, srcRec: Rectangle, position: Vector2, tint: Color) #foreign raylib_native;
+ImageDrawImagePro :: (dst: *Image, src: Image, srcRec: Rectangle, dstRec: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 ImageDrawText :: (dst: *Image, text: *u8, posX: s32, posY: s32, fontSize: s32, color: Color) #foreign raylib_native;
 ImageDrawTextEx :: (dst: *Image, font: Font, text: *u8, position: Vector2, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
+ImageDrawTextPro :: (dst: *Image, font: Font, text: *u8, position: Vector2, origin: Vector2, rotation: float, fontSize: float, spacing: float, tint: Color) #foreign raylib_native;
 
 // Texture loading functions
 // NOTE: These functions require GPU access
@@ -1364,6 +1382,7 @@ LoadTexture :: (fileName: *u8) -> Texture2D #foreign raylib_native;
 LoadTextureFromImage :: (image: Image) -> Texture2D #foreign raylib_native;
 LoadTextureCubemap :: (image: Image, layout: CubemapLayout) -> TextureCubemap #foreign raylib_native;
 LoadRenderTexture :: (width: s32, height: s32) -> RenderTexture2D #foreign raylib_native;
+LoadRenderTextureEx :: (width: s32, height: s32, format: s32) -> RenderTexture2D #foreign raylib_native;
 IsTextureValid :: (texture: Texture2D) -> bool #foreign raylib_native;
 UnloadTexture :: (texture: Texture2D) #foreign raylib_native;
 IsRenderTextureValid :: (target: RenderTexture2D) -> bool #foreign raylib_native;
@@ -1380,9 +1399,9 @@ SetTextureWrap :: (texture: Texture2D, wrap: TextureWrap) #foreign raylib_native
 DrawTexture :: (texture: Texture2D, posX: s32, posY: s32, tint: Color) #foreign raylib_native;
 DrawTextureV :: (texture: Texture2D, position: Vector2, tint: Color) #foreign raylib_native;
 DrawTextureEx :: (texture: Texture2D, position: Vector2, rotation: float, scale: float, tint: Color) #foreign raylib_native;
-DrawTextureRec :: (texture: Texture2D, source: Rectangle, position: Vector2, tint: Color) #foreign raylib_native;
-DrawTexturePro :: (texture: Texture2D, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
-DrawTextureNPatch :: (texture: Texture2D, nPatchInfo: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
+DrawTextureRec :: (texture: Texture2D, rec: Rectangle, position: Vector2, tint: Color) #foreign raylib_native;
+DrawTexturePro :: (texture: Texture2D, srcrec: Rectangle, dstrec: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
+DrawTextureNPatch :: (texture: Texture2D, nPatchInfo: NPatchInfo, dstrec: Rectangle, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 
 // Color/pixel related functions
 ColorIsEqual :: (col1: Color, col2: Color) -> bool #foreign raylib_native;
@@ -1495,12 +1514,12 @@ DrawCubeWiresV :: (position: Vector3, size: Vector3, color: Color) #foreign rayl
 DrawSphere :: (centerPos: Vector3, radius: float, color: Color) #foreign raylib_native;
 DrawSphereEx :: (centerPos: Vector3, radius: float, rings: s32, slices: s32, color: Color) #foreign raylib_native;
 DrawSphereWires :: (centerPos: Vector3, radius: float, rings: s32, slices: s32, color: Color) #foreign raylib_native;
-DrawCylinder :: (position: Vector3, radiusTop: float, radiusBottom: float, height: float, slices: s32, color: Color) #foreign raylib_native;
+DrawCylinder :: (position: Vector3, radiusTop: float, radiusBottom: float, height: float, sides: s32, color: Color) #foreign raylib_native;
 DrawCylinderEx :: (startPos: Vector3, endPos: Vector3, startRadius: float, endRadius: float, sides: s32, color: Color) #foreign raylib_native;
-DrawCylinderWires :: (position: Vector3, radiusTop: float, radiusBottom: float, height: float, slices: s32, color: Color) #foreign raylib_native;
+DrawCylinderWires :: (position: Vector3, radiusTop: float, radiusBottom: float, height: float, sides: s32, color: Color) #foreign raylib_native;
 DrawCylinderWiresEx :: (startPos: Vector3, endPos: Vector3, startRadius: float, endRadius: float, sides: s32, color: Color) #foreign raylib_native;
-DrawCapsule :: (startPos: Vector3, endPos: Vector3, radius: float, slices: s32, rings: s32, color: Color) #foreign raylib_native;
-DrawCapsuleWires :: (startPos: Vector3, endPos: Vector3, radius: float, slices: s32, rings: s32, color: Color) #foreign raylib_native;
+DrawCapsule :: (startPos: Vector3, endPos: Vector3, radius: float, rings: s32, slices: s32, color: Color) #foreign raylib_native;
+DrawCapsuleWires :: (startPos: Vector3, endPos: Vector3, radius: float, rings: s32, slices: s32, color: Color) #foreign raylib_native;
 DrawPlane :: (centerPos: Vector3, size: Vector2, color: Color) #foreign raylib_native;
 DrawRay :: (ray: Ray, color: Color) #foreign raylib_native;
 DrawGrid :: (slices: s32, spacing: float) #foreign raylib_native;
@@ -1523,8 +1542,8 @@ DrawModelWires :: (model: Model, position: Vector3, scale: float, tint: Color) #
 DrawModelWiresEx :: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) #foreign raylib_native;
 DrawBoundingBox :: (box: BoundingBox, color: Color) #foreign raylib_native;
 DrawBillboard :: (camera: Camera, texture: Texture2D, position: Vector3, scale: float, tint: Color) #foreign raylib_native;
-DrawBillboardRec :: (camera: Camera, texture: Texture2D, source: Rectangle, position: Vector3, size: Vector2, tint: Color) #foreign raylib_native;
-DrawBillboardPro :: (camera: Camera, texture: Texture2D, source: Rectangle, position: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
+DrawBillboardRec :: (camera: Camera, texture: Texture2D, rec: Rectangle, position: Vector3, size: Vector2, tint: Color) #foreign raylib_native;
+DrawBillboardPro :: (camera: Camera, texture: Texture2D, rec: Rectangle, position: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: float, tint: Color) #foreign raylib_native;
 
 // Mesh management functions
 UploadMesh :: (mesh: *Mesh, dynamic: bool) #foreign raylib_native;
@@ -1594,7 +1613,7 @@ LoadSound :: (fileName: *u8) -> Sound #foreign raylib_native;
 LoadSoundFromWave :: (wave: Wave) -> Sound #foreign raylib_native;
 LoadSoundAlias :: (source: Sound) -> Sound #foreign raylib_native;
 IsSoundValid :: (sound: Sound) -> bool #foreign raylib_native;
-UpdateSound :: (sound: Sound, data: *void, sampleCount: s32) #foreign raylib_native;
+UpdateSound :: (sound: Sound, data: *void, frameCount: s32) #foreign raylib_native;
 UnloadWave :: (wave: Wave) #foreign raylib_native;
 UnloadSound :: (sound: Sound) #foreign raylib_native;
 UnloadSoundAlias :: (alias: Sound) #foreign raylib_native;

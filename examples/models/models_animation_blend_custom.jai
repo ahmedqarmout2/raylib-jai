@@ -77,7 +77,7 @@ main :: ()
         // When upperBodyBlend is ON: upper body = attack (1.0), lower body = walk (0.0)
         // When upperBodyBlend is OFF: uniform blend at 0.5 (50% walk, 50% attack)
         blendFactor: float = (ifx upperBodyBlend then 1.0 else 0.5);
-        UpdateModelAnimationBones(*model, *anim0, animCurrentFrame0,
+        UpdateModelAnimationBoneCustom(*model, *anim0, animCurrentFrame0,
             *anim1, animCurrentFrame1, blendFactor, upperBodyBlend);
 
         // raylib provided animation blending function
@@ -152,7 +152,7 @@ IsUpperBodyBone :: (boneName: *u8) -> bool
 }
 
 // Blend two animations per-bone with selective upper/lower body blending
-UpdateModelAnimationBones :: (model: *Model, anim0: *ModelAnimation, frame0: s32,
+UpdateModelAnimationBoneCustom :: (model: *Model, anim0: *ModelAnimation, frame0: s32,
     anim1: *ModelAnimation, frame1: s32, blend: float, upperBodyBlend: bool)
 {
     // Validate inputs
@@ -170,7 +170,7 @@ UpdateModelAnimationBones :: (model: *Model, anim0: *ModelAnimation, frame0: s32
         if (frame1 < 0) frame1 = 0;
 
         // Get bone count (use minimum of all to be safe)
-        boneCount: s32 = model.skeleton.boneCount;
+        boneCount: u32 = model.skeleton.boneCount;
         if (anim0.boneCount < boneCount) boneCount = anim0.boneCount;
         if (anim1.boneCount < boneCount) boneCount = anim1.boneCount;
 

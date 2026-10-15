@@ -26,7 +26,7 @@ main :: ()
     parrots: Image = LoadImage("resources/parrots.png");    // Load image in CPU memory (RAM)
 
     // Draw one image over the other with a scaling of 1.5f
-    ImageDraw(*parrots, cat, Rectangle.{ 0, 0, cast(float)cat.width, cast(float)cat.height }, Rectangle.{ 30, 40, cat.width*1.5, cat.height*1.5 }, WHITE);
+    ImageDrawImagePro(*parrots, cat, Rectangle.{ 0, 0, cast(float)cat.width, cast(float)cat.height }, Rectangle.{ 30, 40, cat.width*1.5, cat.height*1.5 }, Vector2.{ 0, 0 }, 0.0, WHITE);
     ImageCrop(*parrots, Rectangle.{ 0, 50, cast(float)parrots.width, cast(float)parrots.height - 100 }); // Crop resulting image
 
     // Draw on the image with a few image draw methods

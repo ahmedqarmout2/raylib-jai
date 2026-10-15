@@ -27,7 +27,7 @@ main :: ()
     // NOTE: The gesture log uses an array (as an inverted circular queue) to store the performed gestures
     gestureLog: [GESTURE_LOG_SIZE][12]u8;
     // NOTE: The index for the inverted circular queue (moving from last to first direction, then looping around)
-    gestureLogIndex: s32 = GESTURE_LOG_SIZE;
+    gestureLogIndex: s32 = 0;
     previousGesture: Gesture = .GESTURE_NONE;
 
     // Log mode values:
