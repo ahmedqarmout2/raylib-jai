@@ -82,6 +82,7 @@ MODELS_EXAMPLES :: string.[
     "models_loading_vox",
     "models_mesh_generation",
     "models_mesh_picking",
+    "models_mesh_uv_painting",
     "models_orthographic_projection",
     "models_point_rendering",
     "models_rlgl_solar_system",
