@@ -30,12 +30,19 @@ main :: ()
     model: Model = LoadModel("resources/models/gltf/greenman.glb"); // Load character model
     position: Vector3 = .{ 0.0, 0.0, 0.0 }; // Set model position
 
-    // Load skinning shader
-    // WARNING: GPU skinning must be enabled in raylib with a compilation flag,
-    // if not enabled, CPU skinning will be used instead
-    skinningShader: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/skinning.vs", GLSL_VERSION),
-                                       TextFormat("resources/shaders/glsl%i/skinning.fs", GLSL_VERSION));
-    model.materials[1].shader = skinningShader;
+    #if SUPPORT_GPU_SKINNING {
+        // WARNING: SUPPORT_GPU_SKINNING is required to be enabled at raylib compile time (disabled by default)
+        // It will skip loading CPU required buffers to store animation updated data, so, both modes are exclusive
+
+        // Load skinning shader
+        // NOTE: It must be a valid shader, following raylib attribs/uniform conventions for GPU skinning
+        skinningShader: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/skinning.vs", GLSL_VERSION),
+            TextFormat("resources/shaders/glsl%i/skinning.fs", GLSL_VERSION));
+
+        // Skinning shader could be required to be assigned to all materials shaders, just to make
+        // sure required uniforms are being updated for the mesh using that material (and shader)
+        model.materials[1].shader = skinningShader; // Just assigning to materials[1] for this model
+    }
 
     // Load gltf model animations
     animCount: s32 = 0;
@@ -89,8 +96,9 @@ main :: ()
     //--------------------------------------------------------------------------------------
     UnloadModelAnimations(anims, animCount); // Unload model animation
     UnloadModel(model);             // Unload model and meshes/material
-    UnloadShader(skinningShader);   // Unload GPU skinning shader
-
+    #if SUPPORT_GPU_SKINNING {
+        UnloadShader(skinningShader);   // Unload GPU skinning shader
+    }
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

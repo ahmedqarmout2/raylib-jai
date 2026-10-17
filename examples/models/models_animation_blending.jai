@@ -30,13 +30,19 @@ main :: ()
     model: Model = LoadModel("resources/models/gltf/robot.glb"); // Load character model
     position: Vector3 = .{ 0.0, 0.0, 0.0 }; // Set model world position
 
-    // Load skinning shader
-    // WARNING: It requires SUPPORT_GPU_SKINNING enabled on raylib (disabled by default)
-    skinningShader: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/skinning.vs", GLSL_VERSION),
-                                       TextFormat("resources/shaders/glsl%i/skinning.fs", GLSL_VERSION));
+    #if SUPPORT_GPU_SKINNING {
+        // WARNING: SUPPORT_GPU_SKINNING is required to be enabled at raylib compile time (disabled by default)
+        // It will skip loading CPU required buffers to store animation updated data, so, both modes are exclusive
 
-    // Assign skinning shader to all materials shaders
-    //for (int i = 0; i < model.materialCount; i++) model.materials[i].shader = skinningShader;
+        // Load skinning shader
+        // NOTE: It must be a valid shader, following raylib attribs/uniform conventions for GPU skinning
+        skinningShader: Shader = LoadShader(TextFormat("resources/shaders/glsl%i/skinning.vs", GLSL_VERSION),
+                                        TextFormat("resources/shaders/glsl%i/skinning.fs", GLSL_VERSION));
+
+        // Skinning shader could be required to be assigned to all materials shaders, just to make
+        // sure required uniforms are being updated for the mesh using that material (and shader)
+        for i: 0..model.materialCount-1 model.materials[i].shader = skinningShader;
+    }
 
     // Load model animations
     animCount: s32 = 0;
@@ -85,7 +91,7 @@ main :: ()
 
         if (IsKeyPressed(.KEY_P)) animPause = !animPause;
 
-        if (!animPause)
+        if (!animPause && (animCount > 0)) // Animations could fail to load
         {
             // Start transition from anim0[] to anim1[]
             if (IsKeyPressed(.KEY_SPACE) && !animTransition)
@@ -221,21 +227,30 @@ main :: ()
             if (GuiDropdownBox(Rectangle.{ GetScreenWidth() - 170.0, 10, 160, 24 }, TextJoin(animNames.data, animCount, ";"),
                 *animIndex1, dropdownEditMode1)) dropdownEditMode1 = !dropdownEditMode1;
 
-            // Draw playing timeline with keyframes for anim0[]
-            GuiProgressBar(Rectangle.{ 60, GetScreenHeight() - 60.0, GetScreenWidth() - 180.0, 20 }, "ANIM 0",
-                TextFormat("FRAME: %.2f / %i", animFrameProgress0, anims[animIndex0].keyframeCount),
-                *animFrameProgress0, 0.0, cast(float)anims[animIndex0].keyframeCount);
-            for i: 0..anims[animIndex0].keyframeCount-1
-                DrawRectangle(60 + cast(s32)((cast(float)(GetScreenWidth() - 180)/cast(float)anims[animIndex0].keyframeCount)*cast(float)i),
-                    GetScreenHeight() - 60, 1, 20, BLUE);
+            GuiSetStyle(.LABEL, cast(s32)GuiControlProperty.TEXT_ALIGNMENT, cast(s32)GuiTextAlignment.TEXT_ALIGN_CENTER);
+            GuiSetStyle(.DEFAULT, cast(s32)GuiDefaultProperty.TEXT_SIZE, GuiGetFont().baseSize*2);
+            GuiLabel(Rectangle.{ 0, GetScreenHeight() - 100.0, cast(float)GetScreenWidth(), 40 }, "PRESS SPACE to START BLENDING");
+            GuiSetStyle(.DEFAULT, cast(s32)GuiDefaultProperty.TEXT_SIZE, GuiGetFont().baseSize);
+            GuiSetStyle(.LABEL, cast(s32)GuiControlProperty.TEXT_ALIGNMENT, cast(s32)GuiTextAlignment.TEXT_ALIGN_LEFT);
 
-            // Draw playing timeline with keyframes for anim1[]
-            GuiProgressBar(Rectangle.{ 60, GetScreenHeight() - 30.0, GetScreenWidth() - 180.0, 20 }, "ANIM 1",
-                TextFormat("FRAME: %.2f / %i", animFrameProgress1, anims[animIndex1].keyframeCount),
-                *animFrameProgress1, 0.0, cast(float)anims[animIndex1].keyframeCount);
-            for i: 0..anims[animIndex1].keyframeCount-1
-                DrawRectangle(60 + cast(s32)((cast(float)(GetScreenWidth() - 180)/cast(float)anims[animIndex1].keyframeCount)*cast(float)i),
-                    GetScreenHeight() - 30, 1, 20, BLUE);
+            if (animCount > 0)
+            {
+                // Draw playing timeline with keyframes for anim0[]
+                GuiProgressBar(Rectangle.{ 60, GetScreenHeight() - 60.0, GetScreenWidth() - 180.0, 20 }, "ANIM 0",
+                    TextFormat("FRAME: %.2f / %i", animFrameProgress0, anims[animIndex0].keyframeCount),
+                    *animFrameProgress0, 0.0, cast(float)anims[animIndex0].keyframeCount);
+                for i: 0..anims[animIndex0].keyframeCount-1
+                    DrawRectangle(60 + cast(s32)((cast(float)(GetScreenWidth() - 180)/cast(float)anims[animIndex0].keyframeCount)*cast(float)i),
+                        GetScreenHeight() - 60, 1, 20, BLUE);
+
+                // Draw playing timeline with keyframes for anim1[]
+                GuiProgressBar(Rectangle.{ 60, GetScreenHeight() - 30.0, GetScreenWidth() - 180.0, 20 }, "ANIM 1",
+                    TextFormat("FRAME: %.2f / %i", animFrameProgress1, anims[animIndex1].keyframeCount),
+                    *animFrameProgress1, 0.0, cast(float)anims[animIndex1].keyframeCount);
+                for i: 0..anims[animIndex1].keyframeCount-1
+                    DrawRectangle(60 + cast(s32)((cast(float)(GetScreenWidth() - 180)/cast(float)anims[animIndex1].keyframeCount)*cast(float)i),
+                        GetScreenHeight() - 30, 1, 20, BLUE);
+            }
             //---------------------------------------------------------------------------------------------
 
         EndDrawing();
@@ -246,7 +261,9 @@ main :: ()
     //--------------------------------------------------------------------------------------
     UnloadModelAnimations(anims, animCount); // Unload model animation
     UnloadModel(model);             // Unload model and meshes/material
-    UnloadShader(skinningShader);   // Unload GPU skinning shader
+    #if SUPPORT_GPU_SKINNING {
+        UnloadShader(skinningShader);   // Unload GPU skinning shader
+    }
 
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

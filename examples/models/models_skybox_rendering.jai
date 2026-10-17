@@ -153,8 +153,8 @@ main :: ()
     //--------------------------------------------------------------------------------------
     UnloadShader(skybox.materials[0].shader);
     UnloadTexture(skybox.materials[0].maps[MaterialMapIndex.MATERIAL_MAP_CUBEMAP].texture);
-
     UnloadModel(skybox);        // Unload skybox model
+    UnloadShader(shdrCubemap);
 
     CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

@@ -2,9 +2,9 @@
 #import "Basic";
 #import "Math";
 
-MAP_SIZE :: 10;
-
 GLSL_VERSION :: 330;
+
+MAP_SIZE :: 10;
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -145,6 +145,7 @@ main :: ()
     UnloadShader(shader);   // Unload shader
     UnloadTexture(texture); // Unload texture
     UnloadTexture(light);   // Unload texture
+    UnloadRenderTexture(lightmap); // Unload lightmap render texture
 
     CloseWindow();          // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

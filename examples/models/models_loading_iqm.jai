@@ -36,6 +36,7 @@ main :: ()
     // Animation playing variables
     animIndex: u32 = 0;         // Current animation playing
     animCurrentFrame: float = 0.0;      // Current animation frame (supporting interpolated frames)
+    animSpeed: float = 1.0; // How fast the animation plays
 
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -47,10 +48,23 @@ main :: ()
         //----------------------------------------------------------------------------------
         UpdateCamera(*camera, .CAMERA_ORBITAL);
 
-        // Play animation when spacebar is held down
-        animCurrentFrame += 1.0;
-        UpdateModelAnimation(model, anims[0], animCurrentFrame);
-        if (animCurrentFrame >= anims[0].keyframeCount * 1.0) animCurrentFrame = 0;
+        if (IsKeyPressed(.KEY_RIGHT))
+        {
+            animIndex = ifx (animIndex == cast(u32)animCount - 1) then 0 else animIndex + 1;
+            animCurrentFrame = 0.0;
+        }
+        if (IsKeyPressed(.KEY_LEFT))
+        {
+            animIndex = ifx (animIndex == 0) then cast(u32)animCount - 1 else animIndex - 1;
+            animCurrentFrame = 0.0;
+        }
+
+        if (IsKeyPressed(.KEY_UP))   animSpeed = min(5.0, animSpeed + 0.1);
+        if (IsKeyPressed(.KEY_DOWN)) animSpeed = max(0.0, animSpeed - 0.1);
+
+        animCurrentFrame += animSpeed;
+        UpdateModelAnimation(model, anims[animIndex], animCurrentFrame);
+        if (animCurrentFrame >= anims[animIndex].keyframeCount * 1.0) animCurrentFrame = 0;
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -68,6 +82,9 @@ main :: ()
             EndMode3D();
 
             DrawText(TextFormat("Current animation: %s", *anims[animIndex].name), 10, 10, 20, MAROON);
+            DrawText(TextFormat("Animation speed: %.2f", animSpeed), 10, 40, 20, MAROON);
+            DrawText("Use left and right arrow keys to change current animation", 10, screenHeight - 34, 10, BLACK);
+            DrawText("Use up and down arrow keys to change animation speed", 10, screenHeight - 20, 10, BLACK);
             DrawText("(c) Guy IQM 3D model by @culacant", screenWidth - 200, screenHeight - 20, 10, GRAY);
 
         EndDrawing();

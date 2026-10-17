@@ -79,6 +79,9 @@ generate_bindings :: (command_options: Command_Options) {
         binder: Binder;
         binder.name = "raylib";
         binder.input_file = "src/raylib.h";
+        binder.header = #string DONE
+SUPPORT_GPU_SKINNING :: false;
+DONE
         binder.footer = #string DONE
 TraceLogCallback     :: #type (logLevel: TraceLogLevel, text: *u8, args: .. Any) #c_call;
 LoadFileDataCallback :: #type (fileName: *u8, bytesRead: *u32) -> *u8 #c_call;
