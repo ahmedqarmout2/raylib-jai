@@ -71,6 +71,8 @@ main :: ()
     whiteImage: Image = GenImageColor(GOL_WIDTH, GOL_WIDTH, WHITE);
     whiteTex: Texture = LoadTextureFromImage(whiteImage);
     UnloadImage(whiteImage);
+
+    SetTargetFPS(0); // Set our game to run with an uncapped framerate
     //--------------------------------------------------------------------------------------
 
     // Main game loop

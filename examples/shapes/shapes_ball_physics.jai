@@ -51,6 +51,8 @@ main :: ()
 
     gravity: float = 100;            // World gravity
 
+    windowPosition: Vector2 = GetWindowPosition();
+
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //---------------------------------------------------------------------------------------
 
@@ -110,6 +112,17 @@ main :: ()
                     grabbed = false
                 };
                 ballCount += 1;
+            }
+        }
+
+        // Get window position change for shaking
+        windowPositionDelta: Vector2 = Vector2Subtract(windowPosition, GetWindowPosition());
+
+        if (Vector2Length(windowPositionDelta) > 5.0)
+        {
+            for i: 0..ballCount-1
+            {
+                if (!balls[i].grabbed) balls[i].speed = Vector2Add(balls[i].speed, Vector2Scale(windowPositionDelta, 10.0));
             }
         }
 
@@ -179,6 +192,8 @@ main :: ()
                 ball.prevPosition = ball.position;
             }
         }
+
+        windowPosition = GetWindowPosition();
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -207,6 +222,7 @@ main :: ()
     // De-Initialization
     //--------------------------------------------------------------------------------------
     free(balls);
+
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 }

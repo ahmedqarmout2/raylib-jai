@@ -68,7 +68,7 @@ main :: ()
         if (!IsMouseButtonDown(MOUSE_LEFT_BUTTON))  curveSelectedPoint = null;
 
         // If a point was selected, move it
-        if (curveSelectedPoint) {
+        if (curveSelectedPoint != null) {
             curveSelectedPoint.* = Vector2Add(curveSelectedPoint.*, GetMouseDelta());
         }
 

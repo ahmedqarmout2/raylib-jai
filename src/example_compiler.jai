@@ -146,6 +146,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_dashed_line",
     "shapes_digital_clock",
     "shapes_double_pendulum",
+    "shapes_drag_puzzle",
     "shapes_easings_ball",
     "shapes_easings_box",
     "shapes_easings_rectangles",

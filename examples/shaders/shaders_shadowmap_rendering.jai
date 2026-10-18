@@ -89,6 +89,9 @@ main :: ()
         //----------------------------------------------------------------------------------
         deltaTime: float = GetFrameTime();
 
+        UpdateCamera(*camera, .CAMERA_ORBITAL);
+
+        // send the updated camera position to the shader so that it can calculate the correct lighting for the scene
         cameraPos: Vector3 = camera.position;
         SetShaderValue(shadowShader, shadowShader.locs[ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], *cameraPos, .SHADER_UNIFORM_VEC3);
         UpdateCamera(*camera, .CAMERA_ORBITAL);
