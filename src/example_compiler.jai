@@ -160,6 +160,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_logo_raylib",
     "shapes_logo_raylib_anim",
     "shapes_outlines_testbed",
+    "shapes_outlines_thickness",
     "shapes_rectangle_scaling",
     "shapes_recursive_tree",
     "shapes_ring_drawing",
