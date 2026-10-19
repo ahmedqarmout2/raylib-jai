@@ -38,7 +38,7 @@ main :: ()
     mousePos: Vector2;
     prevMousePos: Vector2;
     scaleVector: Vector2 = .{ 1.0, -1.0 };
-    offset: Vector2 = .{ cast(float)screenWidth/2.0, cast(float)screenHeight/2.0 };
+    offset: Vector2 = .{ GetRenderWidth()/2.0, GetRenderHeight()/2.0 };
 
     camera: Camera2D;
     camera.target = Vector2.{0, 0};

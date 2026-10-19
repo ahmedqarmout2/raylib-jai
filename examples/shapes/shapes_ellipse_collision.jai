@@ -12,7 +12,7 @@ main :: ()
     screenWidth  : s32 : 800;
     screenHeight : s32 : 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - collision ellipses");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - ellipse collision");
     SetTargetFPS(60);
 
     ellipseACenter: Vector2 = .{ cast(float)screenWidth/4, cast(float)screenHeight/2 };
