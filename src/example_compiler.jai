@@ -161,6 +161,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_logo_raylib_anim",
     "shapes_outlines_testbed",
     "shapes_outlines_thickness",
+    "shapes_penrose_tile",
     "shapes_pie_chart",
     "shapes_polygon_lines",
     "shapes_rectangle_advanced",

@@ -14,6 +14,17 @@ array_len :: (s: *$T) -> s64 {
     return count;
 }
 
+array_len :: (s: *$T, maxlen: s64) -> s64 {
+    if !s return 0;
+
+    count: s64 = 0;
+    while count < maxlen && s.* {
+        count += 1;
+        s     += 1;
+    }
+    return count;
+}
+
 strstr :: (haystack: *u8, needle: *u8) -> *u8 {
     if needle == null   return haystack;
     if haystack == null return null;
@@ -36,6 +47,51 @@ strstr :: (haystack: *u8, needle: *u8) -> *u8 {
     }
 
     return null;
+}
+
+strncat :: (dest: *u8, src: *u8, n: s64) -> *u8 {
+    if !dest return dest;
+    if !src  return dest;
+
+    // 1. Find the null terminator of the destination string
+    dest_idx: s64 = 0;
+    while dest[dest_idx] != 0 {
+        dest_idx += 1;
+    }
+
+    // 2. Append up to 'n' characters from the source string
+    src_idx: s64 = 0;
+    while src_idx < n && src[src_idx] != 0 {
+        dest[dest_idx] = src[src_idx];
+        dest_idx += 1;
+        src_idx  += 1;
+    }
+
+    // 3. Always explicitly null-terminate the result
+    dest[dest_idx] = 0;
+
+    return dest;
+}
+
+strncpy :: (dest: *u8, src: *u8, n: s64) -> *u8 {
+    if !dest return dest;
+    if !src  return dest;
+
+    i: s64 = 0;
+
+    // 1. Copy characters from src to dest until a null terminator or 'n' limit is reached
+    while i < n && src[i] != 0 {
+        dest[i] = src[i];
+        i += 1;
+    }
+
+    // 2. Pad the remaining space with null bytes if src was shorter than 'n'
+    while i < n {
+        dest[i] = 0;
+        i += 1;
+    }
+
+    return dest;
 }
 
 // Macros for Begin/End pairs where the EndXXX Function is called automatically
