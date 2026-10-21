@@ -163,6 +163,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_outlines_thickness",
     "shapes_pie_chart",
     "shapes_polygon_lines",
+    "shapes_rectangle_advanced",
     "shapes_rectangle_scaling",
     "shapes_recursive_tree",
     "shapes_ring_drawing",
