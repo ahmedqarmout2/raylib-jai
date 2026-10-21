@@ -159,6 +159,7 @@ SHAPES_EXAMPLES :: string.[
     "shapes_lines_drawing",
     "shapes_logo_raylib",
     "shapes_logo_raylib_anim",
+    "shapes_math_angle_rotation",
     "shapes_math_sine_cosine",
     "shapes_mouse_trail",
     "shapes_outlines_testbed",
