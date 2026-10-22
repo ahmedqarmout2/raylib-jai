@@ -219,6 +219,7 @@ TEXTURES_EXAMPLES :: string.[
     "textures_polygon_drawing",
     "textures_portal_window",
     "textures_raw_data",
+    "textures_screen_buffer",
     "textures_sprite_animation",
     "textures_sprite_button",
     "textures_sprite_explosion",
