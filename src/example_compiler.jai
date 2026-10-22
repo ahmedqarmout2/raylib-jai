@@ -222,6 +222,7 @@ TEXTURES_EXAMPLES :: string.[
     "textures_sprite_animation",
     "textures_sprite_button",
     "textures_sprite_explosion",
+    "textures_sprite_stacking",
     "textures_srcrec_dstrec",
     "textures_textured_curve",
     "textures_tiled_drawing",
