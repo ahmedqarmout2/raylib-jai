@@ -657,4 +657,7 @@ MatrixDecompose :: (mat: Matrix4, translation: *Vector3, rotation: *Quaternion, 
     // Extract Rotation
 
 
+MatrixToFloat :: (mat: Matrix4) -> *float32 {
+    return MatrixToFloatV(mat).v.data;
+}
 

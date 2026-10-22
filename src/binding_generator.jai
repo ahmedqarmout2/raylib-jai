@@ -103,6 +103,11 @@ EPSILON :: 0.000001;
 DEG2RAD :: (PI/180.0);
 RAD2DEG :: (180.0/PI);
 DONE
+        binder.footer = #string DONE
+MatrixToFloat :: (mat: Matrix4) -> *float32 {
+    return MatrixToFloatV(mat).v.data;
+}
+DONE
         generate_binding(command_options, *binder);
     }
 

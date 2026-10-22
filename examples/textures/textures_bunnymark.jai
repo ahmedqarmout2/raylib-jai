@@ -38,7 +38,7 @@ main :: ()
 
     paused: bool = false;
 
-    SetTargetFPS(60);              // Set our game to run at 60 frames-per-second
+    SetTargetFPS(0); // Set our game to run with an uncapped framerate
     //--------------------------------------------------------------------------------------
 
     // Main game loop

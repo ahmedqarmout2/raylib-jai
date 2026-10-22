@@ -217,6 +217,7 @@ TEXTURES_EXAMPLES :: string.[
     "textures_npatch_drawing",
     "textures_particles_blending",
     "textures_polygon_drawing",
+    "textures_portal_window",
     "textures_raw_data",
     "textures_sprite_animation",
     "textures_sprite_button",

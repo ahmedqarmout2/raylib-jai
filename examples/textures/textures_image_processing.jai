@@ -93,7 +93,7 @@ main :: ()
         else if (IsKeyPressed(.KEY_UP))
         {
             currentProcess -= 1;
-            if (currentProcess < 0) currentProcess = 7;
+            if (currentProcess < 0) currentProcess = (NUM_PROCESSES - 1);
             textureReload = true;
         }
 

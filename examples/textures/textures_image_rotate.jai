@@ -32,6 +32,10 @@ main :: ()
     textures[1] = LoadTextureFromImage(image90);
     textures[2] = LoadTextureFromImage(imageNeg90);
 
+    UnloadImage(image45);
+    UnloadImage(image90);
+    UnloadImage(imageNeg90);
+
     currentTexture: s32 = 0;
     //--------------------------------------------------------------------------------------
 

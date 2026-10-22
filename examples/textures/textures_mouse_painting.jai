@@ -121,7 +121,7 @@ main :: ()
             EndTextureMode();
         }
 
-        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT) || (GetGestureDetected() == .GESTURE_DRAG))
+        if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT) || (IsGestureDetected(.GESTURE_DRAG)))
         {
             // Paint circle into render texture
             // NOTE: To avoid discontinuous circles, we could store
