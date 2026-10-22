@@ -16,8 +16,7 @@ main :: ()
 
     InitWindow(screenWidth, screenHeight, "raylib [text] example - font filters");
 
-    msg: [50]u8;
-    for "Loaded Font" msg[it_index] = it;
+    msg: *u8 = "Loaded Font";
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
 
@@ -64,7 +63,7 @@ main :: ()
             currentFontFilter = 2;
         }
 
-        textSize = MeasureTextEx(font, msg.data, fontSize, 0);
+        textSize = MeasureTextEx(font, msg, fontSize, 0);
 
              if (IsKeyDown(.KEY_LEFT))  fontPosition.x -= 10;
         else if (IsKeyDown(.KEY_RIGHT)) fontPosition.x += 10;
@@ -96,7 +95,7 @@ main :: ()
             DrawText("Use 1, 2, 3 to change texture filter", 20, 60, 10, GRAY);
             DrawText("Drop a new TTF font for dynamic loading", 20, 80, 10, DARKGRAY);
 
-            DrawTextEx(font, msg.data, fontPosition, fontSize, 0, BLACK);
+            DrawTextEx(font, msg, fontPosition, fontSize, 0, BLACK);
 
             // TODO: It seems texSize measurement is not accurate due to u8s offsets...
             //DrawRectangleLines(fontPosition.x, fontPosition.y, textSize.x, textSize.y, RED);

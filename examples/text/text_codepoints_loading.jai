@@ -109,7 +109,7 @@ main :: ()
 }
 
 // Remove codepoint duplicates if requested
-// WARNING: This process could be a bit slow if there text to process is very long
+// WARNING: This process could be a bit slow if the text to process is very long
 CodepointRemoveDuplicates :: (codepoints: *s32, codepointCount: s32, codepointsResultCount: *s32) -> *s32
 {
     codepointsNoDupsCount: s32 = codepointCount;
@@ -123,7 +123,7 @@ CodepointRemoveDuplicates :: (codepoints: *s32, codepointCount: s32, codepointsR
         {
             if (codepointsNoDups[i] == codepointsNoDups[j])
             {
-                for k: j..codepointsNoDupsCount-1
+                for k: j..codepointsNoDupsCount-2
                 {
                     codepointsNoDups[k] = codepointsNoDups[k + 1];
                 }

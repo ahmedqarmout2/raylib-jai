@@ -393,6 +393,7 @@ main :: ()
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    UnloadShader(alphaDiscard);
     UnloadFont(font);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

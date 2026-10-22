@@ -18,8 +18,7 @@ main :: ()
 
     // Define characters to draw
     // NOTE: raylib supports UTF-8 encoding, following list is actually codified as UTF8 internally
-    msg: [256]u8;
-    for "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHI\nJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmn\nopqrstuvwxyz{|}~¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓ\nÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷\nøùúûüýþÿ" msg[it_index] = it;
+    msg: *u8 = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHI\nJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklm\nnopqrstuvwxyz{|}~¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒ\nÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö\n÷øùúûüýþÿ";
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
 
@@ -56,12 +55,12 @@ main :: ()
 
             if (!useTtf)
             {
-                DrawTextEx(fontBm, msg.data, Vector2.{ 20.0, 100.0 }, cast(float)fontBm.baseSize, 2, MAROON);
+                DrawTextEx(fontBm, msg, Vector2.{ 20.0, 100.0 }, cast(float)fontBm.baseSize, 2, MAROON);
                 DrawText("Using BMFont (Angelcode) imported", 20, GetScreenHeight() - 30, 20, GRAY);
             }
             else
             {
-                DrawTextEx(fontTtf, msg.data, Vector2.{ 20.0, 100.0 }, cast(float)fontTtf.baseSize, 2, LIME);
+                DrawTextEx(fontTtf, msg, Vector2.{ 20.0, 100.0 }, cast(float)fontTtf.baseSize, 2, LIME);
                 DrawText("Using TTF font generated", 20, GetScreenHeight() - 30, 20, GRAY);
             }
 

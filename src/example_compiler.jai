@@ -184,6 +184,7 @@ SHAPES_EXAMPLES :: string.[
 
 TEXT_EXAMPLES :: string.[
     "text_3d_drawing",
+    "text_animations",
     "text_codepoints_loading",
     "text_font_filters",
     "text_font_loading",
