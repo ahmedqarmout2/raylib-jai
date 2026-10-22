@@ -213,6 +213,7 @@ TEXTURES_EXAMPLES :: string.[
     "textures_image_rotate",
     "textures_image_text",
     "textures_logo_raylib",
+    "textures_magnifying_glass",
     "textures_mouse_painting",
     "textures_npatch_drawing",
     "textures_particles_blending",
