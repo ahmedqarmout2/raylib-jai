@@ -202,6 +202,7 @@ TEXTURES_EXAMPLES :: string.[
     "textures_background_scrolling",
     "textures_blend_modes",
     "textures_bunnymark",
+    "textures_clipboard_image",
     "textures_fog_of_war",
     "textures_framebuffer_rendering",
     "textures_gif_player",
