@@ -203,6 +203,7 @@ TEXTURES_EXAMPLES :: string.[
     "textures_blend_modes",
     "textures_bunnymark",
     "textures_fog_of_war",
+    "textures_framebuffer_rendering",
     "textures_gif_player",
     "textures_image_channel",
     "textures_image_drawing",
