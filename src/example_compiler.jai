@@ -191,6 +191,7 @@ TEXT_EXAMPLES :: string.[
     "text_font_sdf",
     "text_font_spritefont",
     "text_format_text",
+    "text_inline_styling",
     "text_input_box",
     "text_rectangle_bounds",
     "text_sprite_fonts",
