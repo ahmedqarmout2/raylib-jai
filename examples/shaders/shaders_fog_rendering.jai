@@ -114,7 +114,8 @@ main :: ()
                 DrawModel(modelC, Vector3.{ 2.6, 0, 0}, 1.0, WHITE);
 
                 i: s32 = -20;
-                while (i < 20) {
+                while (i < 20)
+                {
                     defer i += 2;
 
                     DrawModel(modelA, Vector3.{cast(float)i, 0, 2}, 1.0, WHITE);

@@ -88,7 +88,8 @@ main :: ()
         spots[i].position.y = cast(float)GetRandomValue(64, screenHeight - 64);
         spots[i].speed = Vector2.{0, 0};
 
-        while ((abs(spots[i].speed.x) + abs(spots[i].speed.y)) < 2) {
+        while ((abs(spots[i].speed.x) + abs(spots[i].speed.y)) < 2)
+        {
             spots[i].speed.x = GetRandomValue(-400, 40) / 10.0;
             spots[i].speed.y = GetRandomValue(-400, 40) / 10.0;
         }

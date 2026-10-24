@@ -66,7 +66,8 @@ main :: ()
                 // Try reloading updated shader
                 updatedShader: Shader = LoadShader(null, fragShaderFileName.data);
 
-                if (updatedShader.id != rlGetShaderIdDefault()) {
+                if (updatedShader.id != rlGetShaderIdDefault())
+                {
                     UnloadShader(shader);
                     shader = updatedShader;
 

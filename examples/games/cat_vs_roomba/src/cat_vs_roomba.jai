@@ -60,7 +60,11 @@ transFadeOut := false;
 transFromScreen : GameScreen = .LOGO;
 transToScreen   : GameScreen = .LOGO;
 
-main :: () {
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+main :: ()
+{
     set_working_directory(#filepath);
 
     // Initialization (Note windowTitle is unused on Android)

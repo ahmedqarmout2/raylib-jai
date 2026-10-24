@@ -108,7 +108,8 @@ main :: ()
 
 // Draw sphere without any matrix transformation
 // NOTE: Sphere is drawn in world position ( 0, 0, 0 ) with radius 1.0
-DrawSphereBasic :: (color: Color) {
+DrawSphereBasic :: (color: Color)
+{
     rings: s32 = 16;
     slices: s32 = 16;
 

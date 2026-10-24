@@ -73,7 +73,8 @@ main :: ()
                     currentFrame = 0;
                     currentLine += 1;
 
-                    if (currentLine >= NUM_LINES) {
+                    if (currentLine >= NUM_LINES)
+                    {
                         currentLine = 0;
                         active = false;
                     }

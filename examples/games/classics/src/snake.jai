@@ -61,7 +61,8 @@ counterTail   : s32 = 0;
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-main :: () {
+main :: ()
+{
     // Initialization (Note windowTitle is unused on Android)
     //---------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "classic game: snake");
@@ -93,7 +94,8 @@ main :: () {
 //------------------------------------------------------------------------------------
 
 // Initialize game variables
-InitGame :: () {
+InitGame :: ()
+{
     framesCounter = 0;
     gameOver = false;
     pause = false;
@@ -125,7 +127,8 @@ InitGame :: () {
 }
 
 // Update game (one frame)
-UpdateGame :: () {
+UpdateGame :: ()
+{
     if (!gameOver)
     {
         if (IsKeyPressed(.KEY_P)) pause = !pause;
@@ -224,7 +227,8 @@ UpdateGame :: () {
 }
 
 // Draw game (one frame)
-DrawGame :: () {
+DrawGame :: ()
+{
     BeginDrawing();
 
         ClearBackground(RAYWHITE);
@@ -256,12 +260,14 @@ DrawGame :: () {
 }
 
 // Unload game variables
-UnloadGame :: () {
+UnloadGame :: ()
+{
     // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
 
 // Update and Draw (one frame)
-UpdateDrawFrame :: () {
+UpdateDrawFrame :: ()
+{
     UpdateGame();
     DrawGame();
 }

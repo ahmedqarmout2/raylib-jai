@@ -133,7 +133,8 @@ AudioProcessEffectLPF :: (buffer: *void, frames: u32) #c_call
     bufferData: *float = cast(*float)buffer;
 
     i : u32 = 0;
-    while (i < frames*2) {
+    while (i < frames*2)
+    {
         defer i += 2;
 
         l: float = bufferData[i];
@@ -152,7 +153,8 @@ AudioProcessEffectDelay :: (buffer: *void, frames: u32) #c_call
     _buffer: *float = cast(*float)buffer;
 
     i : u32 = 0;
-    while (i < frames*2) {
+    while (i < frames*2)
+    {
         defer i += 2;
 
         leftDelay : float = delayBuffer[delayReadIndex];    // ERROR: Reading buffer -> WHY??? Maybe thread related???

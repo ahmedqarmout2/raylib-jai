@@ -114,7 +114,8 @@ main :: ()
 // Push turtle state for next step
 PushTurtleState :: (state: TurtleState)
 {
-    if (turtleTop < (TURTLE_STACK_MAX_SIZE - 1)) {
+    if (turtleTop < (TURTLE_STACK_MAX_SIZE - 1))
+    {
         turtleTop += 1;
         turtleStack[turtleTop] = state;
     }
@@ -124,7 +125,8 @@ PushTurtleState :: (state: TurtleState)
 // Pop turtle state step
 PopTurtleState :: () -> TurtleState
 {
-    if (turtleTop >= 0) {
+    if (turtleTop >= 0)
+    {
         defer turtleTop -= 1;
         return turtleStack[turtleTop];
     }

@@ -124,7 +124,8 @@ GenerateRandomColorRectSequence :: (rectCount: s32, rectWidth: float, screenWidt
     return rectangles;
 }
 
-ShuffleColorRectSequence :: (rectangles: [..]ColorRect, rectCount: s32) {
+ShuffleColorRectSequence :: (rectangles: [..]ColorRect, rectCount: s32)
+{
     seq: *s32 = LoadRandomSequence(cast(u32)rectCount, 0, rectCount-1);
     defer UnloadRandomSequence(seq);
 

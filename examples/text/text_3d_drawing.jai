@@ -145,7 +145,8 @@ main :: ()
         }
 
         // Handle clicking the cube
-        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonPressed(.MOUSE_BUTTON_LEFT))
+        {
             ray: Ray = GetScreenToWorldRay(GetMousePosition(), camera);
 
             // Check collision between ray and box
@@ -202,7 +203,8 @@ main :: ()
         {
             // handle newline
             len: s32 = cast(s32) TextLength(text.data);
-            if (len < text.count - 1) {
+            if (len < text.count - 1)
+            {
                 text[len]   = #char "\n";
                 text[len+1] = #char "\0";
             }

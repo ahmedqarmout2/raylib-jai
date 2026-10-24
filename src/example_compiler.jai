@@ -197,6 +197,7 @@ TEXT_EXAMPLES :: string.[
     "text_sprite_fonts",
     "text_strings_management",
     "text_unicode_emojis",
+    "text_unicode_ranges",
     "text_words_alignment",
     "text_writing_anim"
 ];

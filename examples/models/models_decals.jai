@@ -579,6 +579,7 @@ _GuiButton :: (rec: Rectangle , label: *u8) -> bool
     return pressed;
 }
 
-FreeDecalMeshData :: () {
+FreeDecalMeshData :: ()
+{
     GenMeshDecal(Model.{ meshCount = -1 }, Matrix4.{}, 0.0, 0.0);
 }

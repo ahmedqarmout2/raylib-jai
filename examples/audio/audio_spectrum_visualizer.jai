@@ -264,7 +264,8 @@ RenderFrame :: (fftData: *FFTData, fftImage: *Image)
 
     amplitude: [BUFFER_SIZE]float = fftData.fftHistory[historyPosition];
     bin: s32 = 0;
-    while (bin < BUFFER_SIZE) {
+    while (bin < BUFFER_SIZE)
+    {
         defer bin += 1;
 
         ImageDrawPixel(fftImage, bin, FFT_ROW, ColorFromNormalized(Vector4.{ amplitude[bin], UNUSED_CHANNEL, UNUSED_CHANNEL, UNUSED_CHANNEL }));

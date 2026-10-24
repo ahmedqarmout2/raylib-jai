@@ -291,7 +291,8 @@ DrawTextBoxedSelectable :: (font: Font, text: *u8, rec: Rectangle, fontSize: flo
 
     i: s32 = 0;
     k: s32 = 0;
-    while (i < length) {
+    while (i < length)
+    {
         defer i += 1;
         defer k += 1;
 
@@ -306,7 +307,8 @@ DrawTextBoxedSelectable :: (font: Font, text: *u8, rec: Rectangle, fontSize: flo
         i += (codepointByteCount - 1);
 
         glyphWidth: float = 0;
-        if (codepoint != #char "\n") {
+        if (codepoint != #char "\n")
+        {
             glyphWidth = ifx (font.glyphs[index].advanceX == 0) then font.recs[index].width*scaleFactor else font.glyphs[index].advanceX*scaleFactor;
 
             if (i + 1 < length) glyphWidth = glyphWidth + spacing;
@@ -317,23 +319,27 @@ DrawTextBoxedSelectable :: (font: Font, text: *u8, rec: Rectangle, fontSize: flo
         // and change states again and again recursively until the end of the text (or until we get outside of the container).
         // When wordWrap is OFF we don't need the measure state so we go to the drawing state immediately
         // and begin drawing on the next line before we can get outside the container.
-        if (state == .MEASURE_STATE) {
+        if (state == .MEASURE_STATE)
+        {
             // TODO: There are multiple types of spaces in UNICODE, maybe it's a good idea to add support for more
             // Ref: http://jkorpela.fi/chars/spaces.html
             if ((codepoint == #char " ") || (codepoint == #char "\t") || (codepoint == #char "\n")) endLine = i;
 
-            if ((textOffsetX + glyphWidth) > rec.width) {
+            if ((textOffsetX + glyphWidth) > rec.width)
+            {
                 endLine = ifx (endLine < 1) then i else endLine;
                 if (i == endLine) endLine -= codepointByteCount;
                 if ((startLine + codepointByteCount) == endLine) endLine = (i - codepointByteCount);
 
                 state = ifx (state == .MEASURE_STATE) then .DRAW_STATE else .MEASURE_STATE;
-            } else if ((i + 1) == length) {
+            } else if ((i + 1) == length)
+            {
                 endLine = i;
                 state = ifx (state == .MEASURE_STATE) then .DRAW_STATE else .MEASURE_STATE;
             } else if (codepoint == #char "\n") state = ifx (state == .MEASURE_STATE) then .DRAW_STATE else .MEASURE_STATE;
 
-            if (state == .DRAW_STATE) {
+            if (state == .DRAW_STATE)
+            {
                 textOffsetX = 0;
                 i = startLine;
                 glyphWidth = 0;
@@ -344,13 +350,16 @@ DrawTextBoxedSelectable :: (font: Font, text: *u8, rec: Rectangle, fontSize: flo
                 k = tmp;
             }
         } else {
-            if (codepoint == #char "\n") {
-                if (!wordWrap) {
+            if (codepoint == #char "\n")
+            {
+                if (!wordWrap)
+                {
                     textOffsetY += (font.baseSize + font.baseSize/2)*scaleFactor;
                     textOffsetX = 0;
                 }
             } else {
-                if (!wordWrap && ((textOffsetX + glyphWidth) > rec.width)) {
+                if (!wordWrap && ((textOffsetX + glyphWidth) > rec.width))
+                {
                     textOffsetY += (font.baseSize + font.baseSize/2)*scaleFactor;
                     textOffsetX = 0;
                 }
@@ -360,7 +369,8 @@ DrawTextBoxedSelectable :: (font: Font, text: *u8, rec: Rectangle, fontSize: flo
 
                 // Draw selection background
                 isGlyphSelected: bool = false;
-                if ((selectStart >= 0) && (k >= selectStart) && (k < (selectStart + selectLength))) {
+                if ((selectStart >= 0) && (k >= selectStart) && (k < (selectStart + selectLength)))
+                {
                     DrawRectangleRec(Rectangle.{rec.x + textOffsetX - 1, rec.y + textOffsetY, glyphWidth, cast(float)font.baseSize*scaleFactor}, selectBackTint);
                     isGlyphSelected = true;
                 }
@@ -372,7 +382,8 @@ DrawTextBoxedSelectable :: (font: Font, text: *u8, rec: Rectangle, fontSize: flo
                 }
             }
 
-            if (wordWrap && (i == endLine)) {
+            if (wordWrap && (i == endLine))
+            {
                 textOffsetY += (font.baseSize + font.baseSize/2)*scaleFactor;
                 textOffsetX  = 0;
                 startLine    = endLine;

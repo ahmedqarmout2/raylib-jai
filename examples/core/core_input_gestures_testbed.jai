@@ -180,7 +180,8 @@ main :: ()
 
             // Loop in both directions to print the gesture log array in the inverted order (and looping around if the index started somewhere in the middle)
             i = 0; ii = gestureLogIndex;
-            while (i < GESTURE_LOG_SIZE) {
+            while (i < GESTURE_LOG_SIZE)
+            {
                 ii = (ii + 1)%GESTURE_LOG_SIZE;
                 DrawText(gestureLog[ii].data, cast(s32)gestureLogPosition.x, cast(s32)gestureLogPosition.y + 410 - i*20, 20, ifx i == 0 then gestureColor else LIGHTGRAY);
                 i += 1;

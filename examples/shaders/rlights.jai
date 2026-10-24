@@ -68,7 +68,8 @@ lightsCount: s32 = 0;    // Current amount of created lights
 CreateLight :: (type: LightType, position: Vector3, target: Vector3, color: Color, shader: Shader) -> Light {
     light: Light;
 
-    if (lightsCount < MAX_LIGHTS) {
+    if (lightsCount < MAX_LIGHTS)
+    {
         light.enabled  = true;
         light.type     = type;
         light.position = position;
@@ -94,7 +95,8 @@ CreateLight :: (type: LightType, position: Vector3, target: Vector3, color: Colo
 CreateLight :: (type: LightType, position: Vector3, target: Vector3, color: Color, intensity: float, shader: Shader) -> Light {
     light: Light;
 
-    if (lightsCount < MAX_LIGHTS) {
+    if (lightsCount < MAX_LIGHTS)
+    {
         light.enabled   = true;
         light.type      = type;
         light.position  = position;
@@ -120,7 +122,8 @@ CreateLight :: (type: LightType, position: Vector3, target: Vector3, color: Colo
 
 // Send light properties to shader
 // NOTE: Light shader locations should be available 
-UpdateLightValues :: (shader: Shader, light: Light) {
+UpdateLightValues :: (shader: Shader, light: Light)
+{
     // Send to shader light enabled state and type
     SetShaderValue(shader, light.enabledLoc, *light.enabled, .SHADER_UNIFORM_INT);
     SetShaderValue(shader, light.typeLoc   , *light.type   , .SHADER_UNIFORM_INT);
@@ -144,7 +147,8 @@ UpdateLightValues :: (shader: Shader, light: Light) {
 
 // Send light properties to shader
 // NOTE: Light shader locations should be available
-UpdateLight :: (shader: Shader, light: Light) {
+UpdateLight :: (shader: Shader, light: Light)
+{
     SetShaderValue(shader, light.enabledLoc, *light.enabled, .SHADER_UNIFORM_INT);
     SetShaderValue(shader, light.typeLoc   , *light.type   , .SHADER_UNIFORM_INT);
     

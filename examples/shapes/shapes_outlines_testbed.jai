@@ -89,8 +89,10 @@ main :: ()
 
         if (IsMouseButtonReleased(.MOUSE_BUTTON_LEFT)) disableMouseControl = false;
 
-        if (!disableMouseControl) {
-            if (mouseWheelVec.y != 0.0) {
+        if (!disableMouseControl)
+        {
+            if (mouseWheelVec.y != 0.0)
+            {
                 prevWorldZoomPoint: Vector2 = GetScreenToWorld2D(zoomPoint, camera);
 
                 camera.zoom *= exp(MOUSE_CAMERA_ZOOM_SPEED*mouseWheelVec.y); // Constant zoom rate
@@ -100,7 +102,8 @@ main :: ()
                 camera.target = Vector2Add(camera.target, Vector2Subtract(prevWorldZoomPoint, worldZoomPoint));
             }
 
-            if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT)) {
+            if (IsMouseButtonDown(.MOUSE_BUTTON_LEFT))
+            {
                 mouseDelta: Vector2 = GetMouseDelta();
                 camera.target.x -= mouseDelta.x/camera.zoom;
                 camera.target.y -= mouseDelta.y/camera.zoom;
