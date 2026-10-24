@@ -195,6 +195,7 @@ TEXT_EXAMPLES :: string.[
     "text_input_box",
     "text_rectangle_bounds",
     "text_sprite_fonts",
+    "text_strings_management",
     "text_unicode_emojis",
     "text_writing_anim"
 ];
