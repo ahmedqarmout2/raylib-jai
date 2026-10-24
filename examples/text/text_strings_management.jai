@@ -280,13 +280,13 @@ SliceTextParticle :: (tp: *TextParticle, particlePos: s32, sliceLength: s32, tps
             defer i += sliceLength;
 
             text: *u8 = ifx sliceLength == 1 then TextFormat("%c", tp.text[i]) else TextSubtext(tp.text.data, i, sliceLength);
-            ((.*)particleCount) += 1;
             tps[(.*)particleCount] = CreateTextParticle(
                 text,
                 tp.rect.x + i * tp.rect.width/length,
                 tp.rect.y,
                 Color.{ cast(u8)GetRandomValue(0, 255), cast(u8)GetRandomValue(0, 255), cast(u8)GetRandomValue(0, 255), 255 }
             );
+            ((.*)particleCount) += 1;
         }
         RealocateTextParticles(tps, particlePos, particleCount);
     }
@@ -304,25 +304,25 @@ SliceTextParticleByChar :: (tp: *TextParticle, charToSlice: u8, tps: *TextPartic
         {
             if (tp.text[i] == charToSlice)
             {
-                ((.*)particleCount) += 1;
                 tps[(.*)particleCount] = CreateTextParticle(
                     TextFormat("%c", charToSlice),
                     tp.rect.x,
                     tp.rect.y,
                     Color.{ cast(u8)GetRandomValue(0, 255), cast(u8)GetRandomValue(0, 255), cast(u8)GetRandomValue(0, 255), 255 }
                 );
+                ((.*)particleCount) += 1;
             }
         }
         for i: 0..tokenCount-1
         {
             tokenLength: s32 = cast(s32)TextLength(tokens[i]);
-            ((.*)particleCount) += 1;
             tps[(.*)particleCount] = CreateTextParticle(
                 TextFormat("%s", tokens[i]),
                 tp.rect.x + i * tp.rect.width/tokenLength,
                 tp.rect.y,
                 Color.{ cast(u8)GetRandomValue(0, 255), cast(u8)GetRandomValue(0, 255), cast(u8)GetRandomValue(0, 255), 255 }
             );
+            ((.*)particleCount) += 1;
         }
         if (tokenCount)
         {
@@ -356,8 +356,8 @@ GlueTextParticles :: (grabbed: *TextParticle, target: *TextParticle, tps: *TextP
             RAYWHITE
         );
         tp.grabbed = true;
-        ((.*)particleCount) += 1;
         tps[(.*)particleCount] = tp;
+        ((.*)particleCount) += 1;
         grabbed.grabbed = false;
         if (p1 < p2)
         {
