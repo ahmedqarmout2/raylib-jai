@@ -22,7 +22,7 @@
 
 ## Examples
 
-Direct Jai ports for the following:
+More than 220 direct Jai ports for the following:
 * [raylib examples](https://www.raylib.com/examples.html)
 * [raylib games](https://www.raylib.com/games.html)
 
